@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agregar integrante</title>
+    <link rel="stylesheet" href="/static/add_member.css">
+</head>
+<body>
+
+<div class="add-container">
+    <h2>Agregar integrante</h2>
+    <form class="add-form" method="POST" enctype="multipart/form-data">
+        <input type="text" name="nombre" placeholder="Nombre" required>
+        <input type="text" name="apellido" placeholder="Apellido" required>
+        <input type="email" name="email" placeholder="Correo" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <input type="date" name="fecha_nac" placeholder="Fecha de nacimiento">
+        <input type="text" name="municipio" placeholder="Municipio">
+        <input type="text" name="pais" placeholder="País">
+        <input type="text" name="telefono" placeholder="Teléfono">
+        <input type="text" name="estado_civil" placeholder="Estado civil">
+        <textarea name="bio" placeholder="Pequeña biografía..." rows="3"></textarea>
+        <input type="file" name="foto">
+        <button type="submit" class="btn-save">Guardar</button>
+    </form>
+    <a href="/admin_home" class="btn-back">← Volver</a>
+</div>
+
+</body>
+</html>

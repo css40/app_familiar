@@ -1,0 +1,229 @@
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* ------------------ BOTONES ------------------ */
+.nav-buttons {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.nav-buttons .btn {
+    display: inline-block;
+    margin: 5px 10px;
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.nav-buttons .btn.logout {
+    background-color: #dc3545;
+}
+
+.nav-buttons .btn:hover {
+    opacity: 0.85;
+}
+
+/* ------------------ CONTENEDOR DE TARJETAS ------------------ */
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* ------------------ CADA TARJETA ------------------ */
+.card {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    width: 180px;
+    min-height: 230px;
+    text-align: center;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+}
+
+/* Foto de perfil */
+.perfil-card {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 10px auto;
+}
+
+/* Nombre y rol */
+.card h3 {
+    font-size: 16px;
+    margin: 5px 0 2px 0;
+}
+
+.card p {
+    font-size: 14px;
+    color: #555;
+    margin: 0 0 10px 0;
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Botón */
+.card .btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 15px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.card .btn:hover {
+    background-color: #0056b3;
+}
+
+/* ------------------ FORMULARIO CREAR GRUPO ------------------ */
+form {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 500px;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+form input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.miembro-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+/* Contenedor de búsqueda de miembros */
+.busqueda-miembros {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.sugerencias {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    border-radius: 6px;
+    z-index: 100;
+}
+
+.sugerencias div {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.sugerencias div:hover {
+    background-color: #f0f0f0;
+}
+
+/* Miembros seleccionados */
+#miembros-seleccionados .miembro-form {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+#miembros-seleccionados .miembro-form button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-weight: bold;
+}
+
+#miembros-seleccionados .miembro-form button:hover {
+    opacity: 0.85;
+}
+/* Contenedor de búsqueda de miembros */
+.busqueda-miembros {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.sugerencias {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    border-radius: 6px;
+    z-index: 100;
+}
+
+.sugerencias div {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.sugerencias div:hover {
+    background-color: #f0f0f0;
+}
+
+/* Miembros seleccionados */
+#miembros-seleccionados .miembro-form {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+#miembros-seleccionados .miembro-form button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-weight: bold;
+}
+
+#miembros-seleccionados .miembro-form button:hover {
+    opacity: 0.85;
+}

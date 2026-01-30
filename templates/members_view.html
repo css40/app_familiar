@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Integrantes</title>
+    <link rel="stylesheet" href="/static/members_view.css">
+</head>
+<body>
+
+    <h2>Integrantes</h2>
+
+    <!-- Botones volver / cerrar sesión -->
+    <div class="nav-buttons">
+        <a href="/user_home" class="nav-btn">Volver al inicio</a>
+        <a href="/logout" class="nav-btn logout">Cerrar sesión</a>
+    </div>
+
+    <div class="container">
+        {% for i in integrantes %}
+        <div class="card">
+            {% if i[6] and i[6] != "" %}
+                <img src="{{ i[6].replace('\\','/') }}" alt="{{ i[1] }}" class="perfil-card">
+            {% else %}
+                <img src="/static/default_user.png" alt="Sin foto" class="perfil-card">
+            {% endif %}
+            
+            <h3 class="nombre-card">
+                {{ i[1] }} {{ i[2] }}
+                {% if i[3] == 'jhos@admin.com' %}
+                    <img src="/static/verificado.png" alt="Verificado" class="icon-verificado">
+                {% endif %}
+            </h3>
+            
+            <p class="correo-card">{{ i[3] }}</p>
+
+            <a class="btn" href="/member/{{ i[0] }}">Ver perfil</a>
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

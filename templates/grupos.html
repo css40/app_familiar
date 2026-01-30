@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Grupos</title>
+    <link rel="stylesheet" href="/static/grupos.css">
+</head>
+<body>
+    <h2>Mis Grupos</h2>
+
+    <div class="nav-buttons">
+        <a href="/user_home" class="btn">Volver al inicio</a>
+        <a href="/crear_grupo" class="btn">Crear Grupo</a>
+        <a href="/logout" class="btn logout">Cerrar sesión</a>
+    </div>
+
+    <div class="container">
+        {% for g in grupos %}
+        <div class="card">
+            <h3>{{ g[1] }}</h3> <!-- Nombre del grupo -->
+            <p>Creado por: {{ g[2] }} {{ g[3] }}</p>
+            <a class="btn" href="/grupo/{{ g[0] }}">Ver Grupo</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

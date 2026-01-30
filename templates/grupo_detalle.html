@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ grupo_nombre }}</title>
+    <link rel="stylesheet" href="/static/grupos.css">
+
+</head>
+<body>
+    <h2>Grupo: {{ grupo_nombre }}</h2>
+
+    <div class="nav-buttons">
+        <a href="/grupos" class="btn">Volver</a>
+        <a href="/user_home" class="btn">Inicio</a>
+        <a href="/logout" class="btn logout">Cerrar sesión</a>
+    </div>
+
+    <h3>Miembros</h3>
+    <div class="container">
+        {% for m in miembros %}
+        <div class="card">
+            {% if m[8] and m[8] != "" %}
+                <img src="{{ m[8].replace('\\','/') }}" class="perfil-card">
+            {% else %}
+                <img src="/static/default_user.png" class="perfil-card">
+            {% endif %}
+            <div class="nombre-card">{{ m[1] }} {{ m[2] }}</div>
+            <div class="rol-card">Rol: {{ m[4] }}</div>
+            <div class="acciones-card">
+                <a class="btn" href="/member/{{ m[0] }}">Ver perfil</a>
+                {% if user_id == creador_id and m[0] != creador_id %}
+                <form action="/grupo/{{ grupo_id }}/eliminar/{{ m[0] }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn eliminar">Eliminar</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if user_id == creador_id %}
+    <h3>Añadir nuevo miembro</h3>
+    <div class="agregar-miembro">
+        <input type="text" id="buscar-usuario" placeholder="Buscar usuario por nombre o correo...">
+        <div id="sugerencias"></div>
+        <div id="miembros-seleccionados"></div>
+        <button id="agregar-btn" class="btn">Agregar al grupo</button>
+    </div>
+
+    <script>
+        let usuarios = {{ usuarios_disponibles|tojson }};
+        let seleccionados = [];
+
+        const input = document.getElementById('buscar-usuario');
+        const sugerencias = document.getElementById('sugerencias');
+        const seleccionadosDiv = document.getElementById('miembros-seleccionados');
+
+        input.addEventListener('input', () => {
+            const val = input.value.toLowerCase();
+            sugerencias.innerHTML = '';
+            if(val.length === 0) return;
+
+            let encontrados = usuarios.filter(u => 
+                (u.nombre + ' ' + u.apellido).toLowerCase().includes(val) || 
+                u.email.toLowerCase().includes(val)
+            );
+
+            if(encontrados.length === 0){
+                const div = document.createElement('div');
+                div.textContent = 'Usuario no encontrado';
+                div.style.color = 'red';
+                sugerencias.appendChild(div);
+                return;
+            }
+
+            encontrados.forEach(u => {
+                const div = document.createElement('div');
+                div.textContent = `${u.nombre} ${u.apellido} (${u.email})`;
+                div.dataset.id = u.id;
+                div.addEventListener('click', () => {
+                    let rol = prompt(`Asignar rol para ${u.nombre} ${u.apellido}:`);
+                    if(!rol){
+                        alert('Debes asignar un rol');
+                        return;
+                    }
+                    if(!seleccionados.find(s => s.id == u.id)){
+                        seleccionados.push({id:u.id, nombre:u.nombre, apellido:u.apellido, rol});
+                        renderSeleccionados();
+                    }
+                    input.value = '';
+                    sugerencias.innerHTML = '';
+                });
+                sugerencias.appendChild(div);
+            });
+        });
+
+        function renderSeleccionados(){
+            seleccionadosDiv.innerHTML = '';
+            seleccionados.forEach(s => {
+                const div = document.createElement('div');
+                div.textContent = `${s.nombre} ${s.apellido} - ${s.rol}`;
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Eliminar';
+                removeBtn.addEventListener('click', () => {
+                    seleccionados = seleccionados.filter(x => x.id != s.id);
+                    renderSeleccionados();
+                });
+                div.appendChild(removeBtn);
+                seleccionadosDiv.appendChild(div);
+            });
+        }
+
+        document.getElementById('agregar-btn').addEventListener('click', () => {
+            if(seleccionados.length === 0){
+                return alert('Selecciona al menos un usuario');
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "/grupo/{{ grupo_id }}/agregar";
+            seleccionados.forEach(s => {
+                const inputId = document.createElement('input');
+                inputId.type = 'hidden';
+                inputId.name = 'usuario_id';
+                inputId.value = s.id;
+                form.appendChild(inputId);
+
+                const inputRol = document.createElement('input');
+                inputRol.type = 'hidden';
+                inputRol.name = 'rol';
+                inputRol.value = s.rol;
+                form.appendChild(inputRol);
+            });
+            document.body.appendChild(form);
+            form.submit();
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

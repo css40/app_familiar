@@ -1,0 +1,64 @@
+/* ======= ESTILO GENERAL ======= */
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1d3752, #597981);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* ======= TARJETA DE LOGIN ======= */
+.login-card {
+    background: white;
+    padding: 25px 30px 30px 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    width: 320px;
+    text-align: center;
+}
+
+/* ======= LOGO REDONDO ======= */
+.login-logo {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #007BFF;
+    margin-bottom: 10px;
+}
+
+/* ======= TÍTULO ======= */
+.login-card h2 {
+    margin: 5px 0 15px 0;
+    color: #333;
+}
+
+/* ======= INPUTS ======= */
+.login-card input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* ======= BOTÓN ======= */
+.login-card button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #007BFF;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-card button:hover {
+    background: #0056b3;
+}

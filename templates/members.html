@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Integrantes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='members.css') }}">
+</head>
+<body>
+
+<div class="members-container">
+    <div class="header">
+        <h2>Lista de Integrantes</h2>
+        <div class="top-links">
+            <a href="/admin_home">Volver al inicio</a>
+            <a href="/logout" class="logout">Cerrar sesión</a>
+        </div>
+    </div>
+
+    <table>
+        <tr>
+            <th>Foto</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Email</th>
+            <th>Contraseña</th>
+            <th>Acciones</th>
+        </tr>
+        {% for i in integrantes %}
+        <tr>
+            <td>
+                {% if i[5] %}
+                    <img src="/{{ i[5].replace('\\','/') }}" alt="{{ i[1] }}">
+                {% else %}
+                    <img src="/static/default_user.png" alt="Sin foto">
+                {% endif %}
+            </td>
+            <td>{{ i[1] }}</td>
+            <td>{{ i[2] }}</td>
+            <td>{{ i[3] }}</td>
+            <td>{{ i[4] }}</td>
+            <td class="action-links">
+                <a href="/edit_member/{{ i[0] }}">Editar</a> |
+                <a href="/delete_member/{{ i[0] }}" onclick="return confirm('¿Seguro que quieres eliminar este integrante?')">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+</body>
+</html>

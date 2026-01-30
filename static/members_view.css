@@ -1,0 +1,243 @@
+/* ------------------ ESTILO GENERAL ------------------ */
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+/* Título centrado */
+h2 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* ------------------ BOTONES ARRIBA ------------------ */
+.nav-buttons {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.nav-buttons a {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.nav-buttons a:hover {
+    background-color: #0056b3;
+}
+
+/* ------------------ CONTENEDOR DE TARJETAS ------------------ */
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* ------------------ CADA TARJETA ------------------ */
+.card {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    width: 180px;              /* ancho fijo */
+    min-height: 230px;         /* altura mínima para que todas sean iguales */
+    text-align: center;
+    padding: 15px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* distribuye el contenido uniformemente */
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+}
+
+/* Foto de perfil */
+.card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 10px auto;
+}
+
+/* Nombre */
+.card h3 {
+    font-size: 16px;
+    margin: 5px 0 2px 0;
+    word-wrap: break-word; /* corta palabras largas */
+}
+
+/* Correo */
+.card p {
+    font-size: 14px;
+    color: #555;
+    margin: 0 0 10px 0;
+    word-wrap: break-word;      /* fuerza ajuste de texto largo */
+    overflow: hidden;           /* evita que se salga */
+    text-overflow: ellipsis;    /* añade "..." si es demasiado largo */
+    white-space: nowrap;        /* opcional: mantiene una línea */
+}
+
+/* Botón ver perfil */
+.card .btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 15px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.card .btn:hover {
+    background-color: #0056b3;
+}
+
+/* ------------------ Botones volver / cerrar sesión ------------------ */
+.nav-buttons {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.nav-buttons a {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.nav-buttons a:hover {
+    background-color: #0056b3;
+}
+
+/* ------------------ RESPONSIVE ------------------ */
+@media screen and (max-width: 600px) {
+    .card {
+        width: 45%;
+        min-height: 220px;
+    }
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+}
+
+.nav-buttons {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.nav-btn {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 8px 16px;
+    background-color: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.nav-btn.logout {
+    background-color: #dc3545;
+}
+
+.nav-btn:hover {
+    opacity: 0.85;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    width: 200px;
+    text-align: center;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.perfil-card {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.nombre-card {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.icon-verificado {
+    max-width: 16px;
+    max-height: 16px;
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+
+
+.correo-card {
+    font-size: 14px;
+    color: #555;
+    word-wrap: break-word; /* para que no se salga de la tarjeta */
+    margin-bottom: 10px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    opacity: 0.85;
+}

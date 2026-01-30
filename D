@@ -1,0 +1,2 @@
+user.email=josephpcs50@gmail.com
+user.name=Joseph

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mi perfil</title>
+    <!-- Llamamos al CSS -->
+    <link rel="stylesheet" href="/static/profile.css">
+</head>
+<body>
+    <h2>Mi perfil</h2>
+
+<!-- Foto principal -->
+{% if integrante[8] and integrante[8] != "" %}
+<img src="{{ integrante[8] }}" class="foto-perfil">
+{% else %}
+<img src="/static/default_user.png" class="foto-perfil">
+{% endif %}
+
+
+    <form method="POST" enctype="multipart/form-data">
+        <!-- Campos del formulario -->
+        <input type="text" name="nombre" value="{{ integrante[1] }}" placeholder="Nombre" required><br>
+        <input type="text" name="apellido" value="{{ integrante[2] }}" placeholder="Apellido" required><br>
+        <input type="email" name="email" value="{{ integrante[3] }}" placeholder="Correo" required><br>
+        <input type="password" name="password" value="{{ integrante[4] }}" placeholder="Contraseña" required><br>
+        <input type="date" name="fecha_nac" value="{{ integrante[5] }}"><br>
+        <input type="text" name="municipio" value="{{ integrante[6] }}" placeholder="Municipio"><br>
+        <input type="text" name="pais" value="{{ integrante[7] }}" placeholder="País"><br>
+        <input type="text" name="telefono" value="{{ integrante[9] }}" placeholder="Teléfono"><br>
+        <input type="text" name="direccion" value="{{ integrante[10] }}" placeholder="Dirección"><br>
+        <input type="text" name="estado_civil" value="{{ integrante[11] }}" placeholder="Estado civil"><br>
+        <textarea name="bio" placeholder="Pequeña bio / redes sociales">{{ integrante[12] }}</textarea><br>
+
+        <!-- Foto principal -->
+        <label>Foto de perfil:</label>
+        <input type="file" name="foto"><br>
+
+        <!-- Álbum de fotos -->
+        <h3>Álbum de fotos</h3>
+        <div class="album">
+            {% for f in fotos %}
+                <img src="{{ f[0] }}">
+            {% endfor %}
+        </div>
+        <label>Subir nuevas fotos al álbum:</label>
+        <input type="file" name="fotos" multiple><br><br>
+
+        <button type="submit">Guardar cambios</button>
+    </form>
+
+    <br>
+    <a href="/user_home">Volver</a> | <a href="/logout">Cerrar sesión</a>
+</body>
+</html>

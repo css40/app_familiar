@@ -1,0 +1,146 @@
+/* ------------------ ESTILO GENERAL ------------------ */
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* ------------------ FORMULARIO ------------------ */
+form {
+    background: #fff;
+    max-width: 600px;
+    margin: 0 auto 20px auto;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 2px 12px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="date"],
+form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    transition: border 0.2s;
+}
+
+form input:focus,
+form textarea:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+form textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+/* ------------------ BOTÓN ------------------ */
+form button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    align-self: flex-end;
+    transition: 0.3s;
+}
+
+form button:hover {
+    background: #0056b3;
+}
+
+/* Foto de perfil centrada y tamaño fijo */
+.foto-perfil {
+    display: block;
+    margin: 0 auto 15px auto;
+    width: 150px;       /* ancho fijo */
+    height: 150px;      /* alto fijo */
+    border-radius: 50%; /* redonda */
+    object-fit: cover;  /* ajusta la imagen sin deformar */
+    border: 3px solid #007bff;
+}
+
+/* ------------------ ALBUM DE FOTOS ------------------ */
+form h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 18px;
+    text-align: center;
+}
+
+.album {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.album img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition: transform 0.2s;
+}
+
+.album img:hover {
+    transform: scale(1.05);
+}
+
+/* ------------------ INPUT FILE ------------------ */
+input[type="file"] {
+    font-size: 14px;
+}
+
+/* ------------------ LINKS DE NAVEGACIÓN ------------------ */
+a {
+    text-decoration: none;
+    color: #007bff;
+    margin-right: 10px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+/* ------------------ RESPONSIVE ------------------ */
+@media screen and (max-width: 600px) {
+    form {
+        padding: 15px;
+    }
+
+    form img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .album img {
+        width: 80px;
+        height: 80px;
+    }
+}

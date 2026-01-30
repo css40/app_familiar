@@ -1,0 +1,284 @@
+/* ------------------ ESTILO GENERAL ------------------ */
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+a {
+    text-decoration: none;
+    color: #007bff;
+    margin-right: 10px;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ------------------ TEXTO DE BIENVENIDA ------------------ */
+h2.bienvenida {
+    color: #333;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* ------------------ BOTONES DE NAVEGACIÓN ARRIBA ------------------ */
+.nav-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.nav-buttons a {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: 0.3s;
+    text-decoration: none;
+}
+
+.nav-buttons a:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Botón de cerrar sesión más destacado */
+.nav-buttons a.logout-btn {
+    background-color: #dc3545;
+}
+
+.nav-buttons a.logout-btn:hover {
+    background-color: #b02a37;
+}
+
+
+/* ------------------ FORMULARIO CREAR TWEET COMPACTO ------------------ */
+.tweet-form {
+    position: relative;
+    background: #fff;
+    padding: 10px 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 600px;
+}
+
+/* Textarea más compacto */
+.tweet-form textarea {
+    width: 100%;
+    padding: 20px 3px;
+    border-radius: 12px;
+    border: 2px solid #ccc;
+    resize: vertical;
+    min-height: 40px;  /* más corto inicialmente */
+    font-size: 14px;
+    line-height: 1.4;
+    transition: all 0.2s;
+}
+
+/* Se expande al enfocar */
+.tweet-form textarea:focus {
+    min-height: 80px;
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Contenedor de acciones (botón + input) en línea */
+.tweet-form .tweet-actions-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.tweet-form input[type="file"] {
+    flex: 1;
+    font-size: 14px;
+}
+
+.tweet-form button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.tweet-form button:hover {
+    background: #0056b3;
+}
+
+/* Sugerencias de menciones siguen igual */
+.sugerencias {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    max-height: 180px;
+    overflow-y: auto;
+    width: 100%;
+    z-index: 100;
+    display: none;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
+}
+
+.sugerencias div {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.sugerencias div:hover {
+    background-color: #f0f0f0;
+}
+
+
+/* ------------------ CONTENEDOR DE TWEETS ------------------ */
+.tweets-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* ------------------ CADA TWEET ------------------ */
+.tweet {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    word-wrap: break-word;
+    max-width: 600px;
+}
+
+/* ------------------ CABECERA DEL TWEET (perfil + nombre + fecha) ------------------ */
+.tweet-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tweet-header img.perfil {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.tweet-header .user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.tweet-header .user-info strong {
+    font-size: 16px;
+    color: #333;
+}
+
+.tweet-header .user-info small {
+    font-size: 12px;
+    color: gray;
+}
+
+/* ------------------ TEXTO DEL TWEET ------------------ */
+.tweet p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* ------------------ FOTO DEL TWEET ------------------ */
+.tweet-foto {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    border-radius: 12px;
+    margin-top: 8px;
+    display: block;
+    object-fit: cover;
+}
+
+/* ------------------ BOTONES EDITAR / ELIMINAR ------------------ */
+.tweet-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.tweet-actions a {
+    font-size: 12px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.tweet-actions a:hover {
+    text-decoration: underline;
+}
+
+/* ------------------ REACCIONES ------------------ */
+.tweet-reacciones {
+    display: flex;
+    gap: 15px;
+    margin-top: 8px;
+}
+
+.tweet-reacciones span {
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: 0.2s;
+}
+
+.tweet-reacciones span:hover {
+    transform: scale(1.2);
+}
+
+/* ------------------ RESPONSIVE ------------------ */
+@media screen and (max-width: 600px) {
+    .tweet-header {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .tweet-header img.perfil {
+        width: 40px;
+        height: 40px;
+    }
+
+    .tweet {
+        max-width: 100%;
+    }
+
+    .tweet-form {
+        padding: 12px;
+    }
+}
+
+
+.icon-verificado {
+    width: 16px;       /* tamaño del icono */
+    height: 16px;
+    vertical-align: middle; /* para que quede alineado con el texto */
+    margin-left: 5px;       /* separa el icono del nombre */
+}

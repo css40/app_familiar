@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Editar integrante</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='edit_member.css') }}">
+</head>
+<body>
+
+<div class="edit-container">
+    <h2>Editar integrante</h2>
+    <form method="POST" enctype="multipart/form-data" class="edit-form">
+
+        <!-- Nombre y Apellido -->
+        <label>Nombre:</label>
+        <input type="text" name="nombre" value="{{ integrante[1] }}" required>
+
+        <label>Apellido:</label>
+        <input type="text" name="apellido" value="{{ integrante[2] }}" required>
+
+        <!-- Email y Contraseña -->
+        <label>Email:</label>
+        <input type="email" name="email" value="{{ integrante[3] }}" required>
+
+        <label>Contraseña:</label>
+        <input type="password" name="password" value="{{ integrante[4] }}" required>
+
+        <!-- Fecha de nacimiento, Municipio, País -->
+        <label>Fecha de nacimiento:</label>
+        <input type="date" name="fecha_nac" value="{{ integrante[5] }}">
+
+        <label>Municipio:</label>
+        <input type="text" name="municipio" value="{{ integrante[6] }}">
+
+        <label>País:</label>
+        <input type="text" name="pais" value="{{ integrante[7] }}">
+
+        <!-- Teléfono, Dirección, Estado Civil, Bio -->
+        <label>Teléfono:</label>
+        <input type="text" name="telefono" value="{{ integrante[9] or '' }}">
+
+        <label>Dirección:</label>
+        <input type="text" name="direccion" value="{{ integrante[10] or '' }}">
+
+        <label>Estado Civil:</label>
+        <input type="text" name="estado_civil" value="{{ integrante[11] or '' }}">
+
+        <label>Bio:</label>
+        <textarea name="bio" rows="4">{{ integrante[12] or '' }}</textarea>
+
+        <!-- Foto -->
+        <label>Foto:</label>
+        <input type="file" name="foto">
+        {% if integrante[8] %}
+        <img src="/{{ integrante[8].replace('\\','/') }}" width="80" class="preview"><br>
+        {% endif %}
+
+        <button type="submit" class="btn-save">Guardar cambios</button>
+    </form>
+
+    <a href="/members" class="btn-back">← Volver</a>
+</div>
+
+</body>
+</html>

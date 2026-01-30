@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ integrante[1] }} {{ integrante[2] }}</title>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .card-profile {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007BFF;
+        }
+
+        .info {
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .album {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .album img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 15px;
+            background: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn-back:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card-profile">
+
+    <!-- FOTO REDONDA ARRIBA -->
+    {% if integrante[8] %}
+    <img class="profile-pic" src="/{{ integrante[8].replace('\\','/') }}" alt="{{ integrante[1] }}">
+    {% else %}
+    <img class="profile-pic" src="/static/default_user.png" alt="Sin foto">
+    {% endif %}
+
+
+    <h2>{{ integrante[1] }} {{ integrante[2] }}</h2>
+
+    <div class="info">
+        <p><strong>Email:</strong> {{ integrante[3] }}</p>
+        <p><strong>Fecha de nacimiento:</strong> {{ integrante[5]or 'No especificado'  }}</p>
+        <p><strong>Municipio:</strong> {{ integrante[6] or 'No especificado'  }}</p>
+        <p><strong>País:</strong> {{ integrante[7] or 'No especificado'  }}</p>
+        <p><strong>Teléfono:</strong> {{ integrante[9] or 'No especificado' }}</p>
+        <p><strong>Dirección:</strong> {{ integrante[10] or 'No especificado' }}</p>
+        <p><strong>Estado civil:</strong> {{ integrante[11] or 'No especificado' }}</p>
+        <p><strong>Bio:</strong> {{ integrante[12] or 'Sin bio' }}</p>
+    </div>
+
+    <h3>Álbum</h3>
+    <div class="album">
+        {% for foto in album %}
+            <img src="/{{ foto[0].replace('\\','/') }}" alt="Foto del álbum">
+        {% endfor %}
+    </div>
+
+    <a class="btn-back" href="/members_view">← Volver</a>
+
+</div>
+
+</body>
+</html>

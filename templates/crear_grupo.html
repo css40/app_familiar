@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Grupo</title>
+    <link rel="stylesheet" href="/static/grupos.css">
+</head>
+<body>
+    <h2>Crear Grupo</h2>
+
+    <div class="nav-buttons">
+        <a href="/grupos" class="btn">Volver</a>
+        <a href="/user_home" class="btn">Inicio</a>
+        <a href="/logout" class="btn logout">Cerrar sesión</a>
+    </div>
+
+    <form method="POST" id="crear-grupo-form">
+        <input type="text" name="nombre" placeholder="Nombre del grupo" required>
+
+        <h3>Agregar miembros</h3>
+        <p>Busca usuarios existentes y asigna rol:</p>
+        <div class="busqueda-miembros">
+            <input type="text" id="buscar-usuario" placeholder="Escribe nombre o correo">
+            <div id="sugerencias-usuarios" class="sugerencias"></div>
+        </div>
+
+
+        <div id="miembros-seleccionados">
+            <!-- Aquí se añadirán los miembros seleccionados -->
+        </div>
+
+        <button type="submit" class="btn">Crear Grupo</button>
+    </form>
+
+<script>
+const inputBuscar = document.getElementById("buscar-usuario");
+const sugerencias = document.getElementById("sugerencias-usuarios");
+const miembrosSeleccionados = document.getElementById("miembros-seleccionados");
+
+inputBuscar.addEventListener("input", function() {
+    const valor = this.value.toLowerCase();
+    sugerencias.innerHTML = "";
+
+    if (valor.length === 0) {
+        sugerencias.style.display = "none";
+        return;
+    }
+
+    const filtrados = usuarios.filter(u => 
+        u[1].toLowerCase().includes(valor) || 
+        u[2].toLowerCase().includes(valor) || 
+        u[3].toLowerCase().includes(valor)
+    );
+
+    if(filtrados.length === 0){
+        sugerencias.style.display = "none";
+        return;
+    }
+
+    filtrados.forEach(u => {
+        const div = document.createElement("div");
+        div.textContent = `${u[1]} ${u[2]} (${u[3]})`;
+        div.dataset.id = u[0];
+        div.dataset.nombre = u[1];
+        div.dataset.apellido = u[2];
+        div.dataset.email = u[3];
+
+        div.addEventListener("click", function() {
+            agregarMiembro(u);
+            inputBuscar.value = "";
+            sugerencias.innerHTML = "";
+            sugerencias.style.display = "none";
+        });
+
+        sugerencias.appendChild(div);
+    });
+
+    sugerencias.style.display = "block";
+});
+
+function agregarMiembro(u) {
+    if (document.getElementById("miembro-" + u[0])) return;
+
+    const div = document.createElement("div");
+    div.classList.add("miembro-form");
+    div.id = "miembro-" + u[0];
+    div.innerHTML = `
+        <span>${u[1]} ${u[2]} (${u[3]})</span>
+        <input type="text" name="roles_${u[0]}" placeholder="Rol (Papa, Mama, Hijo...)" required>
+        <button type="button" onclick="quitarMiembro('${u[0]}')">X</button>
+        <input type="hidden" name="miembros" value="${u[0]}">
+    `;
+    miembrosSeleccionados.appendChild(div);
+}
+
+function quitarMiembro(id) {
+    const div = document.getElementById("miembro-" + id);
+    div.remove();
+}
+</script>
+
+
+</body>
+</html>

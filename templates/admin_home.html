@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Home</title>
+    <link rel="stylesheet" href="/static/admin.css">
+</head>
+<body>
+
+<div class="admin-container">
+
+    <div class="admin-header">
+        <h2>👋 Bienvenido, {{ nombre }} (Admin)</h2>
+        <p>Panel de administración familiar</p>
+    </div>
+
+    <!-- PANEL DE ESTADÍSTICAS -->
+    <div class="admin-stats">
+        <div class="stat-card">
+            <h3>👨‍👩‍👧‍👦 Integrantes</h3>
+            <p>{{ total_miembros }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>✅ Activos</h3>
+            <p>{{ activos }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>🏠 Familia</h3>
+            <p>{{ nombre_familia }}</p>
+        </div>
+    </div>
+
+    <!-- MENÚ PRINCIPAL -->
+    <div class="admin-menu">
+
+        <a class="admin-card" href="/add_member">
+            ➕ Agregar integrante
+            <span>Registrar nuevo miembro</span>
+        </a>
+
+        <a class="admin-card" href="/members">
+            👀 Ver integrantes
+            <span>Administrar perfiles</span>
+        </a>
+
+        <a class="admin-card logout" href="/logout">
+            🚪 Cerrar sesión
+            <span>Salir del sistema</span>
+        </a>
+
+    </div>
+
+    <!-- ACTIVIDAD RECIENTE -->
+    <div class="recent-activity">
+        <h3>📌 Actividad reciente</h3>
+        <ul>
+            <li>✔️ Nuevo integrante agregado</li>
+            <li>✔️ Perfil actualizado</li>
+            <li>✔️ Acceso del administrador correcto</li>
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>
