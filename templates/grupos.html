@@ -1,27 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Grupos</title>
-    <link rel="stylesheet" href="/static/grupos.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grupos</title>
+  <link rel="stylesheet" href="/static/grupos.css">
 </head>
+
 <body>
-    <h2>Mis Grupos</h2>
-
-    <div class="nav-buttons">
-        <a href="/user_home" class="btn">Volver al inicio</a>
-        <a href="/crear_grupo" class="btn">Crear Grupo</a>
-        <a href="/logout" class="btn logout">Cerrar sesión</a>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">FW</div>
+      <div class="brand-text">
+        <div class="brand-title">Grupos</div>
+        <div class="brand-sub">Tus espacios para compartir</div>
+      </div>
     </div>
 
-    <div class="container">
-        {% for g in grupos %}
-        <div class="card">
-            <h3>{{ g[1] }}</h3> <!-- Nombre del grupo -->
-            <p>Creado por: {{ g[2] }} {{ g[3] }}</p>
-            <a class="btn" href="/grupo/{{ g[0] }}">Ver Grupo</a>
+    <div class="top-actions">
+      <a class="btn ghost" href="/user_home">Inicio</a>
+      <a class="btn primary" href="/crear_grupo">Crear grupo</a>
+      <a class="btn danger" href="/logout">Cerrar sesión</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-left">
+        <h1>Mis Grupos</h1>
+        <p>Entrá a un grupo para ver publicaciones, miembros y actividad.</p>
+      </div>
+
+      <div class="hero-right">
+        <div class="stat">
+          <div class="stat-num">{{ grupos|length }}</div>
+          <div class="stat-label">Grupos</div>
         </div>
-        {% endfor %}
-    </div>
+        <div class="stat">
+          <div class="stat-num">👥</div>
+          <div class="stat-label">Comunidad</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tools -->
+    <section class="tools">
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input id="search" type="text" placeholder="Buscar grupo por nombre o creador..." autocomplete="off">
+      </div>
+
+      <div class="chips">
+        <button class="chip active" type="button" data-sort="az">A–Z</button>
+        <button class="chip" type="button" data-sort="za">Z–A</button>
+      </div>
+    </section>
+
+    <!-- Grid -->
+    <section class="grid" id="grid">
+      {% for g in grupos %}
+      <article class="card group"
+               data-name="{{ (g[1] or '')|lower }}"
+               data-creator="{{ ((g[2] or '') ~ ' ' ~ (g[3] or ''))|lower }}">
+        <div class="card-head">
+          <div class="badge">👥</div>
+          <div class="head-text">
+            <h3 class="group-name">{{ g[1] }}</h3>
+            <p class="creator">Creado por: <b>{{ g[2] }} {{ g[3] }}</b></p>
+          </div>
+        </div>
+
+        <div class="meta">
+          <span class="tag">Espacio privado</span>
+          <span class="tag muted">Actividad: feed</span>
+        </div>
+
+        <div class="card-actions">
+          <a class="btn primary" href="/grupo/{{ g[0] }}">Ver grupo</a>
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+
+    <!-- Empty -->
+    <section class="empty" id="empty" style="display:none;">
+      <div class="empty-box">
+        <div class="empty-ico">🫥</div>
+        <h2>No hay resultados</h2>
+        <p>Probá con otro nombre o creador.</p>
+        <button class="btn ghost" id="reset" type="button">Limpiar búsqueda</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const search = document.getElementById("search");
+    const cards = Array.from(document.querySelectorAll(".group"));
+    const chips = Array.from(document.querySelectorAll(".chip"));
+    const empty = document.getElementById("empty");
+    const reset = document.getElementById("reset");
+
+    let sortMode = "az";
+
+    function sortCards() {
+      const grid = document.getElementById("grid");
+      const sorted = [...cards].sort((a,b) => {
+        const an = a.dataset.name || "";
+        const bn = b.dataset.name || "";
+        return sortMode === "az" ? an.localeCompare(bn) : bn.localeCompare(an);
+      });
+      sorted.forEach(el => grid.appendChild(el));
+    }
+
+    function apply() {
+      const q = (search.value || "").trim().toLowerCase();
+      let visible = 0;
+
+      cards.forEach(c => {
+        const name = c.dataset.name || "";
+        const creator = c.dataset.creator || "";
+        const show = !q || name.includes(q) || creator.includes(q);
+        c.style.display = show ? "block" : "none";
+        if (show) visible++;
+      });
+
+      empty.style.display = visible === 0 ? "block" : "none";
+    }
+
+    search.addEventListener("input", apply);
+
+    chips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        chips.forEach(x => x.classList.remove("active"));
+        chip.classList.add("active");
+        sortMode = chip.dataset.sort;
+        sortCards();
+        apply();
+      });
+    });
+
+    reset.addEventListener("click", () => {
+      search.value = "";
+      sortMode = "az";
+      chips.forEach(x => x.classList.remove("active"));
+      chips[0].classList.add("active");
+      sortCards();
+      apply();
+      search.focus();
+    });
+
+    // init
+    sortCards();
+    apply();
+  </script>
 </body>
 </html>

@@ -1,53 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Mi perfil</title>
-    <!-- Llamamos al CSS -->
-    <link rel="stylesheet" href="/static/profile.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mi perfil</title>
+  <link rel="stylesheet" href="/static/profile.css">
 </head>
+
 <body>
-    <h2>Mi perfil</h2>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">FW</div>
+      <div class="brand-text">
+        <div class="brand-title">Mi perfil</div>
+        <div class="brand-sub">Editá tu información personal</div>
+      </div>
+    </div>
 
-<!-- Foto principal -->
-{% if integrante[8] and integrante[8] != "" %}
-<img src="{{ integrante[8] }}" class="foto-perfil">
-{% else %}
-<img src="/static/default_user.png" class="foto-perfil">
-{% endif %}
+    <div class="top-actions">
+      <a class="btn ghost" href="/user_home">← Home</a>
+      <a class="btn danger" href="/logout">Cerrar sesión</a>
+    </div>
+  </header>
 
+  <main class="page">
+    <!-- Header perfil -->
+    <section class="profile-header">
+      <div class="cover"></div>
 
-    <form method="POST" enctype="multipart/form-data">
-        <!-- Campos del formulario -->
-        <input type="text" name="nombre" value="{{ integrante[1] }}" placeholder="Nombre" required><br>
-        <input type="text" name="apellido" value="{{ integrante[2] }}" placeholder="Apellido" required><br>
-        <input type="email" name="email" value="{{ integrante[3] }}" placeholder="Correo" required><br>
-        <input type="password" name="password" value="{{ integrante[4] }}" placeholder="Contraseña" required><br>
-        <input type="date" name="fecha_nac" value="{{ integrante[5] }}"><br>
-        <input type="text" name="municipio" value="{{ integrante[6] }}" placeholder="Municipio"><br>
-        <input type="text" name="pais" value="{{ integrante[7] }}" placeholder="País"><br>
-        <input type="text" name="telefono" value="{{ integrante[9] }}" placeholder="Teléfono"><br>
-        <input type="text" name="direccion" value="{{ integrante[10] }}" placeholder="Dirección"><br>
-        <input type="text" name="estado_civil" value="{{ integrante[11] }}" placeholder="Estado civil"><br>
-        <textarea name="bio" placeholder="Pequeña bio / redes sociales">{{ integrante[12] }}</textarea><br>
-
-        <!-- Foto principal -->
-        <label>Foto de perfil:</label>
-        <input type="file" name="foto"><br>
-
-        <!-- Álbum de fotos -->
-        <h3>Álbum de fotos</h3>
-        <div class="album">
-            {% for f in fotos %}
-                <img src="{{ f[0] }}">
-            {% endfor %}
+      <div class="profile-card">
+        <div class="avatar-wrap">
+          {% if integrante[8] and integrante[8] != "" %}
+            <img src="{{ integrante[8] }}" class="avatar">
+          {% else %}
+            <img src="/static/default_user.png" class="avatar">
+          {% endif %}
         </div>
-        <label>Subir nuevas fotos al álbum:</label>
-        <input type="file" name="fotos" multiple><br><br>
 
-        <button type="submit">Guardar cambios</button>
+        <div class="identity">
+          <h1>{{ integrante[1] }} {{ integrante[2] }}</h1>
+          <p>{{ integrante[3] }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Formulario -->
+    <form method="POST" enctype="multipart/form-data" class="card form-card">
+
+      <h2 class="section-title">Información personal</h2>
+
+      <div class="grid">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" name="nombre" value="{{ integrante[1] }}" required>
+        </div>
+
+        <div class="field">
+          <label>Apellido</label>
+          <input type="text" name="apellido" value="{{ integrante[2] }}" required>
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" value="{{ integrante[3] }}" required>
+        </div>
+
+        <div class="field">
+          <label>Contraseña</label>
+          <input type="password" name="password" value="{{ integrante[4] }}" required>
+        </div>
+
+        <div class="field">
+          <label>Fecha de nacimiento</label>
+          <input type="date" name="fecha_nac" value="{{ integrante[5] }}">
+        </div>
+
+        <div class="field">
+          <label>Estado civil</label>
+          <input type="text" name="estado_civil" value="{{ integrante[11] }}">
+        </div>
+
+        <div class="field">
+          <label>Municipio</label>
+          <input type="text" name="municipio" value="{{ integrante[6] }}">
+        </div>
+
+        <div class="field">
+          <label>País</label>
+          <input type="text" name="pais" value="{{ integrante[7] }}">
+        </div>
+
+        <div class="field">
+          <label>Teléfono</label>
+          <input type="text" name="telefono" value="{{ integrante[9] }}">
+        </div>
+
+        <div class="field">
+          <label>Dirección</label>
+          <input type="text" name="direccion" value="{{ integrante[10] }}">
+        </div>
+      </div>
+
+      <div class="field full">
+        <label>Bio / Redes</label>
+        <textarea name="bio" placeholder="Contá algo sobre vos…">{{ integrante[12] }}</textarea>
+      </div>
+
+      <h2 class="section-title">Fotos</h2>
+
+      <div class="photos">
+        <div class="photo-block">
+          <label class="file">
+            Cambiar foto de perfil
+            <input type="file" name="foto">
+          </label>
+        </div>
+
+        <div class="album">
+          {% for f in fotos %}
+            <img src="{{ f[0] }}">
+          {% endfor %}
+        </div>
+
+        <label class="file">
+          Subir nuevas fotos al álbum
+          <input type="file" name="fotos" multiple>
+        </label>
+      </div>
+
+      <div class="actions">
+        <a href="/user_home" class="btn ghost">Cancelar</a>
+        <button type="submit" class="btn primary">Guardar cambios</button>
+      </div>
     </form>
-
-    <br>
-    <a href="/user_home">Volver</a> | <a href="/logout">Cerrar sesión</a>
+  </main>
 </body>
 </html>

@@ -1,140 +1,349 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>{{ grupo_nombre }}</title>
-    <link rel="stylesheet" href="/static/grupos.css">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ grupo_nombre }}</title>
+  <link rel="stylesheet" href="/static/grupodetalle.css">
 </head>
+
 <body>
-    <h2>Grupo: {{ grupo_nombre }}</h2>
-
-    <div class="nav-buttons">
-        <a href="/grupos" class="btn">Volver</a>
-        <a href="/user_home" class="btn">Inicio</a>
-        <a href="/logout" class="btn logout">Cerrar sesión</a>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">FW</div>
+      <div class="brand-text">
+        <div class="brand-title">{{ grupo_nombre }}</div>
+        <div class="brand-sub">Miembros y administración</div>
+      </div>
     </div>
 
-    <h3>Miembros</h3>
-    <div class="container">
-        {% for m in miembros %}
-        <div class="card">
-            {% if m[8] and m[8] != "" %}
-                <img src="{{ m[8].replace('\\','/') }}" class="perfil-card">
-            {% else %}
-                <img src="/static/default_user.png" class="perfil-card">
-            {% endif %}
-            <div class="nombre-card">{{ m[1] }} {{ m[2] }}</div>
-            <div class="rol-card">Rol: {{ m[4] }}</div>
-            <div class="acciones-card">
-                <a class="btn" href="/member/{{ m[0] }}">Ver perfil</a>
-                {% if user_id == creador_id and m[0] != creador_id %}
-                <form action="/grupo/{{ grupo_id }}/eliminar/{{ m[0] }}" method="POST" style="display:inline;">
-                    <button type="submit" class="btn eliminar">Eliminar</button>
-                </form>
-                {% endif %}
-            </div>
+    <div class="top-actions">
+      <a class="btn ghost" href="/grupos">← Grupos</a>
+      <a class="btn ghost" href="/user_home">Inicio</a>
+      <a class="btn danger" href="/logout">Cerrar sesión</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-left">
+        <h1>{{ grupo_nombre }}</h1>
+        <p>Gestioná miembros, roles y accesos del grupo.</p>
+      </div>
+
+      <div class="hero-right">
+        <div class="stat">
+          <div class="stat-num">{{ miembros|length }}</div>
+          <div class="stat-label">Miembros</div>
         </div>
-        {% endfor %}
-    </div>
+        <div class="stat">
+          <div class="stat-num">{% if user_id == creador_id %}🛡️{% else %}👤{% endif %}</div>
+          <div class="stat-label">{% if user_id == creador_id %}Eres admin{% else %}Miembro{% endif %}</div>
+        </div>
+      </div>
+    </section>
 
+    <!-- Tools -->
+    <section class="tools">
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input id="search" type="text" placeholder="Buscar miembro por nombre o rol..." autocomplete="off">
+      </div>
+
+      <div class="chips">
+        <button class="chip active" type="button" data-filter="all">Todos</button>
+        <button class="chip" type="button" data-filter="admin">Admins</button>
+        <button class="chip" type="button" data-filter="withphoto">Con foto</button>
+      </div>
+    </section>
+
+    <!-- Members grid -->
+    <section class="grid" id="grid">
+      {% for m in miembros %}
+      <article class="card member"
+               data-name="{{ ((m[1] or '') ~ ' ' ~ (m[2] or ''))|lower }}"
+               data-role="{{ (m[4] or '')|lower }}"
+               data-photo="{{ '1' if m[8] and m[8] != '' else '0' }}"
+               data-iscreator="{{ '1' if m[0] == creador_id else '0' }}">
+        <div class="card-top">
+          <div class="avatar-wrap">
+            {% if m[8] and m[8] != "" %}
+              <img src="{{ m[8].replace('\\','/') }}" class="avatar" alt="{{ m[1] }}">
+            {% else %}
+              <img src="/static/default_user.png" class="avatar" alt="Sin foto">
+            {% endif %}
+          </div>
+
+          <div class="who">
+            <h3 class="name">
+              {{ m[1] }} {{ m[2] }}
+              {% if m[0] == creador_id %}
+                <span class="crown" title="Creador">👑</span>
+              {% endif %}
+            </h3>
+            <p class="role">Rol: <b>{{ m[4] }}</b></p>
+          </div>
+        </div>
+
+        <div class="meta">
+          {% if m[0] == creador_id %}
+            <span class="tag verified">Creador</span>
+          {% elif (m[4] or '')|lower in ['admin','administrador'] %}
+            <span class="tag verified">Admin</span>
+          {% else %}
+            <span class="tag">Miembro</span>
+          {% endif %}
+
+          {% if m[8] and m[8] != "" %}
+            <span class="tag">📷 Con foto</span>
+          {% else %}
+            <span class="tag muted">Sin foto</span>
+          {% endif %}
+        </div>
+
+        <div class="card-actions">
+          <a class="btn ghost" href="/member/{{ m[0] }}">Ver perfil</a>
+
+          {% if user_id == creador_id and m[0] != creador_id %}
+          <form action="/grupo/{{ grupo_id }}/eliminar/{{ m[0] }}" method="POST" class="inline">
+            <button type="submit" class="btn danger">Eliminar</button>
+          </form>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+
+    <!-- Empty -->
+    <section class="empty" id="empty" style="display:none;">
+      <div class="empty-box">
+        <div class="empty-ico">🫥</div>
+        <h2>No hay resultados</h2>
+        <p>Probá con otro nombre o rol.</p>
+        <button class="btn ghost" id="reset" type="button">Limpiar</button>
+      </div>
+    </section>
+
+    <!-- Add members (only creator) -->
     {% if user_id == creador_id %}
-    <h3>Añadir nuevo miembro</h3>
-    <div class="agregar-miembro">
-        <input type="text" id="buscar-usuario" placeholder="Buscar usuario por nombre o correo...">
-        <div id="sugerencias"></div>
-        <div id="miembros-seleccionados"></div>
-        <button id="agregar-btn" class="btn">Agregar al grupo</button>
-    </div>
+    <section class="card add">
+      <div class="add-head">
+        <div>
+          <h2>Añadir nuevo miembro</h2>
+          <p>Buscá usuarios y asignales un rol. Podés agregar varios de una vez.</p>
+        </div>
+        <span class="pill">Admin only</span>
+      </div>
+
+      <div class="add-body">
+        <div class="add-search">
+          <input type="text" id="buscar-usuario" placeholder="Buscar por nombre o correo...">
+          <div id="sugerencias" class="sugerencias"></div>
+        </div>
+
+        <div class="selected">
+          <div class="selected-title">Seleccionados</div>
+          <div id="miembros-seleccionados" class="selected-list"></div>
+
+          <button id="agregar-btn" class="btn primary" type="button">Agregar al grupo</button>
+        </div>
+      </div>
+    </section>
 
     <script>
-        let usuarios = {{ usuarios_disponibles|tojson }};
-        let seleccionados = [];
+      let usuarios = {{ usuarios_disponibles|tojson }};
+      let seleccionados = [];
 
-        const input = document.getElementById('buscar-usuario');
-        const sugerencias = document.getElementById('sugerencias');
-        const seleccionadosDiv = document.getElementById('miembros-seleccionados');
+      const input = document.getElementById('buscar-usuario');
+      const sugerencias = document.getElementById('sugerencias');
+      const seleccionadosDiv = document.getElementById('miembros-seleccionados');
 
-        input.addEventListener('input', () => {
-            const val = input.value.toLowerCase();
-            sugerencias.innerHTML = '';
-            if(val.length === 0) return;
-
-            let encontrados = usuarios.filter(u => 
-                (u.nombre + ' ' + u.apellido).toLowerCase().includes(val) || 
-                u.email.toLowerCase().includes(val)
-            );
-
-            if(encontrados.length === 0){
-                const div = document.createElement('div');
-                div.textContent = 'Usuario no encontrado';
-                div.style.color = 'red';
-                sugerencias.appendChild(div);
-                return;
-            }
-
-            encontrados.forEach(u => {
-                const div = document.createElement('div');
-                div.textContent = `${u.nombre} ${u.apellido} (${u.email})`;
-                div.dataset.id = u.id;
-                div.addEventListener('click', () => {
-                    let rol = prompt(`Asignar rol para ${u.nombre} ${u.apellido}:`);
-                    if(!rol){
-                        alert('Debes asignar un rol');
-                        return;
-                    }
-                    if(!seleccionados.find(s => s.id == u.id)){
-                        seleccionados.push({id:u.id, nombre:u.nombre, apellido:u.apellido, rol});
-                        renderSeleccionados();
-                    }
-                    input.value = '';
-                    sugerencias.innerHTML = '';
-                });
-                sugerencias.appendChild(div);
-            });
-        });
-
-        function renderSeleccionados(){
-            seleccionadosDiv.innerHTML = '';
-            seleccionados.forEach(s => {
-                const div = document.createElement('div');
-                div.textContent = `${s.nombre} ${s.apellido} - ${s.rol}`;
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Eliminar';
-                removeBtn.addEventListener('click', () => {
-                    seleccionados = seleccionados.filter(x => x.id != s.id);
-                    renderSeleccionados();
-                });
-                div.appendChild(removeBtn);
-                seleccionadosDiv.appendChild(div);
-            });
+      input.addEventListener('input', () => {
+        const val = input.value.toLowerCase().trim();
+        sugerencias.innerHTML = '';
+        if(val.length === 0){
+          sugerencias.style.display = "none";
+          return;
         }
 
-        document.getElementById('agregar-btn').addEventListener('click', () => {
-            if(seleccionados.length === 0){
-                return alert('Selecciona al menos un usuario');
-            }
+        const encontrados = usuarios.filter(u =>
+          (`${u.nombre} ${u.apellido}`.toLowerCase().includes(val)) ||
+          (u.email.toLowerCase().includes(val))
+        ).slice(0, 8);
 
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = "/grupo/{{ grupo_id }}/agregar";
-            seleccionados.forEach(s => {
-                const inputId = document.createElement('input');
-                inputId.type = 'hidden';
-                inputId.name = 'usuario_id';
-                inputId.value = s.id;
-                form.appendChild(inputId);
+        if(encontrados.length === 0){
+          const div = document.createElement('div');
+          div.className = 'suger-item muted';
+          div.textContent = 'Usuario no encontrado';
+          sugerencias.appendChild(div);
+          sugerencias.style.display = "block";
+          return;
+        }
 
-                const inputRol = document.createElement('input');
-                inputRol.type = 'hidden';
-                inputRol.name = 'rol';
-                inputRol.value = s.rol;
-                form.appendChild(inputRol);
-            });
-            document.body.appendChild(form);
-            form.submit();
+        encontrados.forEach(u => {
+          const div = document.createElement('div');
+          div.className = 'suger-item';
+          div.innerHTML = `<b>${u.nombre} ${u.apellido}</b> <span class="sub">(${u.email})</span>`;
+          div.dataset.id = u.id;
+
+          div.addEventListener('click', () => {
+            if(seleccionados.find(s => s.id == u.id)) return;
+
+            // rol por defecto
+            seleccionados.push({id:u.id, nombre:u.nombre, apellido:u.apellido, email:u.email, rol:"miembro"});
+            renderSeleccionados();
+            input.value = '';
+            sugerencias.innerHTML = '';
+            sugerencias.style.display = "none";
+            input.focus();
+          });
+
+          sugerencias.appendChild(div);
         });
+
+        sugerencias.style.display = "block";
+      });
+
+      function renderSeleccionados(){
+        seleccionadosDiv.innerHTML = '';
+
+        if(seleccionados.length === 0){
+          const empty = document.createElement('div');
+          empty.className = 'selected-empty';
+          empty.textContent = 'Aún no seleccionas usuarios.';
+          seleccionadosDiv.appendChild(empty);
+          return;
+        }
+
+        seleccionados.forEach(s => {
+          const row = document.createElement('div');
+          row.className = 'sel-row';
+
+          const left = document.createElement('div');
+          left.className = 'sel-left';
+          left.innerHTML = `<div class="sel-name"><b>${s.nombre} ${s.apellido}</b></div>
+                            <div class="sel-sub">${s.email}</div>`;
+
+          const role = document.createElement('select');
+          role.className = 'sel-role';
+          ["miembro","admin","moderador"].forEach(opt => {
+            const o = document.createElement('option');
+            o.value = opt;
+            o.textContent = opt;
+            if(opt === s.rol) o.selected = true;
+            role.appendChild(o);
+          });
+          role.addEventListener('change', () => s.rol = role.value);
+
+          const rm = document.createElement('button');
+          rm.className = 'btn danger small';
+          rm.type = 'button';
+          rm.textContent = 'Quitar';
+          rm.addEventListener('click', () => {
+            seleccionados = seleccionados.filter(x => x.id != s.id);
+            renderSeleccionados();
+          });
+
+          row.appendChild(left);
+          row.appendChild(role);
+          row.appendChild(rm);
+          seleccionadosDiv.appendChild(row);
+        });
+      }
+
+      document.getElementById('agregar-btn').addEventListener('click', () => {
+        if(seleccionados.length === 0){
+          return alert('Selecciona al menos un usuario');
+        }
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "/grupo/{{ grupo_id }}/agregar";
+
+        seleccionados.forEach(s => {
+          const inputId = document.createElement('input');
+          inputId.type = 'hidden';
+          inputId.name = 'usuario_id';
+          inputId.value = s.id;
+          form.appendChild(inputId);
+
+          const inputRol = document.createElement('input');
+          inputRol.type = 'hidden';
+          inputRol.name = 'rol';
+          inputRol.value = s.rol;
+          form.appendChild(inputRol);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+      });
+
+      renderSeleccionados();
     </script>
     {% endif %}
+
+    <script>
+      // search + filters members
+      const search = document.getElementById("search");
+      const cards = Array.from(document.querySelectorAll(".member"));
+      const chips = Array.from(document.querySelectorAll(".chip"));
+      const empty = document.getElementById("empty");
+      const reset = document.getElementById("reset");
+
+      let filter = "all";
+
+      function apply(){
+        const q = (search.value || "").trim().toLowerCase();
+        let visible = 0;
+
+        cards.forEach(c => {
+          const name = c.dataset.name || "";
+          const role = c.dataset.role || "";
+          const isCreator = c.dataset.iscreator === "1";
+          const hasPhoto = c.dataset.photo === "1";
+
+          const matchesText = !q || name.includes(q) || role.includes(q);
+
+          let matchesFilter = true;
+          if(filter === "admin"){
+            matchesFilter = isCreator || role.includes("admin");
+          }
+          if(filter === "withphoto"){
+            matchesFilter = hasPhoto;
+          }
+
+          const show = matchesText && matchesFilter;
+          c.style.display = show ? "block" : "none";
+          if(show) visible++;
+        });
+
+        empty.style.display = visible === 0 ? "block" : "none";
+      }
+
+      search?.addEventListener("input", apply);
+
+      chips.forEach(chip => {
+        chip.addEventListener("click", () => {
+          chips.forEach(x => x.classList.remove("active"));
+          chip.classList.add("active");
+          filter = chip.dataset.filter;
+          apply();
+        });
+      });
+
+      reset?.addEventListener("click", () => {
+        search.value = "";
+        filter = "all";
+        chips.forEach(x => x.classList.remove("active"));
+        chips[0].classList.add("active");
+        apply();
+        search.focus();
+      });
+
+      apply();
+    </script>
+  </main>
 </body>
 </html>

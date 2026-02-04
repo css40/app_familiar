@@ -1,42 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Integrantes</title>
-    <link rel="stylesheet" href="/static/members_view.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Integrantes</title>
+  <link rel="stylesheet" href="/static/members_view.css">
 </head>
 <body>
 
-    <h2>Integrantes</h2>
-
-    <!-- Botones volver / cerrar sesión -->
-    <div class="nav-buttons">
-        <a href="/user_home" class="nav-btn">Volver al inicio</a>
-        <a href="/logout" class="nav-btn logout">Cerrar sesión</a>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">FW</div>
+      <div class="brand-text">
+        <div class="brand-title">Integrantes</div>
+        <div class="brand-sub">Explorá perfiles y encontrá gente</div>
+      </div>
     </div>
 
-    <div class="container">
-        {% for i in integrantes %}
-        <div class="card">
-            {% if i[6] and i[6] != "" %}
-                <img src="{{ i[6].replace('\\','/') }}" alt="{{ i[1] }}" class="perfil-card">
-            {% else %}
-                <img src="/static/default_user.png" alt="Sin foto" class="perfil-card">
-            {% endif %}
-            
-            <h3 class="nombre-card">
-                {{ i[1] }} {{ i[2] }}
-                {% if i[3] == 'jhos@admin.com' %}
-                    <img src="/static/verificado.png" alt="Verificado" class="icon-verificado">
-                {% endif %}
-            </h3>
-            
-            <p class="correo-card">{{ i[3] }}</p>
+    <div class="top-actions">
+      <a class="btn ghost" href="/user_home">Inicio</a>
+      <a class="btn danger" href="/logout">Cerrar sesión</a>
+    </div>
+  </header>
 
-            <a class="btn" href="/member/{{ i[0] }}">Ver perfil</a>
+  <main class="page">
+    <!-- Header -->
+    <section class="hero">
+      <div class="hero-left">
+        <h1>Integrantes</h1>
+        <p>Listado de usuarios registrados. Entrá al perfil para ver detalles.</p>
+      </div>
+
+      <div class="hero-right">
+        <div class="stat">
+          <div class="stat-num">{{ integrantes|length }}</div>
+          <div class="stat-label">Usuarios</div>
         </div>
-        {% endfor %}
-    </div>
+        <div class="stat">
+          <div class="stat-num">🔎</div>
+          <div class="stat-label">Busca rápido</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search + filters -->
+    <section class="tools">
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input id="search" type="text" placeholder="Buscar por nombre o correo..." autocomplete="off">
+      </div>
+
+      <div class="chips">
+        <button class="chip active" type="button" data-filter="all">Todos</button>
+        <button class="chip" type="button" data-filter="verified">Verificados</button>
+        <button class="chip" type="button" data-filter="withphoto">Con foto</button>
+      </div>
+    </section>
+
+    <!-- Grid -->
+    <section class="grid" id="grid">
+      {% for i in integrantes %}
+      <article class="card member"
+               data-name="{{ (i[1] ~ ' ' ~ i[2])|lower }}"
+               data-email="{{ i[3]|lower }}"
+               data-verified="{{ '1' if i[3] == 'jhos@admin.com' else '0' }}"
+               data-photo="{{ '1' if i[6] and i[6] != '' else '0' }}">
+        <div class="card-top">
+          <div class="avatar-wrap">
+            {% if i[6] and i[6] != "" %}
+              <img src="{{ i[6].replace('\\','/') }}" alt="{{ i[1] }}" class="avatar">
+            {% else %}
+              <img src="/static/default_user.png" alt="Sin foto" class="avatar">
+            {% endif %}
+          </div>
+
+          <div class="who">
+            <h3 class="name">
+              {{ i[1] }} {{ i[2] }}
+              {% if i[3] == 'jhos@admin.com' %}
+                <img src="/static/verificado.png" alt="Verificado" class="icon-verificado">
+              {% endif %}
+            </h3>
+            <p class="email">{{ i[3] }}</p>
+          </div>
+        </div>
+
+        <div class="meta">
+          {% if i[3] == 'jhos@admin.com' %}
+            <span class="tag verified">✔ Verificado</span>
+          {% else %}
+            <span class="tag">Usuario</span>
+          {% endif %}
+
+          {% if i[6] and i[6] != "" %}
+            <span class="tag">📷 Con foto</span>
+          {% else %}
+            <span class="tag muted">Sin foto</span>
+          {% endif %}
+        </div>
+
+        <div class="card-actions">
+          <a class="btn primary" href="/member/{{ i[0] }}">Ver perfil</a>
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+
+    <!-- Empty state -->
+    <section class="empty" id="empty" style="display:none;">
+      <div class="empty-box">
+        <div class="empty-ico">🫥</div>
+        <h2>No hay resultados</h2>
+        <p>Probá con otro nombre o correo.</p>
+        <button class="btn ghost" id="reset" type="button">Limpiar búsqueda</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const search = document.getElementById("search");
+    const cards = Array.from(document.querySelectorAll(".member"));
+    const chips = Array.from(document.querySelectorAll(".chip"));
+    const empty = document.getElementById("empty");
+    const reset = document.getElementById("reset");
+
+    let filter = "all";
+
+    function apply() {
+      const q = (search.value || "").trim().toLowerCase();
+      let visible = 0;
+
+      cards.forEach(c => {
+        const name = c.dataset.name || "";
+        const email = c.dataset.email || "";
+        const verified = c.dataset.verified === "1";
+        const photo = c.dataset.photo === "1";
+
+        const matchesText = !q || name.includes(q) || email.includes(q);
+
+        let matchesFilter = true;
+        if (filter === "verified") matchesFilter = verified;
+        if (filter === "withphoto") matchesFilter = photo;
+
+        const show = matchesText && matchesFilter;
+        c.style.display = show ? "block" : "none";
+        if (show) visible++;
+      });
+
+      empty.style.display = visible === 0 ? "block" : "none";
+    }
+
+    search.addEventListener("input", apply);
+
+    chips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        chips.forEach(x => x.classList.remove("active"));
+        chip.classList.add("active");
+        filter = chip.dataset.filter;
+        apply();
+      });
+    });
+
+    reset.addEventListener("click", () => {
+      search.value = "";
+      filter = "all";
+      chips.forEach(x => x.classList.remove("active"));
+      chips[0].classList.add("active");
+      apply();
+      search.focus();
+    });
+  </script>
 
 </body>
 </html>

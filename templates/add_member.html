@@ -1,29 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Agregar integrante</title>
-    <link rel="stylesheet" href="/static/add_member.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agregar integrante</title>
+  <link rel="stylesheet" href="/static/add_member.css">
 </head>
+
 <body>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="/static/login.png" class="brand-logo" alt="Logo">
+      <div class="brand-text">
+        <div class="brand-title">Agregar integrante</div>
+        <div class="brand-sub">Registro de nuevo miembro</div>
+      </div>
+    </div>
 
-<div class="add-container">
-    <h2>Agregar integrante</h2>
-    <form class="add-form" method="POST" enctype="multipart/form-data">
-        <input type="text" name="nombre" placeholder="Nombre" required>
-        <input type="text" name="apellido" placeholder="Apellido" required>
-        <input type="email" name="email" placeholder="Correo" required>
-        <input type="password" name="password" placeholder="Contraseña" required>
-        <input type="date" name="fecha_nac" placeholder="Fecha de nacimiento">
-        <input type="text" name="municipio" placeholder="Municipio">
-        <input type="text" name="pais" placeholder="País">
-        <input type="text" name="telefono" placeholder="Teléfono">
-        <input type="text" name="estado_civil" placeholder="Estado civil">
-        <textarea name="bio" placeholder="Pequeña biografía..." rows="3"></textarea>
-        <input type="file" name="foto">
-        <button type="submit" class="btn-save">Guardar</button>
-    </form>
-    <a href="/admin_home" class="btn-back">← Volver</a>
-</div>
+    <div class="top-actions">
+      <a href="/admin_home" class="btn ghost">← Admin</a>
+      <a href="/logout" class="btn danger">Cerrar sesión</a>
+    </div>
+  </header>
 
+  <main class="page">
+    <section class="card">
+      <h1>Nuevo integrante</h1>
+      <p class="subtitle">Completá los datos para agregar un nuevo miembro a la familia.</p>
+
+      <form class="add-form" method="POST" enctype="multipart/form-data">
+
+        <div class="grid">
+          <div class="field">
+            <label>Nombre</label>
+            <input type="text" name="nombre" required>
+          </div>
+
+          <div class="field">
+            <label>Apellido</label>
+            <input type="text" name="apellido" required>
+          </div>
+
+          <div class="field">
+            <label>Email</label>
+            <input type="email" name="email" required>
+          </div>
+
+          <div class="field">
+            <label>Contraseña</label>
+            <input type="password" name="password" required>
+          </div>
+
+          <div class="field">
+            <label>Fecha de nacimiento</label>
+            <input type="date" name="fecha_nac">
+          </div>
+
+          <div class="field">
+            <label>Estado civil</label>
+            <input type="text" name="estado_civil">
+          </div>
+
+          <div class="field">
+            <label>Municipio</label>
+            <input type="text" name="municipio">
+          </div>
+
+          <div class="field">
+            <label>País</label>
+            <input type="text" name="pais">
+          </div>
+
+          <div class="field">
+            <label>Teléfono</label>
+            <input type="text" name="telefono">
+          </div>
+        </div>
+
+        <div class="field full">
+          <label>Biografía</label>
+          <textarea name="bio" rows="3" placeholder="Pequeña biografía..."></textarea>
+        </div>
+
+        <div class="field full">
+          <label>Foto de perfil</label>
+          <input type="file" name="foto">
+        </div>
+
+        <div class="actions">
+          <a href="/admin_home" class="btn ghost">Cancelar</a>
+          <button type="submit" class="btn primary">Guardar integrante</button>
+        </div>
+      </form>
+    </section>
+  </main>
 </body>
 </html>

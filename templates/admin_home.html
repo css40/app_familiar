@@ -1,67 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Admin Home</title>
-    <link rel="stylesheet" href="/static/admin.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="/static/admin.css">
 </head>
+
 <body>
-
-<div class="admin-container">
-
-    <div class="admin-header">
-        <h2>👋 Bienvenido, {{ nombre }} (Admin)</h2>
-        <p>Panel de administración familiar</p>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="/static/login.png" class="brand-logo" alt="Logo">
+      <div class="brand-text">
+        <div class="brand-title">Panel Admin</div>
+        <div class="brand-sub">Administración familiar</div>
+      </div>
     </div>
 
-    <!-- PANEL DE ESTADÍSTICAS -->
-    <div class="admin-stats">
-        <div class="stat-card">
-            <h3>👨‍👩‍👧‍👦 Integrantes</h3>
-            <p>{{ total_miembros }}</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>✅ Activos</h3>
-            <p>{{ activos }}</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>🏠 Familia</h3>
-            <p>{{ nombre_familia }}</p>
-        </div>
+    <div class="top-actions">
+      <a href="/user_home" class="btn ghost">Inicio</a>
+      <a href="/logout" class="btn danger">Cerrar sesión</a>
     </div>
+  </header>
 
-    <!-- MENÚ PRINCIPAL -->
-    <div class="admin-menu">
+  <main class="page">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-left">
+        <h1>👋 Hola, {{ nombre }}</h1>
+        <p>Tenés control total del sistema familiar.</p>
+      </div>
 
-        <a class="admin-card" href="/add_member">
-            ➕ Agregar integrante
-            <span>Registrar nuevo miembro</span>
-        </a>
+      <div class="hero-right">
+        <div class="stat">
+          <div class="stat-num">{{ total_miembros }}</div>
+          <div class="stat-label">Integrantes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">{{ activos }}</div>
+          <div class="stat-label">Activos</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">🏠</div>
+          <div class="stat-label">{{ nombre_familia }}</div>
+        </div>
+      </div>
+    </section>
 
-        <a class="admin-card" href="/members">
-            👀 Ver integrantes
-            <span>Administrar perfiles</span>
-        </a>
+    <!-- QUICK ACTIONS -->
+    <section class="quick-actions">
+      <a class="quick-card" href="/add_member">
+        <div class="qc-ico">➕</div>
+        <div class="qc-text">
+          <h3>Agregar integrante</h3>
+          <p>Registrar nuevo miembro</p>
+        </div>
+      </a>
 
-        <a class="admin-card logout" href="/logout">
-            🚪 Cerrar sesión
-            <span>Salir del sistema</span>
-        </a>
+      <a class="quick-card" href="/members">
+        <div class="qc-ico">👀</div>
+        <div class="qc-text">
+          <h3>Ver integrantes</h3>
+          <p>Administrar perfiles</p>
+        </div>
+      </a>
 
-    </div>
+      <a class="quick-card" href="/grupos">
+        <div class="qc-ico">👥</div>
+        <div class="qc-text">
+          <h3>Grupos</h3>
+          <p>Gestionar grupos familiares</p>
+        </div>
+      </a>
 
-    <!-- ACTIVIDAD RECIENTE -->
-    <div class="recent-activity">
-        <h3>📌 Actividad reciente</h3>
-        <ul>
-            <li>✔️ Nuevo integrante agregado</li>
-            <li>✔️ Perfil actualizado</li>
-            <li>✔️ Acceso del administrador correcto</li>
+      <a class="quick-card" href="/admin/config">
+        <div class="qc-ico">⚙️</div>
+        <div class="qc-text">
+          <h3>Configuración</h3>
+          <p>Opciones del sistema</p>
+        </div>
+      </a>
+    </section>
+
+    <!-- GRID -->
+    <section class="grid">
+      <!-- ACTIVIDAD -->
+      <div class="card">
+        <h2>📌 Actividad reciente</h2>
+        <ul class="activity">
+          <li>✔️ Nuevo integrante agregado</li>
+          <li>✔️ Perfil actualizado</li>
+          <li>✔️ Acceso del administrador correcto</li>
         </ul>
-    </div>
+      </div>
 
-</div>
+      <!-- SEGURIDAD -->
+      <div class="card">
+        <h2>🔐 Seguridad</h2>
+        <ul class="activity">
+          <li>✔️ Sesión protegida</li>
+          <li>✔️ Accesos válidos</li>
+          <li>✔️ Sin alertas</li>
+        </ul>
+        <a href="/admin/security" class="btn ghost small">Ver detalles</a>
+      </div>
 
+      <!-- ATAJOS -->
+      <div class="card">
+        <h2>⚡ Atajos rápidos</h2>
+        <div class="shortcuts">
+          <a href="/add_member" class="btn small">➕ Nuevo miembro</a>
+          <a href="/members" class="btn small">👥 Integrantes</a>
+          <a href="/profile" class="btn small">👤 Mi perfil</a>
+        </div>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

@@ -1,51 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Lista de Integrantes</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='members.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integrantes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='members.css') }}">
 </head>
-<body>
 
-<div class="members-container">
-    <div class="header">
-        <h2>Lista de Integrantes</h2>
-        <div class="top-links">
-            <a href="/admin_home">Volver al inicio</a>
-            <a href="/logout" class="logout">Cerrar sesión</a>
-        </div>
+<body>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="/static/login.png" class="brand-logo" alt="Logo">
+      <div class="brand-text">
+        <div class="brand-title">Integrantes</div>
+        <div class="brand-sub">Administración de usuarios</div>
+      </div>
     </div>
 
-    <table>
-        <tr>
-            <th>Foto</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Email</th>
-            <th>Contraseña</th>
-            <th>Acciones</th>
-        </tr>
-        {% for i in integrantes %}
-        <tr>
-            <td>
-                {% if i[5] %}
-                    <img src="/{{ i[5].replace('\\','/') }}" alt="{{ i[1] }}">
-                {% else %}
-                    <img src="/static/default_user.png" alt="Sin foto">
-                {% endif %}
-            </td>
-            <td>{{ i[1] }}</td>
-            <td>{{ i[2] }}</td>
-            <td>{{ i[3] }}</td>
-            <td>{{ i[4] }}</td>
-            <td class="action-links">
-                <a href="/edit_member/{{ i[0] }}">Editar</a> |
-                <a href="/delete_member/{{ i[0] }}" onclick="return confirm('¿Seguro que quieres eliminar este integrante?')">Eliminar</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-</div>
+    <div class="top-actions">
+      <a href="/admin_home" class="btn ghost">← Admin</a>
+      <a href="/logout" class="btn danger">Cerrar sesión</a>
+    </div>
+  </header>
 
+  <main class="page">
+    <section class="card">
+      <h1>Lista de integrantes</h1>
+      <p class="subtitle">Gestioná perfiles, ediciones y eliminaciones.</p>
+
+      <div class="table-wrap">
+        <table class="members-table">
+          <thead>
+            <tr>
+              <th>Foto</th>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Email</th>
+              <th>Contraseña</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in integrantes %}
+            <tr>
+              <td>
+                {% if i[5] %}
+                  <img src="/{{ i[5].replace('\\','/') }}" class="avatar">
+                {% else %}
+                  <img src="/static/default_user.png" class="avatar">
+                {% endif %}
+              </td>
+              <td>{{ i[1] }}</td>
+              <td>{{ i[2] }}</td>
+              <td class="email">{{ i[3] }}</td>
+              <td class="password">••••••••</td>
+              <td class="actions">
+                <a href="/edit_member/{{ i[0] }}" class="btn small">Editar</a>
+                <a href="/delete_member/{{ i[0] }}"
+                   class="btn danger small"
+                   onclick="return confirm('¿Seguro que quieres eliminar este integrante?')">
+                  Eliminar
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

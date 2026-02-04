@@ -1,65 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Editar integrante</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='edit_member.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar integrante</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='edit_member.css') }}">
 </head>
+
 <body>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="/static/login.png" class="brand-logo" alt="Logo">
+      <div class="brand-text">
+        <div class="brand-title">Editar integrante</div>
+        <div class="brand-sub">Actualizar información del usuario</div>
+      </div>
+    </div>
 
-<div class="edit-container">
-    <h2>Editar integrante</h2>
-    <form method="POST" enctype="multipart/form-data" class="edit-form">
+    <div class="top-actions">
+      <a href="/members" class="btn ghost">← Integrantes</a>
+      <a href="/logout" class="btn danger">Cerrar sesión</a>
+    </div>
+  </header>
 
-        <!-- Nombre y Apellido -->
-        <label>Nombre:</label>
-        <input type="text" name="nombre" value="{{ integrante[1] }}" required>
+  <main class="page">
+    <section class="card">
+      <h1>Editar integrante</h1>
+      <p class="subtitle">Modificá los datos y guardá los cambios.</p>
 
-        <label>Apellido:</label>
-        <input type="text" name="apellido" value="{{ integrante[2] }}" required>
+      <form method="POST" enctype="multipart/form-data" class="edit-form">
+        <div class="grid">
+          <div class="field">
+            <label>Nombre</label>
+            <input type="text" name="nombre" value="{{ integrante[1] }}" required>
+          </div>
 
-        <!-- Email y Contraseña -->
-        <label>Email:</label>
-        <input type="email" name="email" value="{{ integrante[3] }}" required>
+          <div class="field">
+            <label>Apellido</label>
+            <input type="text" name="apellido" value="{{ integrante[2] }}" required>
+          </div>
 
-        <label>Contraseña:</label>
-        <input type="password" name="password" value="{{ integrante[4] }}" required>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" name="email" value="{{ integrante[3] }}" required>
+          </div>
 
-        <!-- Fecha de nacimiento, Municipio, País -->
-        <label>Fecha de nacimiento:</label>
-        <input type="date" name="fecha_nac" value="{{ integrante[5] }}">
+          <div class="field">
+            <label>Contraseña</label>
+            <input type="password" name="password" value="{{ integrante[4] }}" required>
+          </div>
 
-        <label>Municipio:</label>
-        <input type="text" name="municipio" value="{{ integrante[6] }}">
+          <div class="field">
+            <label>Fecha de nacimiento</label>
+            <input type="date" name="fecha_nac" value="{{ integrante[5] }}">
+          </div>
 
-        <label>País:</label>
-        <input type="text" name="pais" value="{{ integrante[7] }}">
+          <div class="field">
+            <label>Estado civil</label>
+            <input type="text" name="estado_civil" value="{{ integrante[11] or '' }}">
+          </div>
 
-        <!-- Teléfono, Dirección, Estado Civil, Bio -->
-        <label>Teléfono:</label>
-        <input type="text" name="telefono" value="{{ integrante[9] or '' }}">
+          <div class="field">
+            <label>Municipio</label>
+            <input type="text" name="municipio" value="{{ integrante[6] }}">
+          </div>
 
-        <label>Dirección:</label>
-        <input type="text" name="direccion" value="{{ integrante[10] or '' }}">
+          <div class="field">
+            <label>País</label>
+            <input type="text" name="pais" value="{{ integrante[7] }}">
+          </div>
 
-        <label>Estado Civil:</label>
-        <input type="text" name="estado_civil" value="{{ integrante[11] or '' }}">
+          <div class="field">
+            <label>Teléfono</label>
+            <input type="text" name="telefono" value="{{ integrante[9] or '' }}">
+          </div>
 
-        <label>Bio:</label>
-        <textarea name="bio" rows="4">{{ integrante[12] or '' }}</textarea>
+          <div class="field">
+            <label>Dirección</label>
+            <input type="text" name="direccion" value="{{ integrante[10] or '' }}">
+          </div>
+        </div>
 
-        <!-- Foto -->
-        <label>Foto:</label>
-        <input type="file" name="foto">
-        {% if integrante[8] %}
-        <img src="/{{ integrante[8].replace('\\','/') }}" width="80" class="preview"><br>
-        {% endif %}
+        <div class="field full">
+          <label>Bio</label>
+          <textarea name="bio" rows="4">{{ integrante[12] or '' }}</textarea>
+        </div>
 
-        <button type="submit" class="btn-save">Guardar cambios</button>
-    </form>
+        <div class="photo-section">
+          <div class="photo-left">
+            <label>Nueva foto</label>
+            <input type="file" name="foto">
+          </div>
 
-    <a href="/members" class="btn-back">← Volver</a>
-</div>
+          {% if integrante[8] %}
+          <div class="photo-preview">
+            <span>Foto actual</span>
+            <img src="/{{ integrante[8].replace('\\','/') }}" alt="Foto actual">
+          </div>
+          {% endif %}
+        </div>
 
+        <div class="actions">
+          <a href="/members" class="btn ghost">Cancelar</a>
+          <button type="submit" class="btn primary">Guardar cambios</button>
+        </div>
+      </form>
+    </section>
+  </main>
 </body>
 </html>

@@ -1,142 +1,250 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Usuario Home</title>
-    <link rel="stylesheet" href="/static/user_home.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Usuario Home</title>
+  <link rel="stylesheet" href="/static/user_home.css">
 </head>
 
 <body>
-<!-- Bienvenida -->
-<h2 class="bienvenida">Bienvenido, {{ nombre }}</h2>
-
-<!-- Botones de navegación -->
-<div class="nav-buttons">
-    <a href="/profile">Ver/Editar mi perfil</a>
-    <a href="/members_view">Ver otros integrantes</a>
-    <a href="/logout" class="logout-btn">Cerrar sesión</a>
-    <a href="/grupos" class="btn">Grupos</a>
-</div>
-
-
-<!-- Dentro de user_home.html -->
-<h3>Crear un Tweet</h3>
-<form method="POST" enctype="multipart/form-data" action="/post_tweet" class="tweet-form">
-    <textarea id="tweet-text" name="contenido" placeholder="¿Qué estás pensando?" required></textarea>
-    <div id="sugerencias" class="sugerencias"></div>
-
-    <!-- Botón y archivo alineados horizontalmente -->
-    <div class="tweet-actions-container">
-        <input type="file" name="foto">
-        <button type="submit">Twittear</button>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">FW</div>
+      <div class="brand-text">
+        <div class="brand-title">Family_web</div>
+        <div class="brand-sub">Tu feed privado</div>
+      </div>
     </div>
-</form>
 
+    <div class="top-actions">
+      <a class="btn ghost" href="/members_view">Integrantes</a>
+      <a class="btn ghost" href="/grupos">Grupos</a>
+      <a class="btn primary" href="/profile">Mi perfil</a>
+      <a class="btn danger" href="/logout">Cerrar sesión</a>
+    </div>
+  </header>
 
-
-<h3>Últimos Tweets</h3>
-<div class="tweets-container">
-    {% for tweet in tweets %}
-        <div class="tweet">
-            <div class="tweet-header">
-                <img src="{{ tweet[5] }}" alt="Foto perfil" class="perfil">
-                <div class="user-info">
-                    <strong>
-            {{ tweet[4] }}
-            {% if tweet[4] == "Family_web" %} <!-- o lo que uses para admin -->
-                <img src="/static/verificado.png" alt="Verificado" class="icon-verificado">
-            {% endif %}
-        </strong>
-        <small>{{ tweet[3] }}</small>
-                </div>
-            </div>
-            <p>{{ tweet[1] | safe }}</p>
-            {% if tweet[2] %}
-                <img src="{{ tweet[2] }}" class="tweet-foto">
-            {% endif %}
-        <!-- REACCIONES -->
-            <div class="tweet-reacciones">
-                <span class="reaccion" data-tweet="{{ tweet[0] }}" data-tipo="encanta">❤️ <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('encanta', 0) }}</span></span>
-                <span class="reaccion" data-tweet="{{ tweet[0] }}" data-tipo="divierte">😆 <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('divierte', 0) }}</span></span>
-                <span class="reaccion" data-tweet="{{ tweet[0] }}" data-tipo="enoja">😡 <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('enoja', 0) }}</span></span>
-            </div>
-
-
-
-            {% if tweet[6] == user_id or session['email'] == 'jhos@admin.com' %}
-                <div class="tweet-actions">
-                    <a href="/editar_tweet/{{ tweet[0] }}">Editar</a>
-                    <a href="/eliminar_tweet/{{ tweet[0] }}">Eliminar</a>
-                </div>
-                
-            {% endif %}
+  <main class="page">
+    <!-- Welcome card -->
+    <section class="welcome">
+      <div class="welcome-left">
+        <h1>Bienvenido, <span class="accent">{{ nombre }}</span></h1>
+        <p>Compartí updates, fotos y menciones. Tus reacciones se guardan en tiempo real.</p>
+      </div>
+      <div class="welcome-right">
+        <div class="stat">
+          <div class="stat-num">{{ tweets|length }}</div>
+          <div class="stat-label">Tweets en feed</div>
         </div>
-    {% endfor %}
-</div>  
-</body>
-</html>
-<script>
-document.querySelectorAll(".reaccion").forEach(el => {
-    el.addEventListener("click", () => {
+        <div class="stat">
+          <div class="stat-num">⚡</div>
+          <div class="stat-label">Modo oscuro tuani</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Layout -->
+    <section class="grid">
+      <!-- Left column -->
+      <div class="col">
+        <!-- Composer -->
+        <div class="card composer">
+          <div class="card-title">
+            <h2>Crear un Tweet</h2>
+            <span class="pill">Tip: usa @ para mencionar</span>
+          </div>
+
+          <form method="POST" enctype="multipart/form-data" action="/post_tweet" class="tweet-form">
+            <div class="textarea-wrap">
+              <textarea id="tweet-text" name="contenido" placeholder="¿Qué estás pensando?" required></textarea>
+              <div id="sugerencias" class="sugerencias"></div>
+            </div>
+
+            <div class="composer-actions">
+              <label class="file">
+                <input type="file" name="foto" />
+                <span>📷 Foto</span>
+              </label>
+
+              <button type="submit" class="btn primary">Twittear</button>
+            </div>
+
+            <div class="composer-hint">
+              Se permite texto + imagen. Las menciones aparecen en sugerencias.
+            </div>
+          </form>
+        </div>
+
+        <!-- Sidebar / Tips -->
+        <div class="card side">
+          <h3>Acciones rápidas</h3>
+          <div class="quick">
+            <a class="quick-item" href="/profile">
+              <div class="qi-ico">👤</div>
+              <div class="qi-txt">
+                <div class="qi-title">Editar perfil</div>
+                <div class="qi-sub">Foto, nombre, bio…</div>
+              </div>
+            </a>
+
+            <a class="quick-item" href="/grupos">
+              <div class="qi-ico">👥</div>
+              <div class="qi-txt">
+                <div class="qi-title">Ver grupos</div>
+                <div class="qi-sub">Entrá y publicá</div>
+              </div>
+            </a>
+
+            <a class="quick-item" href="/members_view">
+              <div class="qi-ico">🧑‍🤝‍🧑</div>
+              <div class="qi-txt">
+                <div class="qi-title">Integrantes</div>
+                <div class="qi-sub">Encontrá gente</div>
+              </div>
+            </a>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3>Atajos</h3>
+          <ul class="bullets">
+            <li><b>@usuario</b> para mencionar</li>
+            <li><b>❤️ 😆 😡</b> reacciones por tweet</li>
+            <li>Si sos dueño/Admin podés editar/eliminar</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="col">
+        <div class="feed-header">
+          <h2>Últimos Tweets</h2>
+          <div class="feed-sub">Lo más reciente primero</div>
+        </div>
+
+        <div class="tweets-container">
+          {% for tweet in tweets %}
+            <article class="tweet card">
+              <div class="tweet-head">
+                <img src="{{ tweet[5] }}" alt="Foto perfil" class="avatar">
+
+                <div class="who">
+                  <div class="who-top">
+                    <strong class="name">
+                      {{ tweet[4] }}
+                      {% if tweet[4] == "Family_web" %}
+                        <img src="/static/verificado.png" alt="Verificado" class="icon-verificado">
+                      {% endif %}
+                    </strong>
+                    <span class="time">{{ tweet[3] }}</span>
+                  </div>
+                </div>
+
+                {% if tweet[6] == user_id or session['email'] == 'jhos@admin.com' %}
+                  <div class="menu">
+                    <a class="mini" href="/editar_tweet/{{ tweet[0] }}">Editar</a>
+                    <a class="mini danger" href="/eliminar_tweet/{{ tweet[0] }}">Eliminar</a>
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="tweet-body">
+                <p class="content">{{ tweet[1] | safe }}</p>
+
+                {% if tweet[2] %}
+                  <img src="{{ tweet[2] }}" class="tweet-foto" alt="Foto del tweet">
+                {% endif %}
+              </div>
+
+              <div class="tweet-foot">
+                <div class="reacciones">
+                  <button class="react reaccion" type="button" data-tweet="{{ tweet[0] }}" data-tipo="encanta">
+                    ❤️ <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('encanta', 0) }}</span>
+                  </button>
+
+                  <button class="react reaccion" type="button" data-tweet="{{ tweet[0] }}" data-tipo="divierte">
+                    😆 <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('divierte', 0) }}</span>
+                  </button>
+
+                  <button class="react reaccion" type="button" data-tweet="{{ tweet[0] }}" data-tipo="enoja">
+                    😡 <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('enoja', 0) }}</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Reacciones (tu lógica, solo cambié spans por botones)
+    document.querySelectorAll(".reaccion").forEach(el => {
+      el.addEventListener("click", () => {
         const tweet_id = el.dataset.tweet;
         const tipo = el.dataset.tipo;
 
         fetch("/reaccion_ajax", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({tweet_id: tweet_id, tipo: tipo})
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({tweet_id: tweet_id, tipo: tipo})
         })
         .then(res => res.json())
         .then(data => {
-            if(data.status === "ok") {
-                // Actualizamos los contadores en la tarjeta
-                const parent = el.parentElement;
-                parent.querySelectorAll(".reaccion").forEach(r => {
-                    const t = r.dataset.tipo;
-                    r.querySelector(".count").textContent = data.reacciones[t] || 0;
-                });
-            }
+          if(data.status === "ok") {
+            const parent = el.closest(".tweet").querySelector(".reacciones");
+            parent.querySelectorAll(".reaccion").forEach(r => {
+              const t = r.dataset.tipo;
+              r.querySelector(".count").textContent = data.reacciones[t] || 0;
+            });
+          }
         });
-    });
-});
-
-let usuarios = [];
-fetch("/usuarios_json")
-    .then(res => res.json())
-    .then(data => {
-        usuarios = data.usuarios;
+      });
     });
 
-const textarea = document.getElementById("tweet-text");
-const sugerenciasDiv = document.getElementById("sugerencias");
+    // @menciones (tu lógica igual, solo mejor CSS de sugerencias)
+    let usuarios = [];
+    fetch("/usuarios_json")
+      .then(res => res.json())
+      .then(data => { usuarios = data.usuarios; });
 
-textarea.addEventListener("input", () => {
-    const valor = textarea.value;
-    const ultimo = valor.split(/\s/).pop(); // última palabra
-    if (ultimo.startsWith("@")) {
+    const textarea = document.getElementById("tweet-text");
+    const sugerenciasDiv = document.getElementById("sugerencias");
+
+    textarea.addEventListener("input", () => {
+      const valor = textarea.value;
+      const ultimo = valor.split(/\s/).pop();
+      if (ultimo.startsWith("@")) {
         const query = ultimo.slice(1).toLowerCase();
         const matches = usuarios.filter(u => u.toLowerCase().startsWith(query));
 
         sugerenciasDiv.innerHTML = "";
         if (matches.length > 0) {
-            matches.forEach(u => {
-                const div = document.createElement("div");
-                div.textContent = u;
-                div.addEventListener("click", () => {
-                    const palabras = valor.split(/\s/);
-                    palabras.pop();
-                    palabras.push("@" + u);
-                    textarea.value = palabras.join(" ") + " ";
-                    sugerenciasDiv.style.display = "none";
-                });
-                sugerenciasDiv.appendChild(div);
+          matches.slice(0, 6).forEach(u => {
+            const div = document.createElement("div");
+            div.className = "suger-item";
+            div.textContent = u;
+            div.addEventListener("click", () => {
+              const palabras = valor.split(/\s/);
+              palabras.pop();
+              palabras.push("@" + u);
+              textarea.value = palabras.join(" ") + " ";
+              sugerenciasDiv.style.display = "none";
+              textarea.focus();
             });
-            sugerenciasDiv.style.display = "block"; // ahora se posiciona bien
+            sugerenciasDiv.appendChild(div);
+          });
+          sugerenciasDiv.style.display = "block";
         } else {
-            sugerenciasDiv.style.display = "none";
+          sugerenciasDiv.style.display = "none";
         }
-    } else {
+      } else {
         sugerenciasDiv.style.display = "none";
-    }
-});
-
-</script>
+      }
+    });
+  </script>
+</body>
+</html>

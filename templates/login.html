@@ -1,21 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Login</title>
-    <link rel="stylesheet" href="/static/login.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión</title>
+  <link rel="stylesheet" href="/static/login.css">
 </head>
+
 <body>
-
-<div class="login-card">
-    <img src="/static/LOGIN.PNG" class="login-logo" alt="Logo">
-    <h2>Iniciar sesión</h2>
-    <form method="POST">
-        <input type="email" name="email" placeholder="Correo" required><br>
-        <input type="password" name="password" placeholder="Contraseña" required><br>
-        <button type="submit">Iniciar sesión</button>
-    </form>
-</div>
+  <main class="login-page">
+    <div class="login-card">
+    <div class="login-head">
+    <img src="/static/login.png" alt="Logo" class="login-logo">
+    <h1>Bienvenido</h1>
+    <p>Iniciá sesión para continuar</p>
+    </div>
 
 
+      <form method="POST" class="login-form">
+        <div class="field">
+          <label>Correo</label>
+          <input type="email" name="email" placeholder="correo@ejemplo.com" required>
+        </div>
+
+        <div class="field">
+          <label>Contraseña</label>
+          <input type="password" name="password" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn primary">Iniciar sesión</button>
+      </form>
+
+      <div class="login-footer">
+        <span>¿Problemas para entrar?</span>
+        <a href="#">Contactá al administrador</a>
+      </div>
+    </div>
+  </main>
 </body>
 </html>

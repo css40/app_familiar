@@ -1,104 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Crear Grupo</title>
-    <link rel="stylesheet" href="/static/grupos.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Grupo</title>
+  <link rel="stylesheet" href="/static/crear_grupo.css">
 </head>
-<body>
-    <h2>Crear Grupo</h2>
 
-    <div class="nav-buttons">
-        <a href="/grupos" class="btn">Volver</a>
-        <a href="/user_home" class="btn">Inicio</a>
-        <a href="/logout" class="btn logout">Cerrar sesión</a>
+<body>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="/static/login.png" class="brand-logo" alt="Logo">
+      <div class="brand-text">
+        <div class="brand-title">Crear Grupo</div>
+        <div class="brand-sub">Organizá tu familia o equipo</div>
+      </div>
     </div>
 
-    <form method="POST" id="crear-grupo-form">
-        <input type="text" name="nombre" placeholder="Nombre del grupo" required>
+    <div class="top-actions">
+      <a href="/grupos" class="btn ghost">← Grupos</a>
+      <a href="/user_home" class="btn ghost">Inicio</a>
+      <a href="/logout" class="btn danger">Cerrar sesión</a>
+    </div>
+  </header>
 
-        <h3>Agregar miembros</h3>
-        <p>Busca usuarios existentes y asigna rol:</p>
-        <div class="busqueda-miembros">
-            <input type="text" id="buscar-usuario" placeholder="Escribe nombre o correo">
+  <main class="page">
+    <section class="card">
+      <h1>Nuevo grupo</h1>
+      <p class="subtitle">Creá un grupo y asigná roles a los miembros.</p>
+
+      <form method="POST" id="crear-grupo-form" class="form">
+        <!-- Nombre -->
+        <div class="field">
+          <label>Nombre del grupo</label>
+          <input type="text" name="nombre" placeholder="Ej: Familia López" required>
+        </div>
+
+        <!-- Miembros -->
+        <div class="members-box">
+          <div class="members-head">
+            <h2>Miembros</h2>
+            <span id="contador" class="pill">0 seleccionados</span>
+          </div>
+
+          <p class="muted">Buscá usuarios existentes y asignales un rol.</p>
+
+          <div class="search-wrap">
+            <input type="text" id="buscar-usuario" placeholder="Buscar por nombre o correo">
             <div id="sugerencias-usuarios" class="sugerencias"></div>
+          </div>
+
+          <div id="miembros-seleccionados" class="selected-list">
+            <div class="empty">Aún no has agregado miembros.</div>
+          </div>
         </div>
 
-
-        <div id="miembros-seleccionados">
-            <!-- Aquí se añadirán los miembros seleccionados -->
+        <!-- Acciones -->
+        <div class="actions">
+          <a href="/grupos" class="btn ghost">Cancelar</a>
+          <button type="submit" class="btn primary">Crear Grupo</button>
         </div>
-
-        <button type="submit" class="btn">Crear Grupo</button>
-    </form>
+      </form>
+    </section>
+  </main>
 
 <script>
+/* usuarios viene desde backend:
+   usuarios = [[id, nombre, apellido, email], ...]
+*/
 const inputBuscar = document.getElementById("buscar-usuario");
 const sugerencias = document.getElementById("sugerencias-usuarios");
 const miembrosSeleccionados = document.getElementById("miembros-seleccionados");
+const contador = document.getElementById("contador");
 
+let seleccionados = new Map();
+
+/* Buscar usuarios */
 inputBuscar.addEventListener("input", function() {
-    const valor = this.value.toLowerCase();
-    sugerencias.innerHTML = "";
+  const valor = this.value.toLowerCase().trim();
+  sugerencias.innerHTML = "";
 
-    if (valor.length === 0) {
-        sugerencias.style.display = "none";
-        return;
-    }
+  if (!valor) {
+    sugerencias.style.display = "none";
+    return;
+  }
 
-    const filtrados = usuarios.filter(u => 
-        u[1].toLowerCase().includes(valor) || 
-        u[2].toLowerCase().includes(valor) || 
-        u[3].toLowerCase().includes(valor)
-    );
+  const filtrados = usuarios.filter(u =>
+    u[1].toLowerCase().includes(valor) ||
+    u[2].toLowerCase().includes(valor) ||
+    u[3].toLowerCase().includes(valor)
+  );
 
-    if(filtrados.length === 0){
-        sugerencias.style.display = "none";
-        return;
-    }
+  if (filtrados.length === 0) {
+    sugerencias.style.display = "none";
+    return;
+  }
 
-    filtrados.forEach(u => {
-        const div = document.createElement("div");
-        div.textContent = `${u[1]} ${u[2]} (${u[3]})`;
-        div.dataset.id = u[0];
-        div.dataset.nombre = u[1];
-        div.dataset.apellido = u[2];
-        div.dataset.email = u[3];
-
-        div.addEventListener("click", function() {
-            agregarMiembro(u);
-            inputBuscar.value = "";
-            sugerencias.innerHTML = "";
-            sugerencias.style.display = "none";
-        });
-
-        sugerencias.appendChild(div);
-    });
-
-    sugerencias.style.display = "block";
-});
-
-function agregarMiembro(u) {
-    if (document.getElementById("miembro-" + u[0])) return;
+  filtrados.forEach(u => {
+    if (seleccionados.has(u[0])) return;
 
     const div = document.createElement("div");
-    div.classList.add("miembro-form");
-    div.id = "miembro-" + u[0];
-    div.innerHTML = `
-        <span>${u[1]} ${u[2]} (${u[3]})</span>
-        <input type="text" name="roles_${u[0]}" placeholder="Rol (Papa, Mama, Hijo...)" required>
-        <button type="button" onclick="quitarMiembro('${u[0]}')">X</button>
-        <input type="hidden" name="miembros" value="${u[0]}">
-    `;
-    miembrosSeleccionados.appendChild(div);
+    div.className = "suger-item";
+    div.innerHTML = `<b>${u[1]} ${u[2]}</b> <span>${u[3]}</span>`;
+
+    div.onclick = () => {
+      agregarMiembro(u);
+      inputBuscar.value = "";
+      sugerencias.innerHTML = "";
+      sugerencias.style.display = "none";
+    };
+
+    sugerencias.appendChild(div);
+  });
+
+  sugerencias.style.display = "block";
+});
+
+/* Agregar miembro */
+function agregarMiembro(u) {
+  if (seleccionados.has(u[0])) return;
+
+  seleccionados.set(u[0], u);
+  renderSeleccionados();
 }
 
+/* Quitar */
 function quitarMiembro(id) {
-    const div = document.getElementById("miembro-" + id);
-    div.remove();
+  seleccionados.delete(Number(id));
+  renderSeleccionados();
 }
+
+/* Render lista */
+function renderSeleccionados() {
+  miembrosSeleccionados.innerHTML = "";
+
+  if (seleccionados.size === 0) {
+    miembrosSeleccionados.innerHTML = `<div class="empty">Aún no has agregado miembros.</div>`;
+  }
+
+  seleccionados.forEach(u => {
+    const row = document.createElement("div");
+    row.className = "member-row";
+    row.innerHTML = `
+      <div class="info">
+        <strong>${u[1]} ${u[2]}</strong>
+        <span>${u[3]}</span>
+      </div>
+
+      <select name="roles_${u[0]}" required>
+        <option value="">Rol</option>
+        <option value="Padre">Padre</option>
+        <option value="Madre">Madre</option>
+        <option value="Hijo">Hijo</option>
+        <option value="Administrador">Administrador</option>
+        <option value="Miembro">Miembro</option>
+      </select>
+
+      <button type="button" class="remove" onclick="quitarMiembro(${u[0]})">✕</button>
+
+      <input type="hidden" name="miembros" value="${u[0]}">
+    `;
+    miembrosSeleccionados.appendChild(row);
+  });
+
+  contador.textContent = `${seleccionados.size} seleccionados`;
+}
+
+/* Validación */
+document.getElementById("crear-grupo-form").addEventListener("submit", e => {
+  if (seleccionados.size === 0) {
+    e.preventDefault();
+    alert("Debes agregar al menos un miembro al grupo.");
+  }
+});
 </script>
-
-
 </body>
 </html>
