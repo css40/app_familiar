@@ -115,6 +115,7 @@ def login():
 def admin_home():
     if 'user_id' not in session:
         return redirect('/login')
+    nombre_familia = "Family_web"
     
     with sqlite3.connect("database.db") as conn:
         c = conn.cursor()
