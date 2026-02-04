@@ -8,6 +8,8 @@
 </head>
 
 <body>
+  {% set post_reacciones = post_reacciones if post_reacciones is defined else {} %}
+
   <!-- Topbar -->
   <header class="topbar">
     <div class="brand">
@@ -26,6 +28,7 @@
   </header>
 
   <main class="page">
+
     <!-- Hero -->
     <section class="hero">
       <div class="hero-left">
@@ -45,247 +48,348 @@
       </div>
     </section>
 
-    <!-- Tools -->
-    <section class="tools">
-      <div class="search-wrap">
-        <span class="search-ico">🔍</span>
-        <input id="search" type="text" placeholder="Buscar miembro por nombre o rol..." autocomplete="off">
-      </div>
+    <!-- LAYOUT 2 COLUMNAS -->
+    <div class="layout">
 
-      <div class="chips">
-        <button class="chip active" type="button" data-filter="all">Todos</button>
-        <button class="chip" type="button" data-filter="admin">Admins</button>
-        <button class="chip" type="button" data-filter="withphoto">Con foto</button>
-      </div>
-    </section>
+      <!-- COLUMNA IZQUIERDA -->
+      <div class="content">
 
-    <!-- Members grid -->
-    <section class="grid" id="grid">
-      {% for m in miembros %}
-      <article class="card member"
-               data-name="{{ ((m[1] or '') ~ ' ' ~ (m[2] or ''))|lower }}"
-               data-role="{{ (m[4] or '')|lower }}"
-               data-photo="{{ '1' if m[8] and m[8] != '' else '0' }}"
-               data-iscreator="{{ '1' if m[0] == creador_id else '0' }}">
-        <div class="card-top">
-          <div class="avatar-wrap">
-            {% if m[8] and m[8] != "" %}
-              <img src="{{ m[8].replace('\\','/') }}" class="avatar" alt="{{ m[1] }}">
+        <!-- Publicar -->
+        <section class="card post-box">
+          <h2>Publicar en {{ grupo_nombre }}</h2>
+
+          <form action="/grupo/{{ grupo_id }}/post" method="POST" enctype="multipart/form-data">
+            <textarea name="contenido" rows="3"
+              class="input-area"
+              placeholder="¿Qué está pasando en el grupo?"></textarea>
+
+            <div class="post-actions">
+              <input class="file" type="file" name="foto" accept="image/*">
+              <button class="btn primary" type="submit">Publicar</button>
+            </div>
+          </form>
+        </section>
+
+       <!-- Feed -->
+<!-- Feed -->
+<section class="card feed">
+  <div class="feed-head">
+    <h2>Feed</h2>
+  </div>
+
+  {% if posts|length == 0 %}
+    <p class="muted">Aún no hay publicaciones en este grupo.</p>
+  {% else %}
+    <div class="feed-list">
+      {% for p in posts %}
+      <article class="card post-card">
+        <div class="post-top">
+          <div class="avatar-wrap sm">
+            {% if p[7] and p[7] != "" %}
+              <img class="avatar" src="/{{ p[7].replace('\\','/') }}" alt="user">
             {% else %}
-              <img src="/static/default_user.png" class="avatar" alt="Sin foto">
+              <img class="avatar" src="/static/default_user.png" alt="user">
             {% endif %}
           </div>
 
-          <div class="who">
-            <h3 class="name">
-              {{ m[1] }} {{ m[2] }}
-              {% if m[0] == creador_id %}
-                <span class="crown" title="Creador">👑</span>
-              {% endif %}
-            </h3>
-            <p class="role">Rol: <b>{{ m[4] }}</b></p>
+          <div class="post-meta">
+            <div class="post-name">{{ p[5] }} {{ p[6] }}</div>
+            <div class="post-time">{{ p[3] }}</div>
           </div>
         </div>
 
-        <div class="meta">
-          {% if m[0] == creador_id %}
-            <span class="tag verified">Creador</span>
-          {% elif (m[4] or '')|lower in ['admin','administrador'] %}
-            <span class="tag verified">Admin</span>
-          {% else %}
-            <span class="tag">Miembro</span>
-          {% endif %}
+        {% if p[1] and p[1] != "" %}
+          <p class="post-text">{{ p[1] }}</p>
+        {% endif %}
 
-          {% if m[8] and m[8] != "" %}
-            <span class="tag">📷 Con foto</span>
-          {% else %}
-            <span class="tag muted">Sin foto</span>
-          {% endif %}
+        {% if p[2] and p[2] != "" %}
+          <img class="post-img"
+               src="/{{ p[2].replace('\\','/') }}"
+               alt="foto post">
+        {% endif %}
+
+        <!-- REACCIONES (igual que user_home) -->
+        <div class="tweet-foot">
+          <div class="reacciones">
+            <button class="react reaccion-post" type="button"
+                    data-post="{{ p[0] }}" data-tipo="encanta">
+              ❤️ <span class="count">{{ post_reacciones.get(p[0], {}).get('encanta', 0) }}</span>
+            </button>
+
+            <button class="react reaccion-post" type="button"
+                    data-post="{{ p[0] }}" data-tipo="divierte">
+              😆 <span class="count">{{ post_reacciones.get(p[0], {}).get('divierte', 0) }}</span>
+            </button>
+
+            <button class="react reaccion-post" type="button"
+                    data-post="{{ p[0] }}" data-tipo="enoja">
+              😡 <span class="count">{{ post_reacciones.get(p[0], {}).get('enoja', 0) }}</span>
+            </button>
+          </div>
         </div>
 
-        <div class="card-actions">
-          <a class="btn ghost" href="/member/{{ m[0] }}">Ver perfil</a>
-
-          {% if user_id == creador_id and m[0] != creador_id %}
-          <form action="/grupo/{{ grupo_id }}/eliminar/{{ m[0] }}" method="POST" class="inline">
-            <button type="submit" class="btn danger">Eliminar</button>
-          </form>
-          {% endif %}
-        </div>
       </article>
       {% endfor %}
-    </section>
+    </div>
+  {% endif %}
+</section>
 
-    <!-- Empty -->
-    <section class="empty" id="empty" style="display:none;">
-      <div class="empty-box">
-        <div class="empty-ico">🫥</div>
-        <h2>No hay resultados</h2>
-        <p>Probá con otro nombre o rol.</p>
-        <button class="btn ghost" id="reset" type="button">Limpiar</button>
-      </div>
-    </section>
+</div> <!-- ✅ CIERRA .content (ESTO TE FALTABA) -->
+      <!-- COLUMNA DERECHA: MIEMBROS -->
+      <aside class="sidebar">
 
-    <!-- Add members (only creator) -->
-    {% if user_id == creador_id %}
-    <section class="card add">
-      <div class="add-head">
-        <div>
-          <h2>Añadir nuevo miembro</h2>
-          <p>Buscá usuarios y asignales un rol. Podés agregar varios de una vez.</p>
-        </div>
-        <span class="pill">Admin only</span>
-      </div>
+        <!-- Tools (miembros) -->
+        <section class="card tools-card">
+          <div class="search-wrap">
+            <span class="search-ico">🔍</span>
+            <input id="search" type="text" placeholder="Buscar miembro por nombre o rol..." autocomplete="off">
+          </div>
 
-      <div class="add-body">
-        <div class="add-search">
-          <input type="text" id="buscar-usuario" placeholder="Buscar por nombre o correo...">
-          <div id="sugerencias" class="sugerencias"></div>
-        </div>
+          <div class="chips">
+            <button class="chip active" type="button" data-filter="all">Todos</button>
+            <button class="chip" type="button" data-filter="admin">Admins</button>
+            <button class="chip" type="button" data-filter="withphoto">Con foto</button>
+          </div>
+        </section>
 
-        <div class="selected">
-          <div class="selected-title">Seleccionados</div>
-          <div id="miembros-seleccionados" class="selected-list"></div>
+        <!-- Grid de miembros -->
+        <section class="grid" id="grid">
+          {% for m in miembros %}
+          <article class="card member"
+                   data-name="{{ ((m[1] or '') ~ ' ' ~ (m[2] or ''))|lower }}"
+                   data-role="{{ (m[4] or '')|lower }}"
+                   data-photo="{{ '1' if m[3] and m[3] != '' else '0' }}"
+                   data-iscreator="{{ '1' if m[0] == creador_id else '0' }}">
 
-          <button id="agregar-btn" class="btn primary" type="button">Agregar al grupo</button>
-        </div>
-      </div>
-    </section>
+            <div class="card-top">
+              <div class="avatar-wrap">
+                {% if m[3] and m[3] != "" %}
+                  <img src="/{{ m[3].replace('\\','/') }}" class="avatar" alt="{{ m[1] }}">
+                {% else %}
+                  <img src="/static/default_user.png" class="avatar" alt="Sin foto">
+                {% endif %}
+              </div>
 
-    <script>
-      let usuarios = {{ usuarios_disponibles|tojson }};
-      let seleccionados = [];
+              <div class="who">
+                <h3 class="name">
+                  {{ m[1] }} {{ m[2] }}
+                  {% if m[0] == creador_id %}
+                    <span class="crown" title="Creador">👑</span>
+                  {% endif %}
+                </h3>
+                <p class="role">Rol: <b>{{ m[4] }}</b></p>
+              </div>
+            </div>
 
-      const input = document.getElementById('buscar-usuario');
-      const sugerencias = document.getElementById('sugerencias');
-      const seleccionadosDiv = document.getElementById('miembros-seleccionados');
+            <div class="meta">
+              {% if m[0] == creador_id %}
+                <span class="tag verified">Creador</span>
+              {% elif (m[4] or '')|lower in ['admin','administrador'] %}
+                <span class="tag verified">Admin</span>
+              {% else %}
+                <span class="tag">Miembro</span>
+              {% endif %}
 
-      input.addEventListener('input', () => {
-        const val = input.value.toLowerCase().trim();
-        sugerencias.innerHTML = '';
-        if(val.length === 0){
-          sugerencias.style.display = "none";
-          return;
-        }
+              {% if m[3] and m[3] != "" %}
+                <span class="tag">📷 Con foto</span>
+              {% else %}
+                <span class="tag muted">Sin foto</span>
+              {% endif %}
+            </div>
 
-        const encontrados = usuarios.filter(u =>
-          (`${u.nombre} ${u.apellido}`.toLowerCase().includes(val)) ||
-          (u.email.toLowerCase().includes(val))
-        ).slice(0, 8);
+            <div class="card-actions">
+              <a class="btn ghost" href="/member/{{ m[0] }}">Ver perfil</a>
 
-        if(encontrados.length === 0){
-          const div = document.createElement('div');
-          div.className = 'suger-item muted';
-          div.textContent = 'Usuario no encontrado';
-          sugerencias.appendChild(div);
-          sugerencias.style.display = "block";
-          return;
-        }
+              {% if user_id == creador_id and m[0] != creador_id %}
+              <form action="/grupo/{{ grupo_id }}/eliminar/{{ m[0] }}" method="POST" class="inline">
+                <button type="submit" class="btn danger">Eliminar</button>
+              </form>
+              {% endif %}
+            </div>
+          </article>
+          {% endfor %}
+        </section>
 
-        encontrados.forEach(u => {
-          const div = document.createElement('div');
-          div.className = 'suger-item';
-          div.innerHTML = `<b>${u.nombre} ${u.apellido}</b> <span class="sub">(${u.email})</span>`;
-          div.dataset.id = u.id;
+        <!-- Empty -->
+        <section class="empty" id="empty" style="display:none;">
+          <div class="empty-box">
+            <div class="empty-ico">🫥</div>
+            <h2>No hay resultados</h2>
+            <p>Probá con otro nombre o rol.</p>
+            <button class="btn ghost" id="reset" type="button">Limpiar</button>
+          </div>
+        </section>
 
-          div.addEventListener('click', () => {
-            if(seleccionados.find(s => s.id == u.id)) return;
+        <!-- Add members (solo creador) -->
+        {% if user_id == creador_id %}
+        <section class="card add">
+          <div class="add-head">
+            <div>
+              <h2>Añadir nuevo miembro</h2>
+              <p>Buscá usuarios y asignales un rol. Podés agregar varios de una vez.</p>
+            </div>
+            <span class="pill">Admin only</span>
+          </div>
 
-            // rol por defecto
-            seleccionados.push({id:u.id, nombre:u.nombre, apellido:u.apellido, email:u.email, rol:"miembro"});
-            renderSeleccionados();
-            input.value = '';
-            sugerencias.innerHTML = '';
+          <div class="add-body">
+            <div class="add-search">
+              <input type="text" id="buscar-usuario" placeholder="Buscar por nombre o correo...">
+              <div id="sugerencias" class="sugerencias"></div>
+            </div>
+
+            <div class="selected">
+              <div class="selected-title">Seleccionados</div>
+              <div id="miembros-seleccionados" class="selected-list"></div>
+              <button id="agregar-btn" class="btn primary" type="button">Agregar al grupo</button>
+            </div>
+          </div>
+        </section>
+
+        <script>
+          let usuarios = {{ usuarios_disponibles|tojson }};
+          let seleccionados = [];
+
+          const input = document.getElementById('buscar-usuario');
+          const sugerencias = document.getElementById('sugerencias');
+          const seleccionadosDiv = document.getElementById('miembros-seleccionados');
+
+          function esconderSugerencias(){
+            sugerencias.innerHTML = "";
             sugerencias.style.display = "none";
-            input.focus();
+          }
+
+          input.addEventListener('input', () => {
+            const val = input.value.toLowerCase().trim();
+            sugerencias.innerHTML = '';
+
+            if(val.length === 0){
+              esconderSugerencias();
+              return;
+            }
+
+            const encontrados = usuarios.filter(u =>
+              (`${u.nombre} ${u.apellido}`.toLowerCase().includes(val)) ||
+              ((u.email || "").toLowerCase().includes(val))
+            ).slice(0, 8);
+
+            if(encontrados.length === 0){
+              const div = document.createElement('div');
+              div.className = 'suger-item muted';
+              div.textContent = 'Usuario no encontrado';
+              sugerencias.appendChild(div);
+              sugerencias.style.display = "block";
+              return;
+            }
+
+            encontrados.forEach(u => {
+              const div = document.createElement('div');
+              div.className = 'suger-item';
+              div.innerHTML = `<b>${u.nombre} ${u.apellido}</b> <span class="sub">(${u.email})</span>`;
+
+              div.addEventListener('click', () => {
+                if(seleccionados.find(s => s.id == u.id)) return;
+
+                seleccionados.push({id:u.id, nombre:u.nombre, apellido:u.apellido, email:u.email, rol:"miembro"});
+                renderSeleccionados();
+                input.value = '';
+                esconderSugerencias();
+                input.focus();
+              });
+
+              sugerencias.appendChild(div);
+            });
+
+            sugerencias.style.display = "block";
           });
 
-          sugerencias.appendChild(div);
-        });
-
-        sugerencias.style.display = "block";
-      });
-
-      function renderSeleccionados(){
-        seleccionadosDiv.innerHTML = '';
-
-        if(seleccionados.length === 0){
-          const empty = document.createElement('div');
-          empty.className = 'selected-empty';
-          empty.textContent = 'Aún no seleccionas usuarios.';
-          seleccionadosDiv.appendChild(empty);
-          return;
-        }
-
-        seleccionados.forEach(s => {
-          const row = document.createElement('div');
-          row.className = 'sel-row';
-
-          const left = document.createElement('div');
-          left.className = 'sel-left';
-          left.innerHTML = `<div class="sel-name"><b>${s.nombre} ${s.apellido}</b></div>
-                            <div class="sel-sub">${s.email}</div>`;
-
-          const role = document.createElement('select');
-          role.className = 'sel-role';
-          ["miembro","admin","moderador"].forEach(opt => {
-            const o = document.createElement('option');
-            o.value = opt;
-            o.textContent = opt;
-            if(opt === s.rol) o.selected = true;
-            role.appendChild(o);
-          });
-          role.addEventListener('change', () => s.rol = role.value);
-
-          const rm = document.createElement('button');
-          rm.className = 'btn danger small';
-          rm.type = 'button';
-          rm.textContent = 'Quitar';
-          rm.addEventListener('click', () => {
-            seleccionados = seleccionados.filter(x => x.id != s.id);
-            renderSeleccionados();
+          document.addEventListener("click", (e) => {
+            const box = document.querySelector(".add-search");
+            if(box && !box.contains(e.target)) esconderSugerencias();
           });
 
-          row.appendChild(left);
-          row.appendChild(role);
-          row.appendChild(rm);
-          seleccionadosDiv.appendChild(row);
-        });
-      }
+          function renderSeleccionados(){
+            seleccionadosDiv.innerHTML = '';
 
-      document.getElementById('agregar-btn').addEventListener('click', () => {
-        if(seleccionados.length === 0){
-          return alert('Selecciona al menos un usuario');
-        }
+            if(seleccionados.length === 0){
+              const empty = document.createElement('div');
+              empty.className = 'selected-empty';
+              empty.textContent = 'Aún no seleccionas usuarios.';
+              seleccionadosDiv.appendChild(empty);
+              return;
+            }
 
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = "/grupo/{{ grupo_id }}/agregar";
+            seleccionados.forEach(s => {
+              const row = document.createElement('div');
+              row.className = 'sel-row';
 
-        seleccionados.forEach(s => {
-          const inputId = document.createElement('input');
-          inputId.type = 'hidden';
-          inputId.name = 'usuario_id';
-          inputId.value = s.id;
-          form.appendChild(inputId);
+              const left = document.createElement('div');
+              left.className = 'sel-left';
+              left.innerHTML = `<div class="sel-name"><b>${s.nombre} ${s.apellido}</b></div>
+                                <div class="sel-sub">${s.email}</div>`;
 
-          const inputRol = document.createElement('input');
-          inputRol.type = 'hidden';
-          inputRol.name = 'rol';
-          inputRol.value = s.rol;
-          form.appendChild(inputRol);
-        });
+              const role = document.createElement('select');
+              role.className = 'sel-role';
+              ["miembro","admin","moderador"].forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt;
+                o.textContent = opt;
+                if(opt === s.rol) o.selected = true;
+                role.appendChild(o);
+              });
+              role.addEventListener('change', () => s.rol = role.value);
 
-        document.body.appendChild(form);
-        form.submit();
-      });
+              const rm = document.createElement('button');
+              rm.className = 'btn danger small';
+              rm.type = 'button';
+              rm.textContent = 'Quitar';
+              rm.addEventListener('click', () => {
+                seleccionados = seleccionados.filter(x => x.id != s.id);
+                renderSeleccionados();
+              });
 
-      renderSeleccionados();
-    </script>
-    {% endif %}
+              row.appendChild(left);
+              row.appendChild(role);
+              row.appendChild(rm);
+              seleccionadosDiv.appendChild(row);
+            });
+          }
 
+          document.getElementById('agregar-btn').addEventListener('click', () => {
+            if(seleccionados.length === 0){
+              return alert('Selecciona al menos un usuario');
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "/grupo/{{ grupo_id }}/agregar";
+
+            seleccionados.forEach(s => {
+              const inputId = document.createElement('input');
+              inputId.type = 'hidden';
+              inputId.name = 'usuario_id';
+              inputId.value = s.id;
+              form.appendChild(inputId);
+
+              const inputRol = document.createElement('input');
+              inputRol.type = 'hidden';
+              inputRol.name = 'rol';
+              inputRol.value = s.rol;
+              form.appendChild(inputRol);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+          });
+
+          renderSeleccionados();
+        </script>
+        {% endif %}
+
+      </aside>
+    </div>
+
+    <!-- SCRIPT FILTROS MIEMBROS -->
     <script>
-      // search + filters members
       const search = document.getElementById("search");
       const cards = Array.from(document.querySelectorAll(".member"));
       const chips = Array.from(document.querySelectorAll(".chip"));
@@ -344,6 +448,34 @@
 
       apply();
     </script>
+    <script>
+  document.querySelectorAll(".reaccion-post").forEach(el => {
+    el.addEventListener("click", () => {
+      const post_id = el.dataset.post;
+      const tipo = el.dataset.tipo;
+
+      fetch("/reaccion_post_ajax", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({post_id: post_id, tipo: tipo})
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.status === "ok") {
+          const parent = el.closest(".post-card").querySelector(".reacciones");
+          parent.querySelectorAll(".reaccion-post").forEach(r => {
+            const t = r.dataset.tipo;
+            r.querySelector(".count").textContent = data.reacciones[t] || 0;
+          });
+        }
+      });
+    });
+  });
+</script>
+
+
   </main>
 </body>
+{% set post_reacciones = post_reacciones if post_reacciones is defined else {} %}
+
 </html>

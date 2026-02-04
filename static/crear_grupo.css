@@ -111,7 +111,7 @@ input, select{
   border-radius:14px;
   margin-top:6px;
   display:none;
-  z-index:10;
+  z-index:99999;
 }
 .suger-item{
   padding:10px;

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Notificaciones</title>
+  <link rel="stylesheet" href="/static/grupodetalle.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">FW</div>
+    <div class="brand-text">
+      <div class="brand-title">Notificaciones</div>
+      <div class="brand-sub">Tu actividad reciente</div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <a class="btn ghost" href="/user_home">Inicio</a>
+  </div>
+</header>
+
+<main class="page">
+  <section class="card">
+    <h2>🔔 Notificaciones</h2>
+
+    {% if notificaciones|length == 0 %}
+      <p class="muted">No tenés notificaciones todavía.</p>
+    {% else %}
+      <div class="feed-list">
+        {% for n in notificaciones %}
+        <div class="card post-card">
+          <div class="post-top">
+            <img class="avatar" src="/{{ n[5] if n[5] else 'static/default_user.png' }}">
+            <div>
+              <b>{{ n[3] }} {{ n[4] }}</b> {{ n[1] }}
+              <div class="post-time">{{ n[2] }}</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+</main>
+
+</body>
+</html>

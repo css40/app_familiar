@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session , jsonify
 import sqlite3
 import os
 import uuid 
 from werkzeug.utils import secure_filename
+
+
 
 app = Flask(__name__)
 usuarios_activos = set()
@@ -20,6 +22,43 @@ def marcar_activo(user_id, estado):
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+with sqlite3.connect('database.db') as conn:
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS notificaciones (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            actor_id INTEGER NOT NULL,
+            tipo TEXT NOT NULL,
+            ref_id INTEGER,
+            mensaje TEXT NOT NULL,
+            leida INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(actor_id) REFERENCES users(id)
+        )
+    """)
+    conn.commit()
+
+
+with sqlite3.connect('database.db') as conn:
+    c = conn.cursor()
+    c.execute("""
+      CREATE TABLE IF NOT EXISTS post_reacciones (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        post_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        tipo TEXT NOT NULL CHECK(tipo IN ('encanta','divierte','enoja')),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(post_id, user_id, tipo),
+        FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    """)
+    conn.commit()
+
+
 
 # --- Crear tabla user_photos si no existe ---
 with sqlite3.connect('database.db') as conn:
@@ -76,13 +115,15 @@ def login():
 def admin_home():
     if 'user_id' not in session:
         return redirect('/login')
+    
+    with sqlite3.connect("database.db") as conn:
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*) FROM users WHERE activo=1")
+        activos = c.fetchone()[0]
 
-    # Marcar usuario como activo
-    usuarios_activos.add(session['user_id'])
+        c.execute("SELECT COUNT(*) FROM users")
+        total_miembros = c.fetchone()[0]
 
-    total_miembros = 4  # después lo sacamos de tu BD
-    activos = len(usuarios_activos)
-    nombre_familia = "Mi Familia"
 
     return render_template(
         'admin_home.html',
@@ -213,9 +254,12 @@ def add_member():
         # Guardar foto
         foto = request.files.get('foto')
         foto_path = None
+
         if foto and foto.filename != '':
-            foto_path = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()) + "_" + foto.filename)
+            filename = secure_filename(foto.filename)
+            foto_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{uuid.uuid4()}_{filename}")
             foto.save(foto_path)
+            foto_path = foto_path.replace("\\", "/")
 
         # Datos del formulario
         nombre = request.form.get('nombre')
@@ -284,10 +328,12 @@ def user_home():
     if 'user_id' not in session:
         return redirect('/login')
 
-    with sqlite3.connect("database.db") as conn:
+    user_id = session['user_id']  # ✅ ahora sí existe
+
+    with sqlite3.connect("database.db", timeout=20) as conn:
         c = conn.cursor()
         
-        # ------------------ 1️⃣ Traemos todos los tweets ------------------
+        # 1️⃣ Traemos todos los tweets
         c.execute("""
             SELECT tweets.id, tweets.contenido, tweets.foto, tweets.fecha,
                    users.nombre, users.foto, tweets.user_id
@@ -297,7 +343,11 @@ def user_home():
         """)
         tweets = c.fetchall()
 
-        # ------------------ 2️⃣ Contamos reacciones para cada tweet ------------------
+        # ✅ contador notificaciones no leídas
+        c.execute("SELECT COUNT(*) FROM notificaciones WHERE user_id=? AND leida=0", (user_id,))
+        notif_count = c.fetchone()[0]  # ✅ ahora se llama igual que en el template
+
+        # 2️⃣ Contamos reacciones para cada tweet
         tweet_reacciones = {}
         for tweet in tweets:
             tweet_id = tweet[0]
@@ -308,13 +358,14 @@ def user_home():
             """, (tweet_id,))
             tweet_reacciones[tweet_id] = dict(c.fetchall())
 
-    # ------------------ 3️⃣ Renderizamos la plantilla ------------------
+    # 3️⃣ Renderizamos la plantilla
     return render_template(
         "user_home.html",
-        nombre=session['nombre'],
+        nombre=session.get('nombre', ''),
         tweets=tweets,
-        user_id=session['user_id'],
-        tweet_reacciones=tweet_reacciones
+        user_id=user_id,
+        tweet_reacciones=tweet_reacciones,
+        notif_count=notif_count
     )
 
 
@@ -382,9 +433,12 @@ def edit_member(id):
     if request.method == 'POST':
         foto = request.files.get('foto')
         foto_path = None
+
         if foto and foto.filename != '':
-            foto_path = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()) + "_" + foto.filename)
+            filename = secure_filename(foto.filename)
+            foto_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{uuid.uuid4()}_{filename}")
             foto.save(foto_path)
+            foto_path = foto_path.replace("\\", "/")
 
         nombre = request.form.get('nombre')
         apellido = request.form.get('apellido')
@@ -396,16 +450,20 @@ def edit_member(id):
 
         with sqlite3.connect('database.db', timeout=20) as conn:
             c = conn.cursor()
+
             if foto_path:
                 c.execute('''
-                    UPDATE users SET nombre=?, apellido=?, email=?, password=?, fecha_nac=?, municipio=?, pais=?, foto=?
+                    UPDATE users
+                    SET nombre=?, apellido=?, email=?, password=?, fecha_nac=?, municipio=?, pais=?, foto=?
                     WHERE id=?
                 ''', (nombre, apellido, email, password, fecha_nac, municipio, pais, foto_path, id))
             else:
                 c.execute('''
-                    UPDATE users SET nombre=?, apellido=?, email=?, password=?, fecha_nac=?, municipio=?, pais=?
+                    UPDATE users
+                    SET nombre=?, apellido=?, email=?, password=?, fecha_nac=?, municipio=?, pais=?
                     WHERE id=?
                 ''', (nombre, apellido, email, password, fecha_nac, municipio, pais, id))
+
             conn.commit()
 
         return redirect('/members')
@@ -453,14 +511,19 @@ def profile():
     user_id = session['user_id']
 
     if request.method == 'POST':
-        import uuid
 
         # --- Subir foto principal ---
         foto = request.files.get('foto')
         foto_path = None
+
         if foto and foto.filename != '':
-            foto_path = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()) + "_" + foto.filename)
+            filename = secure_filename(foto.filename)
+            foto_path = os.path.join(
+                app.config['UPLOAD_FOLDER'],
+                f"{uuid.uuid4()}_{filename}"
+            )
             foto.save(foto_path)
+            foto_path = foto_path.replace("\\", "/")
 
         # --- Subir fotos adicionales (álbum) ---
         fotos_album = request.files.getlist('fotos')
@@ -468,9 +531,17 @@ def profile():
             c = conn.cursor()
             for f in fotos_album:
                 if f and f.filename != '':
-                    path = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()) + "_" + f.filename)
+                    filename_album = secure_filename(f.filename)
+                    path = os.path.join(
+                        app.config['UPLOAD_FOLDER'],
+                        f"{uuid.uuid4()}_{filename_album}"
+                    )
                     f.save(path)
-                    c.execute("INSERT INTO user_photos (user_id, foto) VALUES (?, ?)", (user_id, path))
+                    path = path.replace("\\", "/")
+                    c.execute(
+                        "INSERT INTO user_photos (user_id, foto) VALUES (?, ?)",
+                        (user_id, path)
+                    )
             conn.commit()
 
         # --- Datos del formulario ---
@@ -495,16 +566,20 @@ def profile():
                     SET nombre=?, apellido=?, email=?, password=?, fecha_nac=?, municipio=?, pais=?,
                         telefono=?, direccion=?, estado_civil=?, bio=?, foto=?
                     WHERE id=?
-                ''', (nombre, apellido, email, password, fecha_nac, municipio, pais,
-                      telefono, direccion, estado_civil, bio, foto_path, user_id))
+                ''', (
+                    nombre, apellido, email, password, fecha_nac, municipio, pais,
+                    telefono, direccion, estado_civil, bio, foto_path, user_id
+                ))
             else:
                 c.execute('''
                     UPDATE users 
                     SET nombre=?, apellido=?, email=?, password=?, fecha_nac=?, municipio=?, pais=?,
                         telefono=?, direccion=?, estado_civil=?, bio=?
                     WHERE id=?
-                ''', (nombre, apellido, email, password, fecha_nac, municipio, pais,
-                      telefono, direccion, estado_civil, bio, user_id))
+                ''', (
+                    nombre, apellido, email, password, fecha_nac, municipio, pais,
+                    telefono, direccion, estado_civil, bio, user_id
+                ))
             conn.commit()
 
         return redirect('/profile')
@@ -512,16 +587,13 @@ def profile():
     # --- GET: mostrar datos actuales ---
     with sqlite3.connect('database.db', timeout=20) as conn:
         c = conn.cursor()
-        # Datos del usuario
         c.execute("SELECT * FROM users WHERE id=?", (user_id,))
         integrante = c.fetchone()
 
-        # Fotos del álbum
         c.execute("SELECT foto FROM user_photos WHERE user_id=?", (user_id,))
         fotos = c.fetchall()
 
     return render_template('profile.html', integrante=integrante, fotos=fotos)
-
 
 
 @app.route('/member/<int:id>')
@@ -551,12 +623,14 @@ def grupos():
         c = conn.cursor()
         # Traemos todos los grupos donde el usuario es miembro
         c.execute("""
-            SELECT g.id, g.nombre, u.nombre, u.apellido
+            SELECT g.id, g.nombre, u.nombre, u.apellido, u.foto
             FROM grupos g
             JOIN grupos_miembros gm ON g.id = gm.grupo_id
             JOIN users u ON g.creador_id = u.id
-         
-        """, )
+            WHERE gm.user_id = ?
+            ORDER BY g.id DESC
+        """, (user_id,))
+
         grupos = c.fetchall()
 
     return render_template("grupos.html", grupos=grupos)
@@ -593,8 +667,11 @@ def crear_grupo():
 
             # Agregar miembros con roles
             for u, r in zip(miembros, roles):
-                c.execute("INSERT INTO grupos_miembros (grupo_id, user_id, rol) VALUES (?, ?, ?)",
-                          (u, r))
+                c.execute("""
+                    INSERT INTO grupos_miembros (grupo_id, user_id, rol)
+                    VALUES (?, ?, ?)
+                """, (grupo_id, int(u), r))
+
             
             conn.commit()
 
@@ -609,38 +686,95 @@ def crear_grupo():
     # Pasamos usuarios como JSON para JS
     return render_template("crear_grupo.html", usuarios=usuarios)
 
-@app.route("/grupo/<int:grupo_id>")
+@app.route("/grupo/<int:grupo_id>/ver")
 def ver_grupo(grupo_id):
     if 'user_id' not in session:
         return redirect('/login')
 
-    with sqlite3.connect("database.db") as conn:
+    user_id = session['user_id']
+
+    with sqlite3.connect("database.db", timeout=20) as conn:
         c = conn.cursor()
-        # Info del grupo
+
+        # ✅ Info del grupo
         c.execute("SELECT nombre, creador_id FROM grupos WHERE id=?", (grupo_id,))
         grupo = c.fetchone()
+        if not grupo:
+            return redirect("/grupos")
 
-        # Miembros del grupo
+        grupo_nombre, creador_id = grupo
+
+        # ✅ Miembros del grupo (id, nombre, apellido, foto, rol)
         c.execute("""
-            SELECT gm.user_id, u.nombre, u.apellido, u.foto, gm.rol
+            SELECT
+                u.id,
+                u.nombre,
+                u.apellido,
+                COALESCE(u.foto, '') AS foto,
+                COALESCE(gm.rol, 'miembro') AS rol
             FROM grupos_miembros gm
-            JOIN users u ON gm.user_id = u.id
-       
-        """, )
+            JOIN users u ON u.id = gm.user_id
+            WHERE gm.grupo_id = ?
+            ORDER BY
+              CASE WHEN u.id = ? THEN 0 ELSE 1 END,
+              CASE WHEN u.id = ? THEN 0 ELSE 1 END,
+              u.nombre ASC
+        """, (grupo_id, creador_id, user_id))
         miembros = c.fetchall()
 
-        # Para agregar miembros: solo usuarios que NO estén ya en el grupo
+        # ✅ Feed del grupo (posts)
         c.execute("""
-            SELECT id, nombre, apellido
+            SELECT
+                p.id,
+                p.contenido,
+                COALESCE(p.foto, '') AS foto_post,
+                p.fecha,
+                u.nombre,
+                u.apellido,
+                COALESCE(u.foto, '') AS foto_user
+            FROM posts p
+            JOIN users u ON u.id = p.user_id
+            WHERE p.grupo_id = ?
+            ORDER BY p.id DESC
+        """, (grupo_id,))
+        posts = c.fetchall()
+
+        # ✅ Reacciones por post (dict igual que tweet_reacciones)
+        c.execute("""
+            SELECT pr.post_id, pr.tipo, COUNT(*) as cnt
+            FROM post_reacciones pr
+            JOIN posts p ON p.id = pr.post_id
+            WHERE p.grupo_id = ?
+            GROUP BY pr.post_id, pr.tipo
+        """, (grupo_id,))
+        rows = c.fetchall()
+
+        post_reacciones = {}
+        for post_id, tipo, cnt in rows:
+            post_reacciones.setdefault(post_id, {})[tipo] = cnt
+
+        # ✅ Usuarios disponibles para agregar al grupo
+        c.execute("""
+            SELECT id, nombre, apellido, COALESCE(email,'') as email
             FROM users
             WHERE id NOT IN (
                 SELECT user_id FROM grupos_miembros WHERE grupo_id=?
             )
         """, (grupo_id,))
-        usuarios_disponibles = c.fetchall()  # <-- esto faltaba
+        usuarios_disponibles = c.fetchall()
 
-    return render_template("grupo_detalle.html", grupo=grupo, miembros=miembros,
-                           usuarios_disponibles=usuarios_disponibles)
+    return render_template(
+        "grupo_detalle.html",
+        grupo_id=grupo_id,
+        grupo_nombre=grupo_nombre,
+        creador_id=creador_id,
+        user_id=user_id,
+        miembros=miembros,
+        posts=posts,
+        usuarios_disponibles=usuarios_disponibles,
+        post_reacciones=post_reacciones
+    )
+
 
 @app.route('/grupo/<int:grupo_id>', methods=['GET', 'POST'])
 def detalle_grupo(grupo_id):
@@ -652,50 +786,111 @@ def detalle_grupo(grupo_id):
     with sqlite3.connect("database.db") as conn:
         c = conn.cursor()
 
-        # Información del grupo
-        c.execute("SELECT nombre, creador_id FROM grupos WHERE id=?", (grupo_id,))
+        # ✅ Grupo + datos del creador (incluye foto)
+        c.execute("""
+            SELECT g.nombre, g.creador_id, u.nombre, u.apellido, u.foto
+            FROM grupos g
+            JOIN users u ON u.id = g.creador_id
+            WHERE g.id = ?
+        """, (grupo_id,))
         grupo = c.fetchone()
+
         if not grupo:
             return "Grupo no encontrado"
 
-        grupo_nombre, creador_id = grupo
+        grupo_nombre = grupo[0]
+        creador_id = grupo[1]
+        creador_nombre = f"{(grupo[2] or '')} {(grupo[3] or '')}".strip()
+        creador_foto = grupo[4]
 
-        # Obtener miembros del grupo
+        # ✅ Miembros del grupo (incluye foto)
         c.execute("""
-            SELECT gm.user_id, u.nombre, u.apellido, u.email, gm.rol
+            SELECT gm.user_id, u.nombre, u.apellido, u.foto, gm.rol
             FROM grupos_miembros gm
             JOIN users u ON gm.user_id = u.id
-            WHERE gm.grupo_id=?
+            WHERE gm.grupo_id = ?
         """, (grupo_id,))
         miembros = c.fetchall()
 
-        # GET: usuarios existentes para añadir
-        c.execute("SELECT id, nombre, apellido, email FROM users WHERE id NOT IN (SELECT user_id FROM grupos_miembros WHERE grupo_id=?)", (grupo_id,))
+        # ✅ POSTS DEL GRUPO (FEED)  <<<<<< AQUÍ VA
+        c.execute("""
+            SELECT gp.id, gp.contenido, gp.foto, gp.fecha,
+                   u.id, u.nombre, u.apellido, u.foto
+            FROM group_posts gp
+            JOIN users u ON u.id = gp.user_id
+            WHERE gp.grupo_id = ?
+            ORDER BY gp.fecha DESC
+        """, (grupo_id,))
+        posts = c.fetchall()
+
+        # ✅ Usuarios disponibles para agregar
+        c.execute("""
+            SELECT id, nombre, apellido, email
+            FROM users
+            WHERE id NOT IN (
+                SELECT user_id FROM grupos_miembros WHERE grupo_id=?
+            )
+        """, (grupo_id,))
         usuarios_disponibles = c.fetchall()
 
-    return render_template("detalle_grupo.html",
-                           grupo_id=grupo_id,
-                           grupo_nombre=grupo_nombre,
-                           creador_id=creador_id,
-                           miembros=miembros,
-                           usuarios_disponibles=usuarios_disponibles,
-                           user_id=user_id)
+        usuarios_disponibles = [
+            {"id": u[0], "nombre": u[1], "apellido": u[2], "email": u[3]}
+            for u in usuarios_disponibles
+        ]
+
+    print("DEBUG grupo =>", grupo)
+    print("DEBUG creador_foto =>", creador_foto)
+
+    return render_template(
+        "grupo_detalle.html",
+        grupo_id=grupo_id,
+        grupo_nombre=grupo_nombre,
+        creador_id=creador_id,
+        creador_nombre=creador_nombre,
+        creador_foto=creador_foto,
+        miembros=miembros,
+        posts=posts,  # ✅ AQUI VA EN EL TEMPLATE
+        usuarios_disponibles=usuarios_disponibles,
+        user_id=user_id
+    )
+
 
 @app.route('/grupo/<int:grupo_id>/agregar', methods=['POST'])
 def agregar_miembro_grupo(grupo_id):
     if 'user_id' not in session:
         return redirect('/login')
 
-    user_id = request.form.get('usuario_id')
-    rol = request.form.get('rol')
-
+    # ✅ Solo el creador puede agregar (opcional pero recomendado)
     with sqlite3.connect("database.db") as conn:
         c = conn.cursor()
-        c.execute("INSERT INTO grupos_miembros (grupo_id, user_id, rol) VALUES (?, ?, ?)",
-                  (grupo_id, user_id, rol))
+        c.execute("SELECT creador_id FROM grupos WHERE id=?", (grupo_id,))
+        row = c.fetchone()
+        if not row:
+            return "Grupo no encontrado"
+        creador_id = row[0]
+
+    if session['user_id'] != creador_id:
+        return "No tienes permiso para agregar miembros"
+
+    # ✅ Leer TODOS los seleccionados
+    user_ids = request.form.getlist('usuario_id')
+    roles = request.form.getlist('rol')
+
+    if not user_ids:
+        return redirect(f"/grupo/{grupo_id}")
+
+    # ✅ Insertar (evita duplicados)
+    with sqlite3.connect("database.db") as conn:
+        c = conn.cursor()
+        for uid, r in zip(user_ids, roles):
+            c.execute("""
+                INSERT OR IGNORE INTO grupos_miembros (grupo_id, user_id, rol)
+                VALUES (?, ?, ?)
+            """, (grupo_id, int(uid), r))
         conn.commit()
 
     return redirect(f"/grupo/{grupo_id}")
+
 
 @app.route('/grupo/<int:grupo_id>/eliminar/<int:miembro_id>', methods=['POST'])
 def eliminar_miembro_grupo(grupo_id, miembro_id):
@@ -708,6 +903,188 @@ def eliminar_miembro_grupo(grupo_id, miembro_id):
         conn.commit()
 
     return redirect(f"/grupo/{grupo_id}")
+
+@app.route('/grupo/<int:grupo_id>/post', methods=['POST'])
+def post_en_grupo(grupo_id):
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    user_id = session['user_id']
+    contenido = (request.form.get('contenido') or "").strip()
+    foto = request.files.get('foto')
+
+    foto_path = None
+    if foto and foto.filename != '':
+        filename = secure_filename(foto.filename)
+        foto_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{uuid.uuid4()}_{filename}")
+        foto.save(foto_path)
+        foto_path = foto_path.replace("\\", "/")  # guardas tipo static/uploads/...
+
+    # Validación mínima: que no publique vacío (sin texto y sin foto)
+    if not contenido and not foto_path:
+        return redirect(f"/grupo/{grupo_id}")
+
+    # (Opcional pero recomendado) verificar que el usuario sea miembro del grupo
+    with sqlite3.connect("database.db") as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT 1 FROM grupos_miembros
+            WHERE grupo_id=? AND user_id=?
+        """, (grupo_id, user_id))
+        es_miembro = c.fetchone()
+        if not es_miembro:
+            return "No perteneces a este grupo"
+
+        c.execute("""
+            INSERT INTO group_posts (grupo_id, user_id, contenido, foto)
+            VALUES (?, ?, ?, ?)
+        """, (grupo_id, user_id, contenido, foto_path))
+        conn.commit()
+
+    return redirect(f"/grupo/{grupo_id}")
+
+
+@app.post("/post/<int:post_id>/like")
+def like_post(post_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user_id = session["user_id"]
+
+    with sqlite3.connect('database.db', timeout=20) as conn:
+        c = conn.cursor()
+
+        c.execute("SELECT 1 FROM post_likes WHERE post_id=? AND user_id=?", (post_id, user_id))
+        existe = c.fetchone()
+
+        if existe:
+            c.execute("DELETE FROM post_likes WHERE post_id=? AND user_id=?", (post_id, user_id))
+        else:
+            c.execute("INSERT OR IGNORE INTO post_likes (post_id, user_id) VALUES (?, ?)", (post_id, user_id))
+
+        conn.commit()
+
+    return redirect(request.referrer or "/grupos")
+
+
+
+@app.post("/reaccion_post_ajax")
+def reaccion_post_ajax():
+    if "user_id" not in session:
+        return jsonify({"status": "noauth"}), 401
+
+    data = request.get_json(force=True)
+    post_id = int(data.get("post_id"))
+    tipo = data.get("tipo")
+
+    if tipo not in ("encanta", "divierte", "enoja"):
+        return jsonify({"status": "bad"}), 400
+
+    user_id = session["user_id"]
+
+    with sqlite3.connect("database.db", timeout=20) as conn:
+        c = conn.cursor()
+
+        # 🔎 Autor del post
+        c.execute("SELECT user_id FROM posts WHERE id=?", (post_id,))
+        autor = c.fetchone()
+        autor_id = autor[0] if autor else None
+
+        # 🔹 ¿ya reaccionó a este post?
+        c.execute("""
+            SELECT tipo
+            FROM post_reacciones
+            WHERE post_id=? AND user_id=?
+        """, (post_id, user_id))
+        row = c.fetchone()
+
+        accion = None  # para saber si notificamos
+
+        if row:
+            if row[0] == tipo:
+                # mismo emoji → quitar reacción
+                c.execute("""
+                    DELETE FROM post_reacciones
+                    WHERE post_id=? AND user_id=?
+                """, (post_id, user_id))
+                accion = "quitó"
+            else:
+                # emoji distinto → actualizar
+                c.execute("""
+                    UPDATE post_reacciones
+                    SET tipo=?
+                    WHERE post_id=? AND user_id=?
+                """, (tipo, post_id, user_id))
+                accion = "cambió"
+        else:
+            # no había reacción → insertar
+            c.execute("""
+                INSERT INTO post_reacciones (post_id, user_id, tipo)
+                VALUES (?, ?, ?)
+            """, (post_id, user_id, tipo))
+            accion = "reaccionó"
+
+        # 🔔 CREAR NOTIFICACIÓN (solo si aplica)
+        if autor_id and autor_id != user_id and accion == "reaccionó":
+            mensaje = f"reaccionó {tipo} a tu publicación"
+
+            c.execute("""
+                INSERT INTO notificaciones (user_id, actor_id, tipo, ref_id, mensaje)
+                VALUES (?, ?, 'reaccion', ?, ?)
+            """, (autor_id, user_id, post_id, mensaje))
+
+        conn.commit()
+
+        # 🔢 Conteos actualizados
+        c.execute("""
+            SELECT tipo, COUNT(*)
+            FROM post_reacciones
+            WHERE post_id=?
+            GROUP BY tipo
+        """, (post_id,))
+        rows = c.fetchall()
+
+    conteos = {"encanta": 0, "divierte": 0, "enoja": 0}
+    for t, n in rows:
+        conteos[t] = n
+
+    return jsonify({
+        "status": "ok",
+        "reacciones": conteos
+    })
+
+
+@app.route("/notificaciones")
+def ver_notificaciones():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user_id = session["user_id"]
+
+    with sqlite3.connect("database.db") as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT
+                n.id,
+                n.mensaje,
+                n.created_at,
+                u.nombre,
+                u.apellido,
+                COALESCE(u.foto, '')
+            FROM notificaciones n
+            JOIN users u ON u.id = n.actor_id
+            WHERE n.user_id = ?
+            ORDER BY n.id DESC
+        """, (user_id,))
+        notificaciones = c.fetchall()
+
+        # marcar como leídas
+        c.execute("UPDATE notificaciones SET leida=1 WHERE user_id=?", (user_id,))
+        conn.commit()
+
+    return render_template("notificaciones.html", notificaciones=notificaciones)
+
+
 
 
 

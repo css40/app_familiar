@@ -64,11 +64,21 @@
       <article class="card group"
                data-name="{{ (g[1] or '')|lower }}"
                data-creator="{{ ((g[2] or '') ~ ' ' ~ (g[3] or ''))|lower }}">
+
         <div class="card-head">
-          <div class="badge">👥</div>
+          <div class="badge">
+            {% if g[4] and g[4] != "" %}
+              <img src="/{{ g[4].replace('\\','/') }}" class="avatar" alt="Creador">
+            {% else %}
+              <img src="/static/default_user.png" class="avatar" alt="Sin foto">
+            {% endif %}
+          </div>
+
           <div class="head-text">
             <h3 class="group-name">{{ g[1] }}</h3>
-            <p class="creator">Creado por: <b>{{ g[2] }} {{ g[3] }}</b></p>
+            <p class="creator">
+              Creado por: <b>{{ g[2] }} {{ g[3] }}</b>
+            </p>
           </div>
         </div>
 
@@ -95,6 +105,7 @@
     </section>
   </main>
 
+  <!-- JS -->
   <script>
     const search = document.getElementById("search");
     const cards = Array.from(document.querySelectorAll(".group"));
@@ -151,7 +162,6 @@
       search.focus();
     });
 
-    // init
     sortCards();
     apply();
   </script>

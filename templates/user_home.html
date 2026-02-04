@@ -18,12 +18,20 @@
       </div>
     </div>
 
-    <div class="top-actions">
-      <a class="btn ghost" href="/members_view">Integrantes</a>
-      <a class="btn ghost" href="/grupos">Grupos</a>
-      <a class="btn primary" href="/profile">Mi perfil</a>
-      <a class="btn danger" href="/logout">Cerrar sesión</a>
-    </div>
+<div class="top-actions">
+  <a class="btn ghost" href="/members_view">Integrantes</a>
+  <a class="btn ghost" href="/grupos">Grupos</a>
+
+  <a class="btn ghost" href="/notificaciones">
+    🔔 {% if notif_count > 0 %}
+      <span class="badge">{{ notif_count }}</span>
+    {% endif %}
+  </a>
+
+  <a class="btn primary" href="/profile">Mi perfil</a>
+  <a class="btn danger" href="/logout">Cerrar sesión</a>
+</div>
+
   </header>
 
   <main class="page">
