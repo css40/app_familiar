@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat - {{ grupo_nombre }}</title>
+  <style>
+  :root{
+    --bg1:#0b1220;
+    --bg2:#0f172a;
+    --card:#111a2e;
+    --border:#22304f;
+    --me:#2563eb;
+    --him:#121b31;
+    --accent:#22c55e;
+    --muted:#9ca3af;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:#e5e7eb;
+    height:100vh;
+    overflow:hidden;
+  }
+
+  /* ---------- TOP ---------- */
+  .top{
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:rgba(17,26,46,.85);
+    backdrop-filter: blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+
+  .wrap{
+    max-width:900px;
+    margin:0 auto;
+    padding:12px 14px;
+  }
+
+  .head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .title{
+    font-weight:800;
+    letter-spacing:.3px;
+  }
+
+  .btn{
+    padding:8px 14px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:rgba(15,23,42,.8);
+    color:#e5e7eb;
+    text-decoration:none;
+    font-size:14px;
+    transition:.2s;
+  }
+  .btn:hover{background:#1e293b}
+
+  /* ---------- MENSAJES ---------- */
+  .msgs{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:10px 0 90px;
+    overflow-y:auto;
+    height:calc(100vh - 120px);
+  }
+
+  .row{
+    display:flex;
+    gap:8px;
+    align-items:flex-end;
+  }
+  .row.me{justify-content:flex-end}
+
+  .avatar{
+    width:34px;
+    height:34px;
+    border-radius:999px;
+    object-fit:cover;
+    border:1px solid var(--border);
+    flex-shrink:0;
+  }
+
+  .bubble{
+    max-width:75%;
+    padding:10px 14px;
+    border-radius:18px;
+    line-height:1.35;
+    animation:fadeUp .15s ease;
+  }
+
+  .bubble.me{
+    background:linear-gradient(135deg,#2563eb,#1d4ed8);
+    border-bottom-right-radius:6px;
+  }
+
+  .bubble.him{
+    background:var(--him);
+    border:1px solid var(--border);
+    border-bottom-left-radius:6px;
+  }
+
+  .name{
+    font-size:12px;
+    font-weight:700;
+    opacity:.9;
+    margin-bottom:4px;
+  }
+
+  .time{
+    font-size:11px;
+    color:var(--muted);
+    margin-top:6px;
+    text-align:right;
+  }
+
+  .media{
+    margin-top:8px;
+    max-width:100%;
+    border-radius:14px;
+    border:1px solid var(--border);
+  }
+
+  /* ---------- BARRA ENVIAR ---------- */
+  .bar{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    background:rgba(15,23,42,.9);
+    backdrop-filter: blur(10px);
+    border-top:1px solid var(--border);
+  }
+
+  form{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  input[type="text"]{
+    flex:1;
+    padding:12px 14px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:#0b1220;
+    color:#e5e7eb;
+    outline:none;
+  }
+
+  /* ---------- FILE INPUT BONITO ---------- */
+  input[type="file"]{display:none}
+
+  .file-btn{
+    width:42px;
+    height:42px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:#0b1220;
+    color:#e5e7eb;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:18px;
+    transition:.2s;
+  }
+  .file-btn:hover{background:#1e293b}
+
+  button{
+    width:42px;
+    height:42px;
+    border-radius:999px;
+    border:none;
+    background:var(--accent);
+    color:#06210f;
+    font-size:18px;
+    font-weight:900;
+    cursor:pointer;
+    transition:.2s;
+  }
+  button:hover{transform:scale(1.05)}
+
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(4px)}
+    to{opacity:1;transform:none}
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:600px){
+    .bubble{max-width:85%}
+    .title{font-size:15px}
+    .btn{font-size:13px;padding:6px 10px}
+
+  }
+  /* ---------- BOTÓN ENVIAR TUANI ---------- */
+.send-btn{
+  width:46px;
+  height:46px;
+  border-radius:999px;
+  border:none;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#052e16;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 8px 20px rgba(34,197,94,.35);
+  transition:.18s ease;
+}
+
+.send-btn:hover{
+  transform:scale(1.08);
+  box-shadow:0 10px 26px rgba(34,197,94,.45);
+}
+
+.send-btn:active{
+  transform:scale(.95);
+}
+
+.send-ico{
+  transform:rotate(-5deg);
+  font-size:20px;
+}
+
+/* en móvil un poco más grande */
+@media (max-width:600px){
+  .send-btn{
+    width:50px;
+    height:50px;
+  }
+
+  /* ---------- BOTONES TOP BAR ---------- */
+.top-btn{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(15,23,42,.6);
+  border:1px solid var(--border);
+  color:#e5e7eb;
+  text-decoration:none;
+  font-size:14px;
+  transition:.2s;
+  backdrop-filter: blur(6px);
+}
+
+.top-btn:hover{
+  background:rgba(30,41,59,.9);
+}
+
+.top-btn .ico{
+  font-size:15px;
+}
+
+.top-btn.back .ico{
+  font-size:16px;
+}
+
+/* móvil: ocultar texto, dejar solo icono */
+@media (max-width:600px){
+  .top-btn{
+    padding:8px;
+  }
+  .top-btn .txt{
+    display:none;
+  }
+}
+
+}
+
+</style>
+
+</head>
+<body>
+
+  <div class="top">
+    <div class="wrap head">
+      <div class="title">💬 {{ grupo_nombre }}</div>
+      <div style="display:flex;gap:10px">
+<a class="top-btn back" href="/grupo/{{grupo_id}}">
+  <span class="ico">←</span>
+  <span class="txt">Volver</span>
+</a>
+
+<a class="top-btn" href="/grupos">
+  <span class="ico">👥</span>
+  <span class="txt">Grupos</span>
+</a>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="msgs" class="msgs"></div>
+  </div>
+
+  <div class="bar">
+    <div class="wrap">
+      <form id="sendForm">
+        <input id="txt" type="text" name="mensaje" placeholder="Escribe un mensaje...">
+        <label class="file-btn" for="file">📎</label>
+<input id="file" type="file" name="media" accept="image/*">
+
+       <button type="submit" class="send-btn">
+  <span class="send-ico">➤</span>
+</button>
+
+      </form>
+    </div>
+  </div>
+
+<script>
+  let lastId = 0;
+  let meId = null;
+  const box = document.getElementById("msgs");
+
+  function escapeHtml(s){
+    return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;")
+                  .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+                  .replaceAll("'","&#039;");
+  }
+
+  function addMsg(m){
+    const isMe = (m.user_id === meId);
+    const row = document.createElement("div");
+    row.className = "row " + (isMe ? "me" : "him");
+
+    if(!isMe){
+      const av = document.createElement("img");
+      av.className = "avatar";
+      av.src = m.avatar;
+      row.appendChild(av);
+    }
+
+    const bub = document.createElement("div");
+    bub.className = "bubble " + (isMe ? "me" : "him");
+
+    // nombre arriba (tipo WhatsApp en grupos)
+    if(!isMe){
+      const nm = document.createElement("div");
+      nm.className = "name";
+      nm.innerHTML = escapeHtml(m.nombre);
+      bub.appendChild(nm);
+    }
+
+    if(m.mensaje){
+      const tx = document.createElement("div");
+      tx.innerHTML = escapeHtml(m.mensaje);
+      bub.appendChild(tx);
+    }
+
+    if(m.media){
+      const im = document.createElement("img");
+      im.className = "media";
+      im.src = m.media;
+      bub.appendChild(im);
+    }
+
+    const tm = document.createElement("div");
+    tm.className = "time";
+    tm.innerHTML = escapeHtml(m.fecha);
+    bub.appendChild(tm);
+
+    row.appendChild(bub);
+
+    if(isMe){
+      const av = document.createElement("img");
+      av.className = "avatar";
+      av.src = m.avatar; // tu avatar también, opcional
+      row.appendChild(av);
+    }
+
+    box.appendChild(row);
+    lastId = Math.max(lastId, m.id);
+  }
+
+  async function poll(){
+    try{
+      const res = await fetch(`/api/grupo/{{grupo_id}}/mensajes?after_id=${lastId}`);
+      if(!res.ok) return;
+
+      const data = await res.json();
+      if(meId === null) meId = data.me;
+
+      (data.messages || []).forEach(addMsg);
+
+      if((data.messages || []).length){
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+    }catch(e){}
+  }
+
+  // enviar sin recargar
+  document.getElementById("sendForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+
+    // evita mandar vacío
+    const txt = (document.getElementById("txt").value || "").trim();
+    const file = document.getElementById("file").files[0];
+    if(!txt && !file) return;
+
+    const res = await fetch(`/api/grupo/{{grupo_id}}/enviar`, { method:"POST", body: fd });
+    if(res.ok){
+      document.getElementById("txt").value = "";
+      document.getElementById("file").value = "";
+      poll(); // refresca rápido
+    }
+  });
+
+  poll();
+  setInterval(poll, 1500);
+</script>
+</body>
+</html>

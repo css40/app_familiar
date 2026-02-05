@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, session , jsonify
 import sqlite3
 import os
 import uuid 
+import time
 from werkzeug.utils import secure_filename
 
 
@@ -18,10 +19,79 @@ def marcar_activo(user_id, estado):
         conn.commit()
 
 
+
 # Carpeta para subir fotos
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def db():
+    return sqlite3.connect("database.db", timeout=20)
+
+def es_miembro(conn, grupo_id, user_id):
+    c = conn.cursor()
+    c.execute("""
+        SELECT 1 FROM grupos_miembros
+        WHERE grupo_id=? AND user_id=?
+    """, (grupo_id, user_id))
+    return c.fetchone() is not None
+
+# carpeta para multimedia del chat
+UPLOAD_CHAT = os.path.join(app.config['UPLOAD_FOLDER'], 'chat')
+os.makedirs(UPLOAD_CHAT, exist_ok=True)
+
+with sqlite3.connect('database.db') as conn:
+    c = conn.cursor()
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS conversaciones (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user1_id INTEGER NOT NULL,
+        user2_id INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user1_id, user2_id)
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS mensajes_priv (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        conv_id INTEGER NOT NULL,
+        from_id INTEGER NOT NULL,
+        mensaje TEXT,
+        media TEXT,
+        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        leido INTEGER DEFAULT 0,
+        FOREIGN KEY(conv_id) REFERENCES conversaciones(id) ON DELETE CASCADE
+    )
+    """)
+
+    conn.commit()
+
+UPLOAD_CHAT_PRIV = 'static/uploads/chat_priv'
+os.makedirs(UPLOAD_CHAT_PRIV, exist_ok=True)
+
+def conv_pair(a, b):
+    a = int(a); b = int(b)
+    return (a, b) if a < b else (b, a)
+
+def get_or_create_conv(conn, u1, u2):
+    a, b = conv_pair(u1, u2)
+    c = conn.cursor()
+    c.execute("SELECT id FROM conversaciones WHERE user1_id=? AND user2_id=?", (a, b))
+    row = c.fetchone()
+    if row:
+        return row[0]
+    c.execute("INSERT INTO conversaciones (user1_id, user2_id) VALUES (?,?)", (a, b))
+    conn.commit()
+    return c.lastrowid
+
+def user_in_conv(conn, conv_id, user_id):
+    c = conn.cursor()
+    c.execute("SELECT 1 FROM conversaciones WHERE id=? AND (user1_id=? OR user2_id=?)", (conv_id, user_id, user_id))
+    return c.fetchone() is not None
+
+
 
 with sqlite3.connect('database.db') as conn:
     c = conn.cursor()
@@ -58,7 +128,20 @@ with sqlite3.connect('database.db') as conn:
     """)
     conn.commit()
 
-
+# tabla mensajes_grupo (por si no existe)
+with sqlite3.connect('database.db') as conn:
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS mensajes_grupo (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            grupo_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            mensaje TEXT,
+            media TEXT,
+            fecha DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
 
 # --- Crear tabla user_photos si no existe ---
 with sqlite3.connect('database.db') as conn:
@@ -133,11 +216,6 @@ def admin_home():
         activos=activos,
         nombre_familia=nombre_familia
     )
-
-
-
-
-
 
 @app.route('/post_tweet', methods=['POST'])
 def post_tweet():
@@ -1085,12 +1163,267 @@ def ver_notificaciones():
 
     return render_template("notificaciones.html", notificaciones=notificaciones)
 
+# =====================
+# --- MENSAJES ---
+# =====================
+@app.route("/api/grupo/<int:grupo_id>/mensajes")
+def api_chat_grupo(grupo_id):
+    if "user_id" not in session:
+        return jsonify({"error": "no_login"}), 401
+
+    user_id = session["user_id"]
+    after_id = int(request.args.get("after_id", 0))
+
+    with db() as conn:
+        if not es_miembro(conn, grupo_id, user_id):
+            return jsonify({"error": "no_member"}), 403
+
+        c = conn.cursor()
+        c.execute("""
+            SELECT mg.id, mg.user_id, mg.mensaje, mg.media, mg.fecha,
+                   u.nombre, COALESCE(u.apellido,''), COALESCE(u.foto,'')
+            FROM mensajes_grupo mg
+            JOIN users u ON u.id = mg.user_id
+            WHERE mg.grupo_id=? AND mg.id>?
+            ORDER BY mg.id ASC
+            LIMIT 200
+        """, (grupo_id, after_id))
+
+        msgs = []
+        for r in c.fetchall():
+            mid, uid, msg, media, fecha, nom, ape, foto = r
+            msgs.append({
+                "id": mid,
+                "user_id": uid,
+                "nombre": f"{nom} {ape}".strip(),
+                "mensaje": msg or "",
+                "media": ("/" + media.replace("\\","/")) if media else "",
+                "avatar": ("/" + foto.replace("\\","/")) if foto else "/static/default_user.png",
+                "fecha": fecha
+            })
+
+    return jsonify({"messages": msgs, "me": user_id})
+
+
+@app.route("/api/grupo/<int:grupo_id>/enviar", methods=["POST"])
+def api_enviar_grupo(grupo_id):
+    if "user_id" not in session:
+        return jsonify({"error": "no_login"}), 401
+
+    user_id = session["user_id"]
+
+    with db() as conn:
+        if not es_miembro(conn, grupo_id, user_id):
+            return jsonify({"error": "no_member"}), 403
+
+        mensaje = (request.form.get("mensaje") or "").strip()
+
+        media_path = None
+        file = request.files.get("media")
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            final_name = f"g{grupo_id}_u{user_id}_{int(time.time())}_{filename}"
+            save_path = os.path.join(UPLOAD_CHAT, final_name)
+            file.save(save_path)
+
+            # GUARDAR RUTA RELATIVA tipo static/uploads/chat/...
+            media_path = save_path.replace("\\", "/")
+
+        if not mensaje and not media_path:
+            return jsonify({"status": "empty"}), 200
+
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO mensajes_grupo (grupo_id, user_id, mensaje, media)
+            VALUES (?, ?, ?, ?)
+        """, (grupo_id, user_id, mensaje, media_path))
+        conn.commit()
+
+    return jsonify({"status": "ok"})
 
 
 
+@app.route("/grupo/<int:grupo_id>/chat")
+def vista_chat_grupo(grupo_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user_id = session["user_id"]
+
+    with db() as conn:
+        if not es_miembro(conn, grupo_id, user_id):
+            return "No eres miembro de este grupo", 403
+
+        c = conn.cursor()
+        c.execute("SELECT nombre FROM grupos WHERE id=?", (grupo_id,))
+        g = c.fetchone()
+        grupo_nombre = g[0] if g else "Grupo"
+
+    return render_template("chat_grupo.html", grupo_id=grupo_id, grupo_nombre=grupo_nombre)
+
+@app.post("/notificaciones/marcar_todo")
+def marcar_todo_notificaciones():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user_id = session["user_id"]
+    with sqlite3.connect("database.db") as conn:
+        c = conn.cursor()
+        c.execute("UPDATE notificaciones SET leida=1 WHERE user_id=?", (user_id,))
+        conn.commit()
+    return redirect("/notificaciones")
 
 
+@app.post("/notificaciones/<int:noti_id>/eliminar")
+def eliminar_notificacion(noti_id):
+    if "user_id" not in session:
+        return ("noauth", 401)
 
+    user_id = session["user_id"]
+    with sqlite3.connect("database.db") as conn:
+        c = conn.cursor()
+        # seguridad: solo borrar la noti del dueño
+        c.execute("DELETE FROM notificaciones WHERE id=? AND user_id=?", (noti_id, user_id))
+        conn.commit()
+    return ("ok", 200)
+
+@app.route("/buscar_usuario")
+def buscar_usuario():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    q = (request.args.get("q") or "").strip()
+    user_id = session["user_id"]
+
+    resultados = []
+    if q:
+        like = f"%{q}%"
+        with sqlite3.connect("database.db", timeout=20) as conn:
+            c = conn.cursor()
+            c.execute("""
+                SELECT id, nombre, apellido, COALESCE(email,''), COALESCE(foto,'')
+                FROM users
+                WHERE id != ?
+                  AND (nombre LIKE ? OR apellido LIKE ? OR email LIKE ?)
+                ORDER BY nombre ASC
+                LIMIT 30
+            """, (user_id, like, like, like))
+            resultados = c.fetchall()
+
+    return render_template("buscar_usuario.html", q=q, resultados=resultados)
+@app.route("/dm/<int:other_id>")
+def dm_chat(other_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    me = session["user_id"]
+    if me == other_id:
+        return redirect("/inbox")
+
+    with sqlite3.connect("database.db", timeout=20) as conn:
+        conv_id = get_or_create_conv(conn, me, other_id)
+
+        c = conn.cursor()
+        c.execute("SELECT nombre, apellido FROM users WHERE id=?", (other_id,))
+        row = c.fetchone()
+        other_name = (f"{row[0]} {row[1]}".strip()) if row else "Usuario"
+
+    return render_template("dm_chat.html", conv_id=conv_id, other_id=other_id, other_name=other_name)
+
+@app.route("/api/dm/<int:conv_id>/mensajes")
+def api_dm_mensajes(conv_id):
+    if "user_id" not in session:
+        return jsonify({"error":"no_login"}), 401
+
+    me = session["user_id"]
+    after_id = int(request.args.get("after_id", 0))
+
+    with sqlite3.connect("database.db", timeout=20) as conn:
+        if not user_in_conv(conn, conv_id, me):
+            return jsonify({"error":"no_access"}), 403
+
+        c = conn.cursor()
+        c.execute("""
+            SELECT m.id, m.from_id, COALESCE(m.mensaje,''), COALESCE(m.media,''), m.fecha,
+                   u.nombre, COALESCE(u.apellido,''), COALESCE(u.foto,'')
+            FROM mensajes_priv m
+            JOIN users u ON u.id = m.from_id
+            WHERE m.conv_id=? AND m.id>?
+            ORDER BY m.id ASC
+            LIMIT 200
+        """, (conv_id, after_id))
+
+        msgs = []
+        for r in c.fetchall():
+            mid, from_id, msg, media, fecha, nom, ape, foto = r
+            msgs.append({
+                "id": mid,
+                "from_id": from_id,
+                "nombre": f"{nom} {ape}".strip(),
+                "mensaje": msg,
+                "media": ("/" + media.replace("\\","/")) if media else "",
+                "avatar": ("/" + foto.replace("\\","/")) if foto else "/static/default_user.png",
+                "fecha": fecha
+            })
+
+    return jsonify({"messages": msgs, "me": me})
+@app.route("/api/dm/<int:conv_id>/enviar", methods=["POST"])
+def api_dm_enviar(conv_id):
+    if "user_id" not in session:
+        return jsonify({"error":"no_login"}), 401
+
+    me = session["user_id"]
+    mensaje = (request.form.get("mensaje") or "").strip()
+
+    file = request.files.get("media")
+    media_path = ""
+
+    if file and file.filename:
+        filename = secure_filename(file.filename)
+        final_name = f"dm{conv_id}_u{me}_{uuid.uuid4().hex}_{filename}"
+        save_path = os.path.join(UPLOAD_CHAT_PRIV, final_name)
+        file.save(save_path)
+        media_path = save_path.replace("\\","/")
+
+    if not mensaje and not media_path:
+        return jsonify({"status":"empty"}), 200
+
+    with sqlite3.connect("database.db", timeout=20) as conn:
+        if not user_in_conv(conn, conv_id, me):
+            return jsonify({"error":"no_access"}), 403
+
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO mensajes_priv (conv_id, from_id, mensaje, media)
+            VALUES (?,?,?,?)
+        """, (conv_id, me, mensaje, media_path))
+        conn.commit()
+
+    return jsonify({"status":"ok"})
+
+@app.route("/inbox")
+def inbox():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    me = session["user_id"]
+    with sqlite3.connect("database.db", timeout=20) as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT
+              conv.id,
+              CASE WHEN conv.user1_id=? THEN conv.user2_id ELSE conv.user1_id END as other_id,
+              u.nombre, COALESCE(u.apellido,''), COALESCE(u.foto,''),
+              (SELECT COALESCE(mensaje,'') FROM mensajes_priv mp WHERE mp.conv_id=conv.id ORDER BY mp.id DESC LIMIT 1) as last_msg,
+              (SELECT fecha FROM mensajes_priv mp WHERE mp.conv_id=conv.id ORDER BY mp.id DESC LIMIT 1) as last_time
+            FROM conversaciones conv
+            JOIN users u ON u.id = other_id
+            WHERE conv.user1_id=? OR conv.user2_id=?
+            ORDER BY COALESCE(last_time, conv.created_at) DESC
+        """, (me, me, me))
+        chats = c.fetchall()
+
+    return render_template("inbox.html", chats=chats)
 
 # =====================
 # --- INICIAR SERVIDOR ---

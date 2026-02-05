@@ -21,6 +21,8 @@
 <div class="top-actions">
   <a class="btn ghost" href="/members_view">Integrantes</a>
   <a class="btn ghost" href="/grupos">Grupos</a>
+  <a class="btn ghost" href="/inbox">💬Chats</a>
+
 
   <a class="btn ghost" href="/notificaciones">
     🔔 {% if notif_count > 0 %}
@@ -30,6 +32,9 @@
 
   <a class="btn primary" href="/profile">Mi perfil</a>
   <a class="btn danger" href="/logout">Cerrar sesión</a>
+
+
+
 </div>
 
   </header>
@@ -48,7 +53,7 @@
         </div>
         <div class="stat">
           <div class="stat-num">⚡</div>
-          <div class="stat-label">Modo oscuro tuani</div>
+          <div class="stat-label">En desarrollo</div>
         </div>
       </div>
     </section>
@@ -136,7 +141,12 @@
           {% for tweet in tweets %}
             <article class="tweet card">
               <div class="tweet-head">
-                <img src="{{ tweet[5] }}" alt="Foto perfil" class="avatar">
+          {% if tweet[5] and tweet[5] != "" %}
+            <img src="/{{ tweet[5].replace('\\','/') }}" alt="Foto perfil" class="avatar">
+          {% else %}
+            <img src="/static/default_user.png" alt="Foto perfil" class="avatar">
+          {% endif %}
+
 
                 <div class="who">
                   <div class="who-top">
@@ -161,9 +171,10 @@
               <div class="tweet-body">
                 <p class="content">{{ tweet[1] | safe }}</p>
 
-                {% if tweet[2] %}
-                  <img src="{{ tweet[2] }}" class="tweet-foto" alt="Foto del tweet">
-                {% endif %}
+            {% if tweet[2] and tweet[2] != "" %}
+              <img src="/{{ tweet[2].replace('\\','/') }}" class="tweet-foto" alt="Foto del tweet">
+            {% endif %}
+
               </div>
 
               <div class="tweet-foot">

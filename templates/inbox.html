@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chats</title>
+  <link rel="stylesheet" href="/static/inbox.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">FW</div>
+    <div class="brand-text">
+      <div class="brand-title">Chats</div>
+      <div class="brand-sub">Tus conversaciones</div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <a class="btn ghost" href="/user_home">Inicio</a>
+    <a class="btn primary" href="/buscar_usuario">+ Nuevo chat</a>
+  </div>
+</header>
+
+<main class="noti-page">
+  {% if chats|length == 0 %}
+    <div class="noti-empty">Aún no tenés chats. Buscá un usuario y dale “Chatear”.</div>
+  {% else %}
+    <div class="noti-list">
+      {% for c in chats %}
+      <a class="noti" href="/dm/{{ c[1] }}" style="text-decoration:none;color:inherit;">
+        <div class="noti-avatar">
+          <img src="/{{ c[4] if c[4] else 'static/default_user.png' }}">
+        </div>
+        <div class="noti-body">
+          <div class="noti-text">
+            <b>{{ c[2] }} {{ c[3] }}</b>
+            <div class="preview">{{ c[5] }}</div>
+
+          </div>
+   
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</main>
+
+</body>
+</html>

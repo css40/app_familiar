@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Notificaciones</title>
-  <link rel="stylesheet" href="/static/grupodetalle.css">
+  <link rel="stylesheet" href="/static/notificaciones.css">
 </head>
 <body>
 
@@ -18,32 +18,82 @@
 
   <div class="top-actions">
     <a class="btn ghost" href="/user_home">Inicio</a>
+    <form action="/notificaciones/marcar_todo" method="POST" style="margin:0">
+      <button class="btn primary" type="submit">✓ Marcar leídas</button>
+    </form>
   </div>
 </header>
 
-<main class="page">
-  <section class="card">
-    <h2>🔔 Notificaciones</h2>
+<main class="noti-page">
 
-    {% if notificaciones|length == 0 %}
-      <p class="muted">No tenés notificaciones todavía.</p>
-    {% else %}
-      <div class="feed-list">
-        {% for n in notificaciones %}
-        <div class="card post-card">
-          <div class="post-top">
-            <img class="avatar" src="/{{ n[5] if n[5] else 'static/default_user.png' }}">
-            <div>
-              <b>{{ n[3] }} {{ n[4] }}</b> {{ n[1] }}
-              <div class="post-time">{{ n[2] }}</div>
-            </div>
+  <div class="noti-head">
+    <h2 class="noti-title">🔔 Notificaciones</h2>
+  </div>
+
+  {% if notificaciones|length == 0 %}
+    <div class="noti-empty">No tenés notificaciones todavía.</div>
+  {% else %}
+    <div class="noti-list">
+      {% for n in notificaciones %}
+      <div class="noti" id="noti-{{ n[0] }}">
+
+        <div class="noti-avatar">
+          <img src="/{{ n[5] if n[5] else 'static/default_user.png' }}">
+        </div>
+
+        <div class="noti-body">
+          <div class="noti-text">
+            <b>{{ n[3] }} {{ n[4] }}</b> {{ n[1] }}
+          </div>
+
+          <!-- guardamos el timestamp real en data-time -->
+          <div class="noti-time" data-time="{{ n[2] }}">{{ n[2] }}</div>
+
+          <div class="noti-actions">
+            <button class="btn danger" type="button" onclick="eliminarNoti({{ n[0] }})">🗑 Eliminar</button>
           </div>
         </div>
-        {% endfor %}
+
       </div>
-    {% endif %}
-  </section>
+      {% endfor %}
+    </div>
+  {% endif %}
+
 </main>
+
+<script>
+  function parseSqliteDatetime(s){
+    // "2026-02-04 19:50:27" -> "2026-02-04T19:50:27"
+    if(!s) return null;
+    return new Date(s.replace(" ", "T"));
+  }
+
+  function timeAgo(date){
+    const sec = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (sec < 5) return "ahorita";
+    if (sec < 60) return `hace ${sec}s`;
+    const min = Math.floor(sec/60);
+    if (min < 60) return `hace ${min} min`;
+    const hr = Math.floor(min/60);
+    if (hr < 24) return `hace ${hr} h`;
+    const d = Math.floor(hr/24);
+    return `hace ${d} días`;
+  }
+
+  // convierte fechas a "hace X"
+  document.querySelectorAll(".noti-time").forEach(el=>{
+    const dt = parseSqliteDatetime(el.dataset.time);
+    if(dt) el.textContent = timeAgo(dt);
+  });
+
+  async function eliminarNoti(id){
+    const res = await fetch(`/notificaciones/${id}/eliminar`, { method:"POST" });
+    if(res.ok){
+      const card = document.getElementById(`noti-${id}`);
+      if(card) card.remove();
+    }
+  }
+</script>
 
 </body>
 </html>

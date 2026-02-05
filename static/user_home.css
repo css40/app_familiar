@@ -161,41 +161,130 @@ body::before{
   background: rgba(255,255,255,.05);
   box-shadow: var(--shadow);
 }
+/* ===============================
+   BOTONES – REDISEÑO COMPLETO
+   =============================== */
 
-/* Buttons */
 .btn{
+  --btn-bg: rgba(255,255,255,.06);
+  --btn-border: rgba(255,255,255,.14);
+  --btn-text: rgba(255,255,255,.92);
+
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:10px;
-  padding: 10px 14px;
-  border-radius: 14px;
+  gap:8px;
+
+  padding: 10px 16px;
+  border-radius: 999px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,.10),
+    rgba(255,255,255,.04)
+  );
+
+  color: var(--btn-text);
+  border: 1px solid var(--btn-border);
   text-decoration:none;
-  color: var(--text);
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,.04);
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
-  font-weight: 700;
-  font-size: 14px;
+
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing:.3px;
+
+  backdrop-filter: blur(6px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 8px 18px rgba(0,0,0,.25);
+
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease,
+    background .15s ease,
+    border-color .15s ease;
 }
+
 .btn:hover{
   transform: translateY(-1px);
-  background: rgba(255,255,255,.07);
-  border-color: rgba(255,255,255,.18);
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,.18),
+    rgba(255,255,255,.08)
+  );
+  border-color: rgba(255,255,255,.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    0 12px 26px rgba(0,0,0,.35);
+}
+
+.btn:active{
+  transform: translateY(0) scale(.97);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.35);
 }
 .btn.primary{
-  background: rgba(79,140,255,.18);
-  border-color: rgba(79,140,255,.35);
+  --btn-text: #ecf2ff;
+
+  background: linear-gradient(
+    135deg,
+    #4f8cff,
+    #6366f1
+  );
+
+  border-color: rgba(99,102,241,.6);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.35),
+    0 10px 28px rgba(79,140,255,.45);
 }
-.btn.primary:hover{ background: rgba(79,140,255,.26); }
-.btn.danger{
-  background: rgba(255,77,77,.14);
-  border-color: rgba(255,77,77,.35);
+
+.btn.primary:hover{
+  background: linear-gradient(
+    135deg,
+    #6ea0ff,
+    #7c7ff5
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45),
+    0 14px 34px rgba(79,140,255,.55);
 }
-.btn.danger:hover{ background: rgba(255,77,77,.22); }
 .btn.ghost{
-  background: rgba(255,255,255,.03);
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 6px 14px rgba(0,0,0,.22);
 }
+
+.btn.ghost:hover{
+  background: rgba(255,255,255,.08);
+}
+.btn.danger{
+  --btn-text: #ffecec;
+
+  background: linear-gradient(
+    135deg,
+    #ff4d4d,
+    #ef4444
+  );
+
+  border-color: rgba(239,68,68,.6);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.28),
+    0 10px 26px rgba(239,68,68,.45);
+}
+
+.btn.danger:hover{
+  background: linear-gradient(
+    135deg,
+    #ff6b6b,
+    #f87171
+  );
+}
+
+
+
 
 /* Composer */
 .composer{
@@ -490,4 +579,273 @@ body::before{
 .react:hover{
   transform: translateY(-1px);
   background: rgba(255,255,255,.06);
+}
+/* =========================================================
+   RESPONSIVE MOBILE (≤ 768px)
+   ========================================================= */
+@media (max-width: 768px){
+
+  /* ---------- TOPBAR ---------- */
+  .topbar{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .brand{
+    gap:10px;
+  }
+
+  .brand-text .brand-title{
+    font-size: 14px;
+  }
+
+  .brand-text .brand-sub{
+    font-size: 11px;
+  }
+
+  .top-actions{
+    width:100%;
+    justify-content: space-between;
+    gap:8px;
+  }
+
+  .top-actions .btn{
+    padding: 8px 10px;
+    font-size: 12px;
+    border-radius: 12px;
+  }
+
+  /* ---------- PAGE ---------- */
+  .page{
+    width: 94vw;
+    margin: 12px auto 24px;
+  }
+
+  /* ---------- WELCOME ---------- */
+  .welcome{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .welcome h1{
+    font-size: 22px;
+  }
+
+  .welcome p{
+    font-size: 13px;
+  }
+
+  .welcome-right{
+    width:100%;
+    justify-content: space-between;
+  }
+
+  .stat{
+    min-width: unset;
+    width: 48%;
+    padding: 10px 12px;
+  }
+
+  .stat-num{
+    font-size: 16px;
+  }
+
+  /* ---------- GRID ---------- */
+  .grid{
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* ---------- COMPOSER ---------- */
+  .composer{
+    padding: 14px;
+  }
+
+  #tweet-text{
+    min-height: 90px;
+    font-size: 14px;
+  }
+
+  .composer-actions{
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .file{
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .btn.primary{
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* ---------- SIDE CARD ---------- */
+  .side{
+    padding: 14px;
+  }
+
+  .quick-item{
+    padding: 10px;
+  }
+
+  .qi-ico{
+    width:34px;
+    height:34px;
+    border-radius: 12px;
+  }
+
+  /* ---------- FEED ---------- */
+  .tweet{
+    padding: 12px;
+  }
+
+  .tweet-head{
+    gap:10px;
+  }
+
+  .avatar{
+    width:36px;
+    height:36px;
+    border-radius: 12px;
+  }
+
+  .name{
+    font-size: 14px;
+  }
+
+  .time{
+    font-size: 11px;
+  }
+
+  .menu{
+    gap:6px;
+  }
+
+  
+
+  .tweet-body{
+    font-size: 14px;
+  }
+
+  .tweet-foto{
+    border-radius: 14px;
+    max-height: 360px;
+  }
+
+  /* ---------- REACCIONES ---------- */
+  .reacciones{
+    gap: 8px;
+  }
+
+  .react{
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+}
+
+/* =========================================================
+   EXTRA PEQUEÑO (≤ 420px) – celulares chicos
+   ========================================================= */
+@media (max-width: 420px){
+
+  .welcome h1{
+    font-size: 20px;
+  }
+
+  .stat{
+    width: 100%;
+  }
+
+  .top-actions{
+    flex-wrap: wrap;
+  }
+
+  .top-actions .btn{
+    flex:1;
+    justify-content:center;
+  }
+
+  .tweet-foto{
+    max-height: 280px;
+  }
+  
+}
+@media (max-width:600px){
+  .btn{
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+}
+/* ===============================
+   BOTONES MINI (Editar / Eliminar)
+   =============================== */
+.mini{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  padding: 7px 10px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.92);
+
+  text-decoration:none;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing:.2px;
+
+  backdrop-filter: blur(6px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 8px 18px rgba(0,0,0,.22);
+
+  transition:
+    transform .15s ease,
+    background .15s ease,
+    border-color .15s ease,
+    box-shadow .15s ease;
+}
+
+.mini:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.26);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    0 12px 26px rgba(0,0,0,.32);
+}
+
+.mini:active{
+  transform: scale(.97);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.35);
+}
+
+/* peligro (Eliminar) */
+.mini.danger{
+  color: #ffecec;
+  border-color: rgba(239,68,68,.45);
+  background: rgba(239,68,68,.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 10px 24px rgba(239,68,68,.28);
+}
+
+.mini.danger:hover{
+  background: rgba(239,68,68,.22);
+  border-color: rgba(239,68,68,.70);
+}
+
+/* móvil: más compactos */
+@media (max-width:600px){
+  .mini{
+    padding: 6px 9px;
+    font-size: 11px;
+  }
 }

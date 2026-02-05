@@ -21,9 +21,11 @@
     </div>
 
     <div class="top-actions">
+      <a class="btn primary" href="/grupo/{{ grupo_id }}/chat">💬 Chat del grupo</a>
       <a class="btn ghost" href="/grupos">← Grupos</a>
       <a class="btn ghost" href="/user_home">Inicio</a>
       <a class="btn danger" href="/logout">Cerrar sesión</a>
+      
     </div>
   </header>
 
@@ -64,7 +66,11 @@
               placeholder="¿Qué está pasando en el grupo?"></textarea>
 
             <div class="post-actions">
-              <input class="file" type="file" name="foto" accept="image/*">
+              <label class="file">
+                📷 Foto
+                <input type="file" name="foto" accept="image/*">
+              </label>
+
               <button class="btn primary" type="submit">Publicar</button>
             </div>
           </form>

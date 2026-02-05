@@ -1,0 +1,183 @@
+:root{
+  --bg:#05070b;
+  --panel: rgba(255,255,255,.06);
+  --panel2: rgba(255,255,255,.04);
+  --border: rgba(255,255,255,.12);
+  --text: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.62);
+
+  --primary:#3b82f6;
+  --danger:#ef4444;
+  --radius:18px;
+}
+
+/* Fondo fijo (no gris al scrollear) */
+html, body { height:100%; min-height:100%; }
+html { background: var(--bg); }
+body { margin:0; background: transparent !important; color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(59,130,246,.20), transparent 45%),
+    radial-gradient(circle at 80% 20%, rgba(34,197,94,.16), transparent 40%),
+    radial-gradient(circle at 50% 120%, rgba(239,68,68,.12), transparent 55%),
+    linear-gradient(180deg, #071016, #05070b);
+  background-repeat:no-repeat;
+  background-size: cover;
+}
+
+/* Topbar */
+.topbar{
+  position: sticky;
+  top:0;
+  z-index: 50;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,.35);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+
+.brand{ display:flex; align-items:center; gap:12px; min-width: 0; }
+.logo{
+  width: 38px; height: 38px;
+  border-radius: 14px;
+  display:grid; place-items:center;
+  font-weight: 900;
+  background: rgba(59,130,246,.18);
+  border: 1px solid rgba(59,130,246,.30);
+}
+.brand-text{ min-width:0; }
+.brand-title{ font-weight: 900; white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
+.brand-sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+.top-actions{ display:flex; gap:10px; flex-wrap: wrap; justify-content:flex-end; }
+
+/* Botones */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  text-decoration:none;
+  font-weight: 900;
+  font-size: 13px;
+  cursor:pointer;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+  user-select:none;
+}
+.btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.18); }
+.btn:active{ transform: scale(.98); }
+
+.btn.primary{
+  background: rgba(59,130,246,.22);
+  border-color: rgba(59,130,246,.40);
+}
+.btn.primary:hover{ background: rgba(59,130,246,.30); }
+
+.btn.danger{
+  background: rgba(239,68,68,.20);
+  border-color: rgba(239,68,68,.40);
+}
+.btn.danger:hover{ background: rgba(239,68,68,.28); }
+
+.btn.ghost{
+  background: rgba(255,255,255,.03);
+}
+
+/* Página */
+.noti-page{
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.noti-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top: 6px;
+}
+
+.noti-title{
+  margin: 0;
+  font-size: 20px;
+  font-weight: 1000;
+}
+
+.noti-list{
+  display:flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+/* Card de notificación */
+.noti{
+  display:flex;
+  gap: 12px;
+  align-items:flex-start;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.30);
+}
+
+.noti-avatar{
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  overflow:hidden;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.04);
+  flex: 0 0 auto;
+}
+.noti-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+.noti-body{ flex:1; min-width:0; }
+.noti-text{ font-size: 14px; line-height: 1.45; word-break: break-word; }
+.noti-time{ margin-top: 6px; font-size: 12px; color: var(--muted); }
+
+.noti-actions{
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.noti-empty{
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: var(--radius);
+  border: 1px dashed rgba(255,255,255,.18);
+  background: rgba(255,255,255,.03);
+  color: var(--muted);
+  font-weight: 900;
+  text-align:center;
+}
+
+/* Responsive */
+@media (max-width: 640px){
+  .topbar{ align-items: stretch; }
+  .top-actions{ width:100%; justify-content: space-between; }
+  .top-actions .btn{ flex:1; min-height: 44px; }
+
+  .noti-page{ padding: 14px; }
+  .noti{ padding: 12px; }
+  .noti-actions .btn{ flex:1; min-height: 42px; }
+}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Chat con {{other_name}}</title>
+  <style>
+    body{font-family:Arial;margin:0;background:#0b1220;color:#e5e7eb}
+    .top{padding:14px 16px;background:#111a2e;position:sticky;top:0}
+    .box{padding:14px 16px;max-width:900px;margin:0 auto}
+    .msgs{display:flex;flex-direction:column;gap:10px;margin:14px 0 90px}
+    .msg{padding:10px 12px;border-radius:14px;max-width:75%}
+    .me{background:#1d4ed8;align-self:flex-end}
+    .him{background:#121b31;border:1px solid #1f2a44;align-self:flex-start}
+    .meta{font-size:12px;opacity:.85;margin-top:6px}
+    .bar{position:fixed;bottom:0;left:0;right:0;background:#0f172a;border-top:1px solid #22304f;padding:12px}
+    form{max-width:900px;margin:0 auto;display:flex;gap:10px}
+    input{flex:1;padding:12px;border-radius:12px;border:1px solid #22304f;background:#0b1220;color:#e5e7eb}
+    button{padding:12px 16px;border-radius:12px;border:0;background:#22c55e;color:#06210f;font-weight:bold;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="box"><b>Chat con:</b> {{other_name}} · <a href="/inbox" style="color:#93c5fd">Inbox</a></div>
+  </div>
+
+  <div class="box">
+    <div id="msgs" class="msgs"></div>
+  </div>
+
+  <div class="bar">
+    <form method="POST">
+      <input name="mensaje" id="inputMsg" autocomplete="off" placeholder="Escribe un mensaje...">
+      <button>Enviar</button>
+    </form>
+  </div>
+
+<script>
+  let lastId = 0;
+  const msgs = document.getElementById("msgs");
+  const meId = {{ session['user_id'] }};
+
+  function addMsg(m){
+    const div = document.createElement("div");
+    div.className = "msg " + (m.emisor_id === meId ? "me" : "him");
+    div.innerHTML = `<div>${escapeHtml(m.mensaje)}</div>
+                     <div class="meta">${escapeHtml(m.fecha)}</div>`;
+    msgs.appendChild(div);
+    lastId = Math.max(lastId, m.id);
+  }
+
+  async function poll(){
+    try{
+      const res = await fetch(`/api/privado/{{other_id}}/mensajes?after_id=${lastId}`);
+      if(!res.ok) return;
+      const data = await res.json();
+      (data.messages || []).forEach(addMsg);
+      if((data.messages || []).length) window.scrollTo(0, document.body.scrollHeight);
+    }catch(e){}
+  }
+
+  function escapeHtml(s){
+    return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;")
+                  .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+                  .replaceAll("'","&#039;");
+  }
+
+  poll();
+  setInterval(poll, 1500);
+</script>
+</body>
+</html>

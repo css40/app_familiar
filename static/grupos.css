@@ -9,16 +9,31 @@
   --radius:18px;
 }
 
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
+/* ===============================
+   FONDO GLOBAL – FIX DEFINITIVO
+   =============================== */
+html, body{
+  width:100%;
+  min-height:100%;
+}
+
+html{
+  background:#05070b;
+}
+
 body{
   margin:0;
+  min-height:100vh;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue";
+  color: var(--text);
+
   background:
     radial-gradient(1200px 600px at 10% -10%, rgba(79,140,255,.22), transparent 55%),
     radial-gradient(900px 600px at 90% 10%, rgba(153,79,255,.18), transparent 55%),
-    var(--bg);
-  color: var(--text);
+    linear-gradient(180deg, #071016, #05070b);
+
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 /* Topbar */
@@ -50,37 +65,85 @@ body{
 .top-actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
 
 /* Buttons */
+/* ===============================
+   BOTONES – ESTILO FINAL PRO
+   =============================== */
 .btn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:10px;
-  padding: 10px 14px;
-  border-radius: 14px;
-  text-decoration:none;
+  gap:8px;
+
+  padding: 10px 16px;
+  border-radius: 999px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,.14),
+    rgba(255,255,255,.05)
+  );
+
   color: var(--text);
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,.04);
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
-  font-weight: 800;
-  font-size: 14px;
+  border: 1px solid rgba(255,255,255,.18);
+  text-decoration:none;
+
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing:.3px;
+
+  backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.30),
+    0 10px 22px rgba(0,0,0,.35);
+
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease,
+    background .15s ease;
 }
+
 .btn:hover{
   transform: translateY(-1px);
-  background: rgba(255,255,255,.07);
-  border-color: rgba(255,255,255,.18);
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,.22),
+    rgba(255,255,255,.10)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.40),
+    0 14px 30px rgba(0,0,0,.45);
 }
+
+.btn:active{
+  transform: scale(.96);
+}
+
+/* primario */
 .btn.primary{
-  background: rgba(79,140,255,.18);
-  border-color: rgba(79,140,255,.35);
+  background: linear-gradient(135deg, #4f8cff, #6366f1);
+  border-color: rgba(99,102,241,.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45),
+    0 14px 34px rgba(79,140,255,.55);
 }
-.btn.primary:hover{ background: rgba(79,140,255,.26); }
+
+/* danger */
 .btn.danger{
-  background: rgba(255,77,77,.14);
-  border-color: rgba(255,77,77,.35);
+  background: linear-gradient(135deg, #ff4d4d, #ef4444);
+  border-color: rgba(239,68,68,.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.35),
+    0 14px 32px rgba(239,68,68,.5);
 }
-.btn.danger:hover{ background: rgba(255,77,77,.22); }
-.btn.ghost{ background: rgba(255,255,255,.03); }
+
+/* ghost */
+.btn.ghost{
+  background: rgba(255,255,255,.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 8px 18px rgba(0,0,0,.30);
+}
+
 
 /* Page */
 .page{
@@ -269,4 +332,119 @@ body{
   height: 100%;
   object-fit: cover;
   display: block;
+}
+/* =================================================
+   RESPONSIVE – GRUPOS (MÓVIL)
+   ================================================= */
+@media (max-width: 768px){
+
+  /* topbar */
+  .topbar{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .brand-text .brand-title{
+    font-size: 14px;
+  }
+
+  .brand-text .brand-sub{
+    font-size: 11px;
+  }
+
+  .top-actions{
+    width:100%;
+    justify-content: space-between;
+    gap:8px;
+  }
+
+  .top-actions .btn{
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  /* page */
+  .page{
+    width: 94vw;
+    margin: 12px auto 24px;
+  }
+
+  /* hero */
+  .hero{
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hero h1{
+    font-size: 22px;
+  }
+
+  .hero-right{
+    width:100%;
+    justify-content: space-between;
+  }
+
+  .stat{
+    min-width: unset;
+    width: 48%;
+    padding: 10px 12px;
+  }
+
+  /* tools */
+  .tools{
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-wrap{
+    min-width: unset;
+    width:100%;
+  }
+
+  /* grid cards */
+  .grid{
+    grid-template-columns: 1fr;
+  }
+
+  .group{
+    padding: 12px;
+  }
+
+  .group-name{
+    font-size: 15px;
+  }
+
+  .creator{
+    font-size: 11px;
+  }
+
+  .badge{
+    width:42px;
+    height:42px;
+  }
+
+  /* acciones */
+  .card-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap: wrap;
+  }
+}
+
+/* celulares muy chicos */
+@media (max-width: 420px){
+  .stat{
+    width:100%;
+  }
+
+  .top-actions{
+    flex-wrap: wrap;
+  }
+
+  .top-actions .btn{
+    flex:1;
+    justify-content:center;
+  }
 }

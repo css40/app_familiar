@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat - {{ other_name }}</title>
+  <link rel="stylesheet" href="/static/dm.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">FW</div>
+    <div class="brand-text">
+      <div class="brand-title">💬 {{ other_name }}</div>
+      <div class="brand-sub">Chat privado</div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <a class="btn ghost" href="/inbox">Chats</a>
+    <a class="btn ghost" href="/buscar_usuario">Buscar</a>
+  </div>
+</header>
+
+<main class="dm-page">
+  <div id="msgs" class="dm-list"></div>
+</main>
+
+<div class="dm-bar">
+  <form id="sendForm" class="dm-form">
+    <input id="txt" class="dm-input" type="text" name="mensaje" placeholder="Escribe un mensaje...">
+
+    <label class="dm-file" title="Enviar imagen">
+      <input id="file" type="file" name="media" accept="image/*">
+    </label>
+
+    <button class="dm-send" type="submit">Enviar</button>
+  </form>
+</div>
+
+<script>
+  let lastId = 0;
+  let meId = null;
+  const box = document.getElementById("msgs");
+
+  function esc(s){
+    return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;")
+                  .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+                  .replaceAll("'","&#039;");
+  }
+
+  function addMsg(m){
+    const isMe = (m.from_id === meId);
+
+    const item = document.createElement("div");
+    item.className = "dm-item " + (isMe ? "me" : "him");
+
+    if(!isMe){
+      const av = document.createElement("div");
+      av.className = "dm-avatar";
+      av.innerHTML = `<img src="${m.avatar}">`;
+      item.appendChild(av);
+    }
+
+    const bub = document.createElement("div");
+    bub.className = "dm-bubble " + (isMe ? "me" : "him");
+
+    if(!isMe){
+      const nm = document.createElement("div");
+      nm.className = "dm-name";
+      nm.innerHTML = esc(m.nombre);
+      bub.appendChild(nm);
+    }
+
+    if(m.mensaje){
+      const tx = document.createElement("div");
+      tx.className = "dm-text";
+      tx.innerHTML = esc(m.mensaje);
+      bub.appendChild(tx);
+    }
+
+    if(m.media){
+      const im = document.createElement("img");
+      im.className = "dm-media";
+      im.src = m.media;
+      bub.appendChild(im);
+    }
+
+    const t = document.createElement("div");
+    t.className = "dm-time";
+    t.textContent = m.fecha;
+    bub.appendChild(t);
+
+    item.appendChild(bub);
+
+    if(isMe){
+      const av = document.createElement("div");
+      av.className = "dm-avatar";
+      av.innerHTML = `<img src="${m.avatar}">`;
+      item.appendChild(av);
+    }
+
+    box.appendChild(item);
+    lastId = Math.max(lastId, m.id);
+  }
+
+  async function poll(){
+    const res = await fetch(`/api/dm/{{conv_id}}/mensajes?after_id=${lastId}`);
+    if(!res.ok) return;
+    const data = await res.json();
+    if(meId === null) meId = data.me;
+
+    (data.messages || []).forEach(addMsg);
+
+    if((data.messages||[]).length){
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+  }
+
+  document.getElementById("sendForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const txt = (document.getElementById("txt").value||"").trim();
+    const file = document.getElementById("file").files[0];
+    if(!txt && !file) return;
+
+    const fd = new FormData(e.target);
+    const res = await fetch(`/api/dm/{{conv_id}}/enviar`, { method:"POST", body: fd });
+
+    if(res.ok){
+      document.getElementById("txt").value = "";
+      document.getElementById("file").value = "";
+      poll();
+    }
+  });
+
+  poll();
+  setInterval(poll, 1500);
+</script>
+
+
+
+</body>
+</html>
