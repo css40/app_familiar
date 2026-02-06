@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shorts</title>
+  <link rel="stylesheet" href="/static/shorts.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">FW</div>
+    <div class="brand-text">
+      <div class="brand-title">Para ti</div>
+      <div class="brand-sub">Shorts de tus grupos</div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <a class="btn" href="/user_home">🏠 Inicio</a>
+    <a class="btn primary" href="/shorts/upload">➕ Subir</a>
+  </div>
+</header>
+
+<main class="feed" id="feed">
+  {% if shorts|length == 0 %}
+    <div style="padding:16px;">No hay shorts todavía. <a class="btn primary" href="/shorts/upload">Subir</a></div>
+  {% endif %}
+
+  {% for s in shorts %}
+  <!-- s: id, video, desc, fecha, nombre, apellido, foto, grupo_nombre, likes -->
+  <section class="short" data-id="{{ s[0] }}">
+    <div class="frame">
+      <!-- muted para autoplay; controls no, porque haremos tap -->
+      <video playsinline muted loop preload="metadata" src="/{{ s[1] }}"></video>
+
+      <div class="grad"></div>
+      <div class="hintTap">⏯️ Tap para pausar</div>
+
+      <div class="actions">
+        <div>
+          <button class="iconBtn likeBtn" title="Me gusta">❤️</button>
+          <div class="count"><span class="likeCount">{{ s[8] }}</span></div>
+        </div>
+
+        <div>
+          <!-- 🔊 sonido -->
+          <button class="iconBtn soundBtn" title="Sonido">🔇</button>
+          <div class="count">Sonido</div>
+        </div>
+
+        <div>
+          <button class="iconBtn shareBtn" title="Copiar link">🔗</button>
+          <div class="count">Link</div>
+        </div>
+      </div>
+
+      <div class="meta">
+        <span class="pill">📌 {{ s[7] }}</span>
+
+        <div class="userRow">
+          <img class="avatar" src="{{ '/' + s[6].replace('\\','/') if s[6] else '/static/default_user.png' }}" alt="">
+          <div class="name">{{ s[4] }} {{ s[5] }}</div>
+        </div>
+
+        {% if s[2] %}
+          <div class="desc">{{ s[2] }}</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </section>
+  {% endfor %}
+</main>
+
+<script>
+  const videos = [...document.querySelectorAll(".frame video")];
+
+  // reproducir el que está visible (muted)
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      const v = e.target;
+      if(e.isIntersecting && e.intersectionRatio > 0.65){
+        videos.forEach(x => { if(x !== v) x.pause(); });
+        v.play().catch(()=>{});
+      } else {
+        v.pause();
+      }
+    });
+  }, { threshold:[0.2,0.65,0.9] });
+
+  videos.forEach(v => io.observe(v));
+
+  // Tap para pausar/reanudar + hint
+  document.querySelectorAll(".frame").forEach(frame=>{
+    const v = frame.querySelector("video");
+    const hint = frame.querySelector(".hintTap");
+
+    frame.addEventListener("click", (ev)=>{
+      // si tocó un botón, no pausar
+      if(ev.target.closest("button")) return;
+
+      if(v.paused){
+        v.play().catch(()=>{});
+        hint.textContent = "▶️ Play";
+      }else{
+        v.pause();
+        hint.textContent = "⏸️ Pausa";
+      }
+      hint.classList.add("show");
+      setTimeout(()=>hint.classList.remove("show"), 650);
+    });
+  });
+
+  // Sonido: solo 1 video con sonido a la vez
+  document.querySelectorAll(".short").forEach(sec=>{
+    const v = sec.querySelector("video");
+    const soundBtn = sec.querySelector(".soundBtn");
+    const shareBtn = sec.querySelector(".shareBtn");
+    const likeBtn = sec.querySelector(".likeBtn");
+    const likeCount = sec.querySelector(".likeCount");
+    const id = sec.dataset.id;
+
+    const refreshIcon = ()=>{
+      soundBtn.textContent = v.muted ? "🔇" : "🔊";
+    };
+    refreshIcon();
+
+soundBtn.addEventListener("click", ()=>{
+  // si está muted, vamos a activar sonido SOLO en este video
+  if (v.muted) {
+    videos.forEach(x => { x.muted = true; x.volume = 1; });
+    v.muted = false;
+    v.volume = 1;
+  } else {
+    // si ya tiene sonido, lo silenciamos
+    v.muted = true;
+  }
+
+  // actualizar iconos en todos
+  document.querySelectorAll(".short").forEach(sec2=>{
+    const vv = sec2.querySelector("video");
+    const bb = sec2.querySelector(".soundBtn");
+    if (bb) bb.textContent = vv.muted ? "🔇" : "🔊";
+  });
+
+  // que siga reproduciendo
+  if (v.paused) v.play().catch(()=>{});
+});
+
+
+    shareBtn.addEventListener("click", async ()=>{
+      const url = location.origin + "/shorts"; // privado
+      try{ await navigator.clipboard.writeText(url); }catch(e){}
+      shareBtn.textContent = "✅";
+      setTimeout(()=> shareBtn.textContent="🔗", 700);
+    });
+
+    likeBtn.addEventListener("click", async ()=>{
+      const r = await fetch(`/shorts/${id}/like`, {method:"POST"});
+      if(!r.ok) return;
+      const data = await r.json();
+      if(data.status === "ok") likeCount.textContent = data.likes;
+    });
+  });
+</script>
+
+</body>
+</html>

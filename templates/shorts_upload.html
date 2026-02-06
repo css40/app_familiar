@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Subir Short</title>
+  <link rel="stylesheet" href="/static/shorts_upload.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="btn" href="/shorts">⬅️ Volver</a>
+  <a class="btn" href="/user_home">🏠 Inicio</a>
+</header>
+
+<main class="page">
+  <div class="card">
+    <h1 class="h1">Subir Short</h1>
+    <div class="sub">Máx 25MB · recomendado 10–30s · mp4/webm/mov</div>
+
+    <form method="POST" enctype="multipart/form-data">
+
+      <!-- GRUPO -->
+      <div class="field">
+        <label>Grupo</label>
+        <select name="grupo_id" required>
+          {% for g in grupos %}
+            <option value="{{ g[0] }}">{{ g[1] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- VIDEO -->
+      <div class="field">
+        <label>Video</label>
+
+        <div class="drop file-picker">
+          <!-- input REAL (oculto) -->
+          <input
+            type="file"
+            id="videoInput"
+            name="video"
+            accept="video/mp4,video/webm,video/quicktime"
+            required
+          >
+
+          <!-- botón bonito -->
+          <button
+            type="button"
+            class="btn ghost file-btn"
+            onclick="document.getElementById('videoInput').click()"
+          >
+            🎬 Seleccionar video
+          </button>
+
+          <!-- nombre archivo -->
+          <div class="file-name" id="fileName">
+            Ningún video seleccionado
+          </div>
+
+          <!-- PREVIEW -->
+            <div class="video-preview hidden" id="previewWrap">
+            <video id="videoPreview" playsinline></video>
+
+            <button
+                type="button"
+                class="preview-play"
+                id="previewPlay"
+            >
+                ▶️
+            </button>
+            </div>
+
+
+          <!-- INFO -->
+          <div class="video-info" id="videoInfo"></div>
+
+          <!-- ERROR -->
+          <div class="video-error" id="videoError"></div>
+          <!-- PROGRESO -->
+            <div class="upload-progress hidden" id="uploadProgress">
+            <div class="bar">
+                <div class="fill" id="uploadFill"></div>
+            </div>
+            <div class="percent" id="uploadPercent">0%</div>
+            </div>
+
+
+          <div class="sub" style="margin-top:8px;">
+            Tip: vertical 9:16 y cortito para que cargue rápido.
+          </div>
+        </div>
+      </div>
+
+      <!-- DESCRIPCIÓN -->
+      <div class="field">
+        <label>Descripción (opcional)</label>
+        <input
+          type="text"
+          name="descripcion"
+          maxlength="120"
+          placeholder="Ej: cumpleaños 🎂"
+        >
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="actions">
+        <a class="btn" href="/shorts">Cancelar</a>
+        <button class="btn primary" type="submit">⬆️ Subir</button>
+      </div>
+
+    </form>
+  </div>
+</main>
+
+<!-- ================= JS ÚNICO ================= -->
+<script>
+  const input = document.getElementById("videoInput");
+  const fileName = document.getElementById("fileName");
+  const previewWrap = document.getElementById("previewWrap");
+  const video = document.getElementById("videoPreview");
+  const info = document.getElementById("videoInfo");
+  const errorBox = document.getElementById("videoError");
+  const submitBtn = document.querySelector("button[type='submit']");
+  const pickBtn = document.querySelector(".file-btn");
+
+  const MAX_MB = 25;
+  const MAX_SECONDS = 30;
+
+  submitBtn.disabled = true;
+
+  const playBtn = document.getElementById("previewPlay");
+
+// toggle play preview
+playBtn.addEventListener("click", ()=>{
+  if (video.paused) {
+    video.play();
+    playBtn.classList.add("hidden");
+  } else {
+    video.pause();
+    playBtn.classList.remove("hidden");
+  }
+});
+
+video.addEventListener("pause", ()=>{
+  playBtn.classList.remove("hidden");
+});
+
+video.addEventListener("play", ()=>{
+  playBtn.classList.add("hidden");
+});
+
+
+  input.addEventListener("change", () => {
+    resetUI();
+
+    if (!input.files.length) return;
+
+    const file = input.files[0];
+    fileName.textContent = file.name;
+
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+    // tamaño
+    if (sizeMB > MAX_MB) {
+      showError(`❌ El video pesa ${sizeMB}MB (máx ${MAX_MB}MB)`);
+      return;
+    }
+
+    // preview
+    const url = URL.createObjectURL(file);
+    video.src = url;
+    previewWrap.classList.remove("hidden");
+
+    video.onloadedmetadata = () => {
+      const duration = video.duration.toFixed(1);
+
+      // duración
+      if (duration > MAX_SECONDS) {
+        showError(`❌ Dura ${duration}s (máx ${MAX_SECONDS}s)`);
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      info.innerHTML = `
+        ⏱️ Duración: <b>${duration}s</b> ·
+        📦 Tamaño: <b>${sizeMB} MB</b>
+      `;
+
+      submitBtn.disabled = false;
+    };
+  });
+
+  function showError(msg){
+    errorBox.textContent = msg;
+    pickBtn.classList.add("error");
+    submitBtn.disabled = true;
+  }
+
+  function resetUI(){
+    previewWrap.classList.add("hidden");
+    info.textContent = "";
+    errorBox.textContent = "";
+    pickBtn.classList.remove("error");
+    submitBtn.disabled = true;
+  }
+
+  const form = document.querySelector("form");
+const progressWrap = document.getElementById("uploadProgress");
+const progressFill = document.getElementById("uploadFill");
+const progressText = document.getElementById("uploadPercent");
+
+form.addEventListener("submit", (e)=>{
+  e.preventDefault();
+
+  const fd = new FormData(form);
+  const xhr = new XMLHttpRequest();
+
+  xhr.open("POST", window.location.href);
+
+  progressWrap.classList.remove("hidden");
+  submitBtn.disabled = true;
+
+  xhr.upload.onprogress = (e)=>{
+    if (!e.lengthComputable) return;
+    const percent = Math.round((e.loaded / e.total) * 100);
+    progressFill.style.width = percent + "%";
+    progressText.textContent = percent + "%";
+  };
+
+  xhr.onload = ()=>{
+    if (xhr.status === 200 || xhr.status === 302) {
+      progressText.textContent = "✅ Subido";
+      window.location.href = "/shorts";
+    } else {
+      showError("❌ Error al subir el video");
+      submitBtn.disabled = false;
+    }
+  };
+
+  xhr.onerror = ()=>{
+    showError("❌ Error de red");
+    submitBtn.disabled = false;
+  };
+
+  xhr.send(fd);
+});
+
+</script>
+
+</body>
+</html>

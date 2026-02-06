@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session , jsonify
+from flask import Flask, render_template, request, redirect, session , jsonify , abort
 import sqlite3
 import os
 import uuid 
@@ -10,6 +10,8 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 usuarios_activos = set()
 app.secret_key = "supersecretkey"
+app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024  # 25 MB máximo
+
 
 
 def marcar_activo(user_id, estado):
@@ -25,6 +27,12 @@ UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+UPLOAD_SHORTS = os.path.join(app.config['UPLOAD_FOLDER'], 'shorts')
+os.makedirs(UPLOAD_SHORTS, exist_ok=True)
+
+ALLOWED_SHORT_EXT = {".mp4", ".webm", ".mov"}
+
+
 def db():
     return sqlite3.connect("database.db", timeout=20)
 
@@ -39,6 +47,43 @@ def es_miembro(conn, grupo_id, user_id):
 # carpeta para multimedia del chat
 UPLOAD_CHAT = os.path.join(app.config['UPLOAD_FOLDER'], 'chat')
 os.makedirs(UPLOAD_CHAT, exist_ok=True)
+
+with sqlite3.connect('database.db') as conn:
+    c = conn.cursor()
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS shorts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        grupo_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        video TEXT NOT NULL,
+        descripcion TEXT,
+        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS short_likes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        short_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(short_id, user_id)
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS short_comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        short_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        texto TEXT NOT NULL,
+        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    conn.commit()
+
 
 with sqlite3.connect('database.db') as conn:
     c = conn.cursor()
@@ -1424,6 +1469,133 @@ def inbox():
         chats = c.fetchall()
 
     return render_template("inbox.html", chats=chats)
+
+
+@app.route("/shorts")
+def shorts_feed():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user_id = session["user_id"]
+
+    with sqlite3.connect("database.db", timeout=20) as conn:
+        c = conn.cursor()
+
+        # grupos donde soy miembro
+        c.execute("SELECT grupo_id FROM grupos_miembros WHERE user_id=?", (user_id,))
+        mis_grupos = [r[0] for r in c.fetchall()]
+
+        if not mis_grupos:
+            shorts = []
+        else:
+            placeholders = ",".join(["?"] * len(mis_grupos))
+
+            c.execute(f"""
+                SELECT s.id, s.video, COALESCE(s.descripcion,''), s.fecha,
+                       u.nombre, COALESCE(u.apellido,''), COALESCE(u.foto,''),
+                       g.nombre,
+                       (SELECT COUNT(*) FROM short_likes WHERE short_id=s.id) AS likes
+                FROM shorts s
+                JOIN users u ON u.id = s.user_id
+                JOIN grupos g ON g.id = s.grupo_id
+                WHERE s.grupo_id IN ({placeholders})
+                ORDER BY s.id DESC
+                LIMIT 80
+            """, mis_grupos)
+
+            shorts = c.fetchall()
+
+    return render_template("shorts_feed.html", shorts=shorts)
+   
+@app.route("/shorts/upload", methods=["GET", "POST"])
+def shorts_upload():
+    if "user_id" not in session:
+        return redirect("/login")
+
+    user_id = session["user_id"]
+
+    with sqlite3.connect("database.db", timeout=20) as conn:
+        c = conn.cursor()
+
+        # traer grupos donde soy miembro (para elegir)
+        c.execute("""
+            SELECT g.id, g.nombre
+            FROM grupos g
+            JOIN grupos_miembros gm ON gm.grupo_id = g.id
+            WHERE gm.user_id=?
+            ORDER BY g.id DESC
+        """, (user_id,))
+        mis_grupos = c.fetchall()
+
+    if request.method == "GET":
+        return render_template("shorts_upload.html", grupos=mis_grupos)
+
+    grupo_id = int(request.form.get("grupo_id"))
+    desc = (request.form.get("descripcion") or "").strip()
+    f = request.files.get("video")
+
+    if not f or f.filename == "":
+        return "Subí un video"
+
+    ext = os.path.splitext(f.filename)[1].lower()
+    if ext not in ALLOWED_SHORT_EXT:
+        return "Formato inválido (mp4/webm/mov)"
+
+    # seguridad: verificar que sea miembro del grupo
+    with sqlite3.connect("database.db", timeout=20) as conn:
+        if not es_miembro(conn, grupo_id, user_id):
+            return "No eres miembro de ese grupo", 403
+
+    # guardar archivo
+    filename = secure_filename(f"{uuid.uuid4().hex}{ext}")
+    save_path = os.path.join(UPLOAD_SHORTS, filename)
+    f.save(save_path)
+
+    video_rel = save_path.replace("\\", "/")  # "static/uploads/shorts/..."
+
+    with sqlite3.connect("database.db", timeout=20) as conn:
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO shorts (grupo_id, user_id, video, descripcion)
+            VALUES (?,?,?,?)
+        """, (grupo_id, user_id, video_rel, desc))
+        conn.commit()
+
+    return redirect("/shorts")
+@app.post("/shorts/<int:short_id>/like")
+def short_like(short_id):
+    if "user_id" not in session:
+        return jsonify({"status":"noauth"}), 401
+
+    user_id = session["user_id"]
+
+    with sqlite3.connect("database.db", timeout=20) as conn:
+        c = conn.cursor()
+
+        # seguridad: el short debe ser de un grupo donde soy miembro
+        c.execute("SELECT grupo_id FROM shorts WHERE id=?", (short_id,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"status":"notfound"}), 404
+
+        grupo_id = row[0]
+        if not es_miembro(conn, grupo_id, user_id):
+            return jsonify({"status":"forbidden"}), 403
+
+        c.execute("SELECT 1 FROM short_likes WHERE short_id=? AND user_id=?", (short_id, user_id))
+        if c.fetchone():
+            c.execute("DELETE FROM short_likes WHERE short_id=? AND user_id=?", (short_id, user_id))
+            liked = False
+        else:
+            c.execute("INSERT OR IGNORE INTO short_likes (short_id, user_id) VALUES (?,?)", (short_id, user_id))
+            liked = True
+
+        c.execute("SELECT COUNT(*) FROM short_likes WHERE short_id=?", (short_id,))
+        likes = c.fetchone()[0]
+
+        conn.commit()
+
+    return jsonify({"status":"ok", "liked": liked, "likes": likes})
 
 # =====================
 # --- INICIAR SERVIDOR ---
