@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{{ grupo_nombre }}</title>
   <link rel="stylesheet" href="/static/grupodetalle.css">
+  <link rel="stylesheet" href="/static/comments.css">
 </head>
 
 <body>
@@ -132,6 +133,15 @@
               😡 <span class="count">{{ post_reacciones.get(p[0], {}).get('enoja', 0) }}</span>
             </button>
           </div>
+        </div>
+
+        <!-- Comentarios -->
+        <div class="comments" id="comments-{{ p[0] }}">
+          <div class="comments-list"></div>
+          <form class="comment-form" data-post="{{ p[0] }}">
+            <input type="text" name="texto" placeholder="Escribí un comentario..." required>
+            <button type="submit" class="btn">Comentar</button>
+          </form>
         </div>
 
       </article>
@@ -479,6 +489,63 @@
   });
 </script>
 
+<script>
+  async function loadCommentsFor(postId){
+    try{
+      const res = await fetch(`/group_post/${postId}/comments`);
+      if(!res.ok) return;
+      const data = await res.json();
+      const list = document.querySelector(`#comments-${postId} .comments-list`);
+      if(!list) return;
+      list.innerHTML = '';
+      data.comments.forEach(c => {
+        const d = document.createElement('div');
+        d.className = 'comment';
+        d.innerHTML = `<img class="avatar" src="${c.avatar}"/><div class="cbody"><div class="who">${c.nombre}</div><div class="text">${c.texto}</div><div class="time">${c.created_at}</div></div>`;
+        list.appendChild(d);
+      });
+    }catch(e){ console.error(e); }
+  }
+
+  document.querySelectorAll('.comment-form').forEach(form => {
+    const postId = form.dataset.post;
+    loadCommentsFor(postId);
+
+    form.addEventListener('submit', async (ev)=>{
+      ev.preventDefault();
+      const fd = new FormData(form);
+      const texto = fd.get('texto') || '';
+      if(texto.trim().length === 0) return;
+      const res = await fetch(`/group_post/${postId}/comment`, { method:'POST', body: fd });
+      if(res.ok){
+        form.querySelector('input[name="texto"]').value = '';
+        loadCommentsFor(postId);
+      } else if(res.status === 401){
+        alert('Inicia sesión para comentar');
+      }
+    });
+  });
+</script>
+
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+  try{
+    const socket = io();
+    socket.on('connect', ()=>{});
+    socket.on('new_comment', data=>{
+      if(!data || !data.post_id) return;
+      const list = document.querySelector(`#comments-${data.post_id} .comments-list`);
+      if(!list) return;
+      const actor = data.actor || {};
+      const name = ((actor.nombre||'') + (actor.apellido?(' '+actor.apellido):'')).trim();
+      const avatar = actor.foto ? ('/'+actor.foto.replace('\\','/')) : '/static/default_user.png';
+      const d = document.createElement('div');
+      d.className = 'comment';
+      d.innerHTML = `<img class="avatar" src="${avatar}"/><div class="cbody"><div class="who">${name}</div><div class="text">${data.texto}</div></div>`;
+      list.appendChild(d);
+    });
+  }catch(e){ console.error(e); }
+</script>
 
   </main>
 </body>

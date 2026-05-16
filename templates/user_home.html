@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Usuario Home</title>
   <link rel="stylesheet" href="/static/user_home.css">
+  <link rel="stylesheet" href="/static/comments.css">
 </head>
 
 <body>
@@ -27,9 +28,7 @@
 
 
   <a class="btn ghost" href="/notificaciones">
-    🔔 {% if notif_count > 0 %}
-      <span class="badge">{{ notif_count }}</span>
-    {% endif %}
+    🔔 <span id="notif-badge">{% if notif_count > 0 %}{{ notif_count }}{% else %}{% endif %}</span>
   </a>
 
   <a class="btn primary" href="/profile">Mi perfil</a>
@@ -59,6 +58,26 @@
         </div>
       </div>
     </section>
+
+  <script>
+    async function pollNotifCount(){
+      try{
+        const res = await fetch('/api/notificaciones/count');
+        if(!res.ok) return;
+        const data = await res.json();
+        const el = document.getElementById('notif-badge');
+        if(!el) return;
+        if(data.count && data.count > 0){
+          el.textContent = data.count;
+        } else {
+          el.textContent = '';
+        }
+      }catch(e){ }
+    }
+
+    setInterval(pollNotifCount, 5000);
+    window.addEventListener('load', pollNotifCount);
+  </script>
 
     <!-- Layout -->
     <section class="grid">
@@ -194,12 +213,39 @@
                   </button>
                 </div>
               </div>
+
+              <!-- Comentarios para el tweet -->
+              <div class="comments" id="comments-{{ tweet[0] }}">
+                <div class="comments-list"></div>
+                <form class="comment-form" data-tweet="{{ tweet[0] }}">
+                  <input type="text" name="texto" placeholder="Comentar..." required>
+                  <button type="submit" class="btn">Comentar</button>
+                </form>
+              </div>
             </article>
           {% endfor %}
         </div>
       </div>
     </section>
   </main>
+
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+  try{
+    window.socket = io();
+    window.socket.on('connect', ()=>{
+      window.socket.emit('identify', {user_id: {{ user_id }} });
+    });
+
+    window.socket.on('new_notification', data=>{
+      if(!data || data.user_id !== {{ user_id }}) return;
+      const el = document.getElementById('notif-badge');
+      if(!el) return;
+      const cur = parseInt(el.textContent) || 0;
+      el.textContent = cur + 1;
+    });
+  }catch(e){ console.error(e); }
+</script>
 
   <script>
     // Reacciones (tu lógica, solo cambié spans por botones)
@@ -266,6 +312,57 @@
         sugerenciasDiv.style.display = "none";
       }
     });
+  </script>
+
+  <script>
+    // Comentarios: carga y envío
+    async function loadTweetComments(tweetId){
+      try{
+        const res = await fetch(`/tweet/${tweetId}/comments`);
+        if(!res.ok) return;
+        const data = await res.json();
+        const container = document.querySelector(`#comments-${tweetId} .comments-list`);
+        if(!container) return;
+        container.innerHTML = '';
+        data.comments.forEach(c=>{
+          const d = document.createElement('div');
+          d.className = 'comment';
+          d.innerHTML = `<img class="avatar" src="${c.avatar}"/><div class="cbody"><div class="who">${c.nombre}</div><div class="text">${c.texto}</div></div>`;
+          container.appendChild(d);
+        });
+      }catch(e){console.error(e)}
+    }
+
+    document.querySelectorAll('.comment-form').forEach(form=>{
+      const tweetId = form.dataset.tweet;
+      loadTweetComments(tweetId);
+      form.addEventListener('submit', async ev=>{
+        ev.preventDefault();
+        const fd = new FormData(form);
+        const res = await fetch(`/tweet/${tweetId}/comment`, { method:'POST', body: fd });
+        if(res.ok){
+          form.querySelector('input[name="texto"]').value = '';
+          loadTweetComments(tweetId);
+        } else if(res.status === 401){
+          alert('Inicia sesión para comentar');
+        }
+      });
+    });
+
+    try{
+      window.socket.on('new_tweet_comment', data=>{
+        if(!data || !data.tweet_id) return;
+        const list = document.querySelector(`#comments-${data.tweet_id} .comments-list`);
+        if(!list) return;
+        const actor = data.actor || {};
+        const name = ((actor.nombre||'') + (actor.apellido?(' '+actor.apellido):'')).trim();
+        const avatar = actor.foto ? ('/'+actor.foto.replace('\\','/')) : '/static/default_user.png';
+        const d = document.createElement('div');
+        d.className = 'comment';
+        d.innerHTML = `<img class="avatar" src="${avatar}"/><div class="cbody"><div class="who">${name}</div><div class="text">${data.texto}</div></div>`;
+        list.appendChild(d);
+      });
+    }catch(e){ }
   </script>
 </body>
 </html>

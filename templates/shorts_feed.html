@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Shorts</title>
   <link rel="stylesheet" href="/static/shorts.css">
+  <link rel="stylesheet" href="/static/comments.css">
 </head>
 <body>
 
@@ -54,6 +55,11 @@
           <button class="iconBtn shareBtn" title="Copiar link">🔗</button>
           <div class="count">Link</div>
         </div>
+
+        <div>
+          <button class="iconBtn commentToggle" title="Comentar">💬</button>
+          <div class="count">Comentar</div>
+        </div>
       </div>
 
       <div class="meta">
@@ -69,10 +75,38 @@
         {% endif %}
       </div>
 
+      <div class="short-comments" id="short-comments-{{ s[0] }}" style="display:none; padding:8px;">
+        <div class="comments-list"></div>
+        <form class="short-comment-form" data-short="{{ s[0] }}">
+          <input type="text" name="texto" placeholder="Comentar..." required>
+          <button type="submit" class="btn">OK</button>
+        </form>
+      </div>
+
     </div>
   </section>
   {% endfor %}
 </main>
+
+<!-- Modal estilo TikTok para comentarios (un solo modal reutilizable) -->
+<div id="short-comments-modal" class="shorts-modal" style="display:none;">
+  <div class="shorts-modal-overlay" data-close></div>
+  <div class="shorts-modal-panel">
+    <div class="modal-header">
+      <button class="close-btn" data-close>✕</button>
+      <div class="modal-title">Comentarios</div>
+    </div>
+    <div class="modal-body">
+      <div class="comments-list"></div>
+    </div>
+    <div class="modal-footer">
+      <form id="short-modal-form">
+        <input id="short-modal-input" type="text" name="texto" placeholder="Añadir un comentario..." autocomplete="off" required>
+        <button id="short-modal-submit" class="btn">Enviar</button>
+      </form>
+    </div>
+  </div>
+</div>
 
 <script>
   const videos = [...document.querySelectorAll(".frame video")];
@@ -164,6 +198,127 @@ soundBtn.addEventListener("click", ()=>{
       if(data.status === "ok") likeCount.textContent = data.likes;
     });
   });
+
+  // Comments for shorts
+  async function loadShortComments(shortId){
+    try{
+      const res = await fetch(`/shorts/${shortId}/comments`);
+      if(!res.ok) return;
+      const data = await res.json();
+      const container = document.querySelector(`#short-comments-${shortId} .comments-list`);
+      if(!container) return;
+      container.innerHTML = '';
+      data.comments.forEach(c=>{
+        const d = document.createElement('div');
+        d.className = 'comment';
+        d.innerHTML = `<img class="avatar" src="${c.avatar}"/><div class="cbody"><div class="who">${c.nombre}</div><div class="text">${c.texto}</div></div>`;
+        container.appendChild(d);
+      });
+    }catch(e){console.error(e)}
+  }
+
+  // Modal estilo TikTok: apertura, carga y envío de comentarios
+  window.currentShortId = null;
+  const modal = document.getElementById('short-comments-modal');
+  const modalList = modal.querySelector('.comments-list');
+  const modalForm = document.getElementById('short-modal-form');
+  const modalInput = document.getElementById('short-modal-input');
+
+  function openShortModal(id){
+    window.currentShortId = id;
+    modal.style.display = 'flex';
+    // trigger enter animation
+    requestAnimationFrame(()=> modal.classList.add('show'));
+    document.body.style.overflow = 'hidden';
+    modalList.innerHTML = '';
+    loadShortCommentsToModal(id);
+    modalInput.focus();
+  }
+
+  function closeShortModal(){
+    // animate out
+    modal.classList.remove('show');
+    setTimeout(()=>{
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      window.currentShortId = null;
+      modalList.innerHTML = '';
+    }, 240);
+  }
+
+  // attach open handlers
+  document.querySelectorAll('.commentToggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const sec = btn.closest('.short');
+      const id = sec.dataset.id;
+      openShortModal(id);
+    });
+  });
+
+  // close on overlay or close button
+  modal.querySelectorAll('[data-close]').forEach(el=> el.addEventListener('click', closeShortModal));
+
+  async function loadShortCommentsToModal(shortId){
+    try{
+      const res = await fetch(`/shorts/${shortId}/comments`);
+      if(!res.ok) return;
+      const data = await res.json();
+      modalList.innerHTML = '';
+      data.comments.forEach(c=>{
+        const d = document.createElement('div');
+        d.className = 'comment';
+        d.innerHTML = `<img class="avatar" src="${c.avatar}"/><div class="cbody"><div class="who">${c.nombre}</div><div class="text">${c.texto}</div></div>`;
+        modalList.appendChild(d);
+      });
+      // scroll to bottom
+      modal.querySelector('.modal-body').scrollTop = modal.querySelector('.modal-body').scrollHeight;
+    }catch(e){console.error(e)}
+  }
+
+  // submit desde modal
+  modalForm.addEventListener('submit', async ev=>{
+    ev.preventDefault();
+    if(!window.currentShortId) return;
+    const fd = new FormData(modalForm);
+    const res = await fetch(`/shorts/${window.currentShortId}/comment`, { method:'POST', body: fd });
+    if(res.ok){
+      modalForm.querySelector('input[name="texto"]').value = '';
+      loadShortCommentsToModal(window.currentShortId);
+    } else if(res.status === 401){
+      alert('Inicia sesión para comentar');
+      closeShortModal();
+    }
+  });
+</script>
+
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+  try{
+    const socket = io();
+    socket.on('connect', ()=>{});
+    socket.on('new_short_comment', data=>{
+      if(!data || !data.short_id) return;
+      // if modal open for this short, append there
+      const modal = document.getElementById('short-comments-modal');
+      const modalOpen = modal.style.display !== 'none' && window.currentShortId == data.short_id;
+      const actor = data.actor || {};
+      const name = ((actor.nombre||'') + (actor.apellido?(' '+actor.apellido):'')).trim();
+      const avatar = actor.foto ? ('/'+actor.foto.replace('\\','/')) : '/static/default_user.png';
+      const d = document.createElement('div');
+      d.className = 'comment';
+      d.innerHTML = `<img class="avatar" src="${avatar}"/><div class="cbody"><div class="who">${name}</div><div class="text">${data.texto}</div></div>`;
+      if(modalOpen){
+        const ml = modal.querySelector('.comments-list');
+        ml.appendChild(d);
+        // autoscroll
+        modal.querySelector('.modal-body').scrollTop = modal.querySelector('.modal-body').scrollHeight;
+      } else {
+        // fallback: append to inline container if present
+        const list = document.querySelector(`#short-comments-${data.short_id} .comments-list`);
+        if(list) list.appendChild(d);
+      }
+    });
+  }catch(e){ console.error(e); }
 </script>
 
 </body>
