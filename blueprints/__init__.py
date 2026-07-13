@@ -4,6 +4,7 @@ from .user import user_bp
 from .groups import groups_bp
 from .chat import chat_bp
 from .shorts import shorts_bp
+from .reports import report_bp
 
 __all__ = [
     "auth_bp",
@@ -12,4 +13,5 @@ __all__ = [
     "groups_bp",
     "chat_bp",
     "shorts_bp",
+    "report_bp",
 ]

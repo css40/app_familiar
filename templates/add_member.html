@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agregar integrante</title>
-  <link rel="stylesheet" href="/static/add_member.css">
+  <link rel="stylesheet" href="/static/admin.css">
 </head>
 
 <body>
@@ -75,6 +75,16 @@
           <div class="field">
             <label>Teléfono</label>
             <input type="text" name="telefono">
+          </div>
+
+          <div class="field admin-toggle">
+            <label>Administrador</label>
+            <label class="switch"><input type="checkbox" name="is_admin"><span class="slider"></span></label>
+          </div>
+
+          <div class="field admin-toggle">
+            <label>Activo</label>
+            <label class="switch"><input type="checkbox" name="activo" checked><span class="slider"></span></label>
           </div>
         </div>
 

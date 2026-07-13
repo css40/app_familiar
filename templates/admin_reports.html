@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reportes del sistema</title>
+  <link rel="stylesheet" href="/static/admin.css" />
+  <link rel="stylesheet" href="/static/admin_extra.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">FW</div>
+      <div class="brand-text">
+        <div class="brand-title">Reportes de usuarios</div>
+        <div class="brand-sub">Administra los estados y responde</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn ghost" href="/admin_home">← Panel</a>
+      <a class="btn danger" href="/logout">Cerrar sesión</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="card">
+      <div class="hero" style="padding:18px; margin-bottom:16px; gap:14px;">
+        <div>
+          <h2>Reportes recientes</h2>
+          <p style="color: rgba(255,255,255,.75); margin:8px 0 0;">Controlá estados y asigná respuestas rápidas.</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <span class="badge">Total: {{ reportes|length }}</span>
+          <span class="badge">Pendientes: {{ pendientes }}</span>
+          <span class="badge">En progreso: {{ en_progreso }}</span>
+          <span class="badge">Resueltos: {{ resueltos }}</span>
+        </div>
+      </div>
+      <div class="report-list">
+        {% if reportes %}
+          {% for r in reportes %}
+            <div class="report-card {{ r[4] }}">
+              <div class="report-header">
+                <div>
+                  <strong>{{ r[1] }}</strong>
+                  <div class="report-meta">De {{ r[6] }} · {{ r[5] }}</div>
+                </div>
+                <span class="badge">{{ r[4] }}</span>
+              </div>
+              <p>{{ r[2] }}</p>
+              <div class="report-actions">
+                <a class="btn ghost" href="/admin/reporte/{{ r[0] }}/pendiente">Pendiente</a>
+                <a class="btn ghost" href="/admin/reporte/{{ r[0] }}/en_progreso">En progreso</a>
+                <a class="btn ghost" href="/admin/reporte/{{ r[0] }}/resuelto">Resuelto</a>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>No hay reportes aún.</p>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</body>
+</html>

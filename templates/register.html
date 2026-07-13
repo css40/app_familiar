@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro</title>
+  <link rel="stylesheet" href="/static/login.css">
+</head>
+
+<body>
+  <main class="login-page">
+    <div class="login-card">
+      <div class="login-head">
+        <h1>Crear cuenta</h1>
+        <p>Registrate y personaliza tu perfil.</p>
+      </div>
+
+      {% if error %}
+        <div class="alert">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data" class="login-form">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" name="nombre" required />
+        </div>
+        <div class="field">
+          <label>Apellido</label>
+          <input type="text" name="apellido" required />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" required />
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <input type="password" name="password" required />
+        </div>
+        <div class="field">
+          <label>Foto de perfil</label>
+          <input type="file" name="foto" accept="image/*" />
+        </div>
+        <button type="submit" class="btn primary">Registrarme</button>
+      </form>
+
+      <div class="login-footer">
+        <span>¿Ya tenés cuenta?</span>
+        <a href="/login">Iniciar sesión</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

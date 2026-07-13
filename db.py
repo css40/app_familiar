@@ -10,6 +10,13 @@ def get_db():
     return sqlite3.connect(DB_PATH, timeout=20)
 
 
+def ensure_column_exists(cursor, table, column_name, definition):
+    cursor.execute(f"PRAGMA table_info({table})")
+    columns = [row[1] for row in cursor.fetchall()]
+    if column_name not in columns:
+        cursor.execute(f"ALTER TABLE {table} ADD COLUMN {definition}")
+
+
 def init_db():
     """Create required tables if they don't exist yet."""
     with get_db() as conn:
@@ -33,6 +40,8 @@ def init_db():
                 activo INTEGER DEFAULT 0
             )
         ''')
+
+        ensure_column_exists(c, 'users', 'is_admin', 'is_admin INTEGER DEFAULT 0')
 
         c.execute('''
             CREATE TABLE IF NOT EXISTS user_photos (
@@ -208,8 +217,24 @@ def init_db():
         ''')
 
         c.execute('''
-            INSERT OR IGNORE INTO users (nombre, apellido, email, password)
-            VALUES ('Jhos', 'Admin', 'jhos@admin.com', 'admin123')
+            CREATE TABLE IF NOT EXISTS reportes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                titulo TEXT NOT NULL,
+                descripcion TEXT NOT NULL,
+                tipo TEXT DEFAULT 'error',
+                estado TEXT DEFAULT 'pendiente',
+                creado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                actualizado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            )
         ''')
+
+        c.execute('''
+            INSERT OR IGNORE INTO users (nombre, apellido, email, password, is_admin)
+            VALUES ('Jhos', 'Admin', 'jhos@admin.com', 'admin123', 1)
+        ''')
+        c.execute("UPDATE users SET is_admin=1 WHERE email='jhos@admin.com'")
+        c.execute("UPDATE users SET activo=1 WHERE email='jhos@admin.com'")
 
         conn.commit()

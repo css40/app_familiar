@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Usuario Home</title>
   <link rel="stylesheet" href="/static/user_home.css">
-  <link rel="stylesheet" href="/static/comments.css">
 </head>
 
 <body>
@@ -19,28 +18,39 @@
       </div>
     </div>
 
-<div class="top-actions">
-  <a class="btn ghost" href="/members_view">Integrantes</a>
-  <a class="btn ghost" href="/grupos">Grupos</a>
-  <a class="btn ghost" href="/inbox">💬Chats</a>
-  <a class="btn ghost" href="/shorts">🎬 Shorts</a>
+    <div class="top-actions">
+      <a class="btn ghost" href="/members_view">👥 Integrantes</a>
+      <a class="btn ghost" href="/grupos">🧩 Grupos</a>
+      <a class="btn ghost" href="/inbox">💬 Chats</a>
+      <a class="btn ghost" href="/shorts">🎬 Shorts</a>
+      <a class="btn ghost" href="/reportar">🐞 Reportar</a>
 
+      {% if session.get('is_admin') == 1 %}
+      <a class="btn ghost" href="/admin_home">🛠️ Panel admin</a>
+      {% endif %}
 
+      <a class="btn ghost" href="/notificaciones">
+        🔔 <span id="notif-badge">{% if notif_count > 0 %}{{ notif_count }}{% else %}{% endif %}</span>
+      </a>
 
-  <a class="btn ghost" href="/notificaciones">
-    🔔 <span id="notif-badge">{% if notif_count > 0 %}{{ notif_count }}{% else %}{% endif %}</span>
-  </a>
-
-  <a class="btn primary" href="/profile">Mi perfil</a>
-  <a class="btn danger" href="/logout">Cerrar sesión</a>
-
-
-
-</div>
-
+      <a class="btn primary" href="/profile">👤 Mi perfil</a>
+      <a class="btn danger" href="/logout">Cerrar sesión</a>
+    </div>
   </header>
 
   <main class="page">
+    {% if session.get('is_admin') == 1 %}
+    <section class="admin-callout">
+      <div class="card admin-card">
+        <div>
+          <h2>Acceso rápido a administración</h2>
+          <p>Como administrador tienes acceso directo al panel. Haz clic aquí para gestionarlo.</p>
+        </div>
+        <a class="btn primary" href="/admin_home">🛠️ Ir al Panel admin</a>
+      </div>
+    </section>
+    {% endif %}
+
     <!-- Welcome card -->
     <section class="welcome">
       <div class="welcome-left">

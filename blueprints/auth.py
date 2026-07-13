@@ -21,9 +21,12 @@ def login():
             session["user_id"] = user[0]
             session["nombre"] = user[1]
             session["email"] = user[3]
+            session["is_admin"] = user[14] if len(user) > 14 else 0
+            if session["is_admin"] != 1 and user[3] == "jhos@admin.com":
+                session["is_admin"] = 1
             marcar_activo(user[0], 1)
 
-            if email == "jhos@admin.com":
+            if session.get("is_admin") == 1:
                 return redirect("/admin_home")
             return redirect("/user_home")
 

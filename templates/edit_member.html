@@ -4,11 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Editar integrante</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='edit_member.css') }}">
-</head>
-
-<body>
-  <!-- TOPBAR -->
+  <link rel="stylesheet" href="/static/admin.css">
   <header class="topbar">
     <div class="brand">
       <img src="/static/login.png" class="brand-logo" alt="Logo">
@@ -79,6 +75,16 @@
           <div class="field">
             <label>Dirección</label>
             <input type="text" name="direccion" value="{{ integrante[10] or '' }}">
+          </div>
+
+          <div class="field">
+            <label>Administrador</label>
+            <label class="switch"><input type="checkbox" name="is_admin" {% if integrante[14] == 1 %}checked{% endif %}><span class="slider"></span></label>
+          </div>
+
+          <div class="field">
+            <label>Activo</label>
+            <label class="switch"><input type="checkbox" name="activo" {% if integrante[13] == 1 %}checked{% endif %}><span class="slider"></span></label>
           </div>
         </div>
 

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportar problema</title>
+  <link rel="stylesheet" href="/static/profile.css">
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">FW</div>
+      <div class="brand-text">
+        <div class="brand-title">Enviar reporte</div>
+        <div class="brand-sub">Reportá errores o fallas técnicas</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn ghost" href="/user_home">← Volver</a>
+      <a class="btn danger" href="/logout">Cerrar sesión</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <form method="POST" class="card form-card">
+      <h2 class="section-title">Nuevo reporte</h2>
+      <div class="grid">
+        <div class="field full">
+          <label>Título</label>
+          <input type="text" name="titulo" placeholder="Resumen breve" required />
+        </div>
+        <div class="field full">
+          <label>Tipo</label>
+          <select name="tipo">
+            <option value="error">Error técnico</option>
+            <option value="mejora">Mejora</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Descripción</label>
+          <textarea name="descripcion" rows="6" placeholder="Contá qué sucede en detalle" required></textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn ghost" href="/user_home">Cancelar</a>
+        <button type="submit" class="btn primary">Enviar reporte</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mi perfil</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil</title>
   <link rel="stylesheet" href="/static/profile.css">
 </head>
 
@@ -32,7 +32,7 @@
       <div class="profile-card">
         <div class="avatar-wrap">
           {% if integrante[8] and integrante[8] != "" %}
-            <img src="{{ integrante[8] }}" class="avatar">
+            <img src="/{{ integrante[8] }}" class="avatar">
           {% else %}
             <img src="/static/default_user.png" class="avatar">
           {% endif %}

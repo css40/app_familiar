@@ -1,6 +1,6 @@
 from flask import Flask
 from db import init_db
-from blueprints import auth_bp, admin_bp, user_bp, groups_bp, chat_bp, shorts_bp
+from blueprints import auth_bp, admin_bp, user_bp, groups_bp, chat_bp, shorts_bp, report_bp
 from extensions import socketio
 import socket_events  # register socket handlers
 
@@ -23,6 +23,7 @@ app.register_blueprint(user_bp)
 app.register_blueprint(groups_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(shorts_bp)
+app.register_blueprint(report_bp)
 
 if __name__ == '__main__':
     # Run with socketio for realtime

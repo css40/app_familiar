@@ -48,8 +48,12 @@
           <div class="stat-label">Activos</div>
         </div>
         <div class="stat">
-          <div class="stat-num">🏠</div>
-          <div class="stat-label">{{ nombre_familia }}</div>
+          <div class="stat-num">{{ total_reports }}</div>
+          <div class="stat-label">Reportes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">{{ total_groups }}</div>
+          <div class="stat-label">Grupos</div>
         </div>
       </div>
     </section>
@@ -135,6 +139,15 @@
           <p>Gestionar grupos familiares</p>
         </div>
         <span class="badge">Social</span>
+      </a>
+
+      <a class="quick-card" href="/admin/reports">
+        <div class="qc-ico">📝</div>
+        <div class="qc-text">
+          <h3>Reportes</h3>
+          <p>Ver reportes técnicos</p>
+        </div>
+        <span class="badge">Admin</span>
       </a>
 
       <a class="quick-card" href="/admin/config">
