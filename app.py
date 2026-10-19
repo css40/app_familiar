@@ -25,6 +25,9 @@ app.register_blueprint(chat_bp)
 app.register_blueprint(shorts_bp)
 app.register_blueprint(report_bp)
 
+# Envuelve tu aplicación Flask con el middleware WSGI/ASGI de socketio para Uvicorn
+# Esto crea una aplicación compatible que Uvicorn puede ejecutar correctamente:
+app_asgi = socketio.WSGIApp(socketio, app)
+
 if __name__ == '__main__':
-    # Esto solo se ejecutará cuando corras 'python app.py' en tu computadora local
     socketio.run(app, host="0.0.0.0", port=5000)
