@@ -26,5 +26,5 @@ app.register_blueprint(shorts_bp)
 app.register_blueprint(report_bp)
 
 if __name__ == '__main__':
-    # Run with socketio for realtime
+    # Esto solo se ejecutará cuando corras 'python app.py' en tu computadora local
     socketio.run(app, host="0.0.0.0", port=5000)
