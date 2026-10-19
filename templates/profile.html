@@ -2,42 +2,32 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Mi perfil</title>
+  <link rel="stylesheet" href="/static/base.css">
   <link rel="stylesheet" href="/static/profile.css">
 </head>
-
 <body>
-  <!-- Topbar -->
   <header class="topbar">
-    <div class="brand">
-      <div class="logo">FW</div>
-      <div class="brand-text">
-        <div class="brand-title">Mi perfil</div>
-        <div class="brand-sub">Editá tu información personal</div>
-      </div>
+    <a class="icon-btn" href="/user_home" aria-label="Volver al inicio" title="Volver al inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Mi perfil</h1>
+      <span>Edita tu información personal</span>
     </div>
-
-    <div class="top-actions">
-      <a class="btn ghost" href="/user_home">← Home</a>
-      <a class="btn danger" href="/logout">Cerrar sesión</a>
-    </div>
+    <div class="top-actions"><a class="btn small danger" href="/logout">Cerrar sesión</a></div>
   </header>
 
   <main class="page">
-    <!-- Header perfil -->
-    <section class="profile-header">
+    <!-- Cabecera del perfil -->
+    <section class="profile-hero card">
       <div class="cover"></div>
-
-      <div class="profile-card">
-        <div class="avatar-wrap">
-          {% if integrante[8] and integrante[8] != "" %}
-            <img src="/{{ integrante[8] }}" class="avatar">
-          {% else %}
-            <img src="/static/default_user.png" class="avatar">
-          {% endif %}
-        </div>
-
+      <div class="profile-id">
+        {% if integrante[8] and integrante[8] != "" %}
+          <img src="/{{ integrante[8] }}" class="avatar lg" alt="Tu foto">
+        {% else %}
+          <img src="/static/default_user.png" class="avatar lg" alt="Tu foto">
+        {% endif %}
         <div class="identity">
           <h1>{{ integrante[1] }} {{ integrante[2] }}</h1>
           <p>{{ integrante[3] }}</p>
@@ -46,94 +36,94 @@
     </section>
 
     <!-- Formulario -->
-    <form method="POST" enctype="multipart/form-data" class="card form-card">
-
+    <form method="POST" enctype="multipart/form-data" class="card">
       <h2 class="section-title">Información personal</h2>
 
-      <div class="grid">
+      <div class="form-grid">
         <div class="field">
-          <label>Nombre</label>
-          <input type="text" name="nombre" value="{{ integrante[1] }}" required>
+          <label for="nombre">Nombre</label>
+          <input id="nombre" type="text" name="nombre" value="{{ integrante[1] }}" required>
         </div>
 
         <div class="field">
-          <label>Apellido</label>
-          <input type="text" name="apellido" value="{{ integrante[2] }}" required>
+          <label for="apellido">Apellido</label>
+          <input id="apellido" type="text" name="apellido" value="{{ integrante[2] }}" required>
         </div>
 
         <div class="field">
-          <label>Email</label>
-          <input type="email" name="email" value="{{ integrante[3] }}" required>
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" value="{{ integrante[3] }}" required>
         </div>
 
         <div class="field">
-          <label>Contraseña</label>
-          <input type="password" name="password" value="{{ integrante[4] }}" required>
+          <label for="password">Contraseña</label>
+          <input id="password" type="password" name="password" value="{{ integrante[4] }}" required>
         </div>
 
         <div class="field">
-          <label>Fecha de nacimiento</label>
-          <input type="date" name="fecha_nac" value="{{ integrante[5] }}">
+          <label for="fecha_nac">Fecha de nacimiento</label>
+          <input id="fecha_nac" type="date" name="fecha_nac" value="{{ integrante[5] }}">
         </div>
 
         <div class="field">
-          <label>Estado civil</label>
-          <input type="text" name="estado_civil" value="{{ integrante[11] }}">
+          <label for="estado_civil">Estado civil</label>
+          <input id="estado_civil" type="text" name="estado_civil" value="{{ integrante[11] }}">
         </div>
 
         <div class="field">
-          <label>Municipio</label>
-          <input type="text" name="municipio" value="{{ integrante[6] }}">
+          <label for="municipio">Municipio</label>
+          <input id="municipio" type="text" name="municipio" value="{{ integrante[6] }}">
         </div>
 
         <div class="field">
-          <label>País</label>
-          <input type="text" name="pais" value="{{ integrante[7] }}">
+          <label for="pais">País</label>
+          <input id="pais" type="text" name="pais" value="{{ integrante[7] }}">
         </div>
 
         <div class="field">
-          <label>Teléfono</label>
-          <input type="text" name="telefono" value="{{ integrante[9] }}">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="text" name="telefono" value="{{ integrante[9] }}">
         </div>
 
         <div class="field">
-          <label>Dirección</label>
-          <input type="text" name="direccion" value="{{ integrante[10] }}">
+          <label for="direccion">Dirección</label>
+          <input id="direccion" type="text" name="direccion" value="{{ integrante[10] }}">
+        </div>
+
+        <div class="field full">
+          <label for="bio">Bio / Redes</label>
+          <textarea id="bio" name="bio" placeholder="Cuenta algo sobre ti…">{{ integrante[12] }}</textarea>
         </div>
       </div>
 
-      <div class="field full">
-        <label>Bio / Redes</label>
-        <textarea name="bio" placeholder="Contá algo sobre vos…">{{ integrante[12] }}</textarea>
-      </div>
-
-      <h2 class="section-title">Fotos</h2>
+      <h2 class="section-title section-gap">Fotos</h2>
 
       <div class="photos">
-        <div class="photo-block">
-          <label class="file">
-            Cambiar foto de perfil
-            <input type="file" name="foto">
-          </label>
+        <div class="field">
+          <label>Foto de perfil</label>
+          <label class="file">📷 <span class="file-label">Cambiar foto de perfil</span><input type="file" name="foto"></label>
         </div>
 
+        {% if fotos %}
         <div class="album">
           {% for f in fotos %}
-            <img src="{{ f[0] }}">
+            <img src="{{ f[0] }}" alt="Foto del álbum">
           {% endfor %}
         </div>
+        {% endif %}
 
-        <label class="file">
-          Subir nuevas fotos al álbum
-          <input type="file" name="fotos" multiple>
-        </label>
+        <div class="field">
+          <label>Álbum</label>
+          <label class="file">🖼️ <span class="file-label">Subir nuevas fotos al álbum</span><input type="file" name="fotos" multiple></label>
+        </div>
       </div>
 
       <div class="actions">
-        <a href="/user_home" class="btn ghost">Cancelar</a>
+        <a href="/user_home" class="btn">Cancelar</a>
         <button type="submit" class="btn primary">Guardar cambios</button>
       </div>
     </form>
   </main>
+  <script src="/static/ui.js"></script>
 </body>
 </html>

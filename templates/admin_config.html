@@ -2,143 +2,89 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configuración Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Resumen del sistema</title>
+  <link rel="stylesheet" href="/static/base.css">
   <link rel="stylesheet" href="/static/admin.css">
 </head>
-
 <body>
   <header class="topbar">
-    <div class="brand">
-      <img src="/static/login.png" class="brand-logo" alt="Logo">
-      <div class="brand-text">
-        <div class="brand-title">Configuración Admin</div>
-        <div class="brand-sub">Panel de control completo</div>
-      </div>
+    <a class="icon-btn" href="/admin_home" aria-label="Volver al panel" title="Volver al panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Resumen del sistema</h1>
+      <span>Usuarios, reportes y grupos</span>
     </div>
-    <div class="top-actions">
-      <a class="btn ghost" href="/admin_home">← Panel</a>
-      <a class="btn ghost" href="/admin/reports">📝 Reportes</a>
-      <a class="btn ghost" href="/members">👥 Integrantes</a>
-      <a class="btn danger" href="/logout">Cerrar sesión</a>
-    </div>
+    
   </header>
 
-  <main class="page">
-    <section class="hero">
-      <div>
-        <h1>Control total del sistema</h1>
-        <p>Monitorizá usuarios, reportes, grupos y métricas desde un solo lugar.</p>
+  <main class="page wide">
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-num">{{ total_users }}</div>
+        <div class="stat-label">Usuarios</div>
       </div>
-      <div class="hero-right">
-        <div class="stat">
-          <div class="stat-num">{{ total_users }}</div>
-          <div class="stat-label">Usuarios</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">{{ active_users }}</div>
-          <div class="stat-label">Activos</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">{{ total_reports }}</div>
-          <div class="stat-label">Reportes</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">{{ total_groups }}</div>
-          <div class="stat-label">Grupos</div>
-        </div>
+      <div class="stat">
+        <div class="stat-num">{{ active_users }}</div>
+        <div class="stat-label">Activos</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">{{ total_reports }}</div>
+        <div class="stat-label">Reportes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">{{ total_groups }}</div>
+        <div class="stat-label">Grupos</div>
       </div>
     </section>
 
-    <section class="summary">
-      <div class="summary-card">
-        <div class="sum-ico">🔎</div>
-        <div>
-          <p class="sum-title">Usuarios recientes</p>
-          <div class="sum-sub">Últimos nuevos registros</div>
-        </div>
-      </div>
-      <div class="summary-card">
-        <div class="sum-ico">⚠️</div>
-        <div>
-          <p class="sum-title">Reportes recientes</p>
-          <div class="sum-sub">Últimos problemas enviados</div>
-        </div>
-      </div>
-      <div class="summary-card">
-        <div class="sum-ico">🛠️</div>
-        <div>
-          <p class="sum-title">Acciones</p>
-          <div class="sum-sub">Control del sistema y permisos</div>
-        </div>
-      </div>
-      <div class="summary-card">
-        <div class="sum-ico">⚙️</div>
-        <div>
-          <p class="sum-title">Privilegios</p>
-          <div class="sum-sub">Gestión de admins y usuarios</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="dash-grid">
-      <div class="card widget span-2">
-        <div class="card-head">
+    <div class="admin-cols">
+      <section class="card">
+        <div class="card-title">
           <h2>Usuarios recientes</h2>
           <span class="pill">Últimos 5</span>
         </div>
-        <div class="table">
-          <div class="trow thead">
-            <div>Usuario</div><div>Email</div><div>Admin</div><div>Activo</div>
-          </div>
-          {% for u in recent_users %}
-          <div class="trow">
-            <div>{{ u[1] }} {{ u[2] }}</div>
-            <div>{{ u[3] }}</div>
-            <div><span class="badge">{{ 'Sí' if u[4] == 1 else 'No' }}</span></div>
-            <div><span class="badge">{{ 'Sí' if u[5] == 1 else 'No' }}</span></div>
-          </div>
-          {% endfor %}
+        <div class="table-wrap">
+          <table class="rtable">
+            <thead>
+              <tr><th>Usuario</th><th>Email</th><th>Admin</th><th>Activo</th></tr>
+            </thead>
+            <tbody>
+              {% for u in recent_users %}
+              <tr>
+                <td data-label="Usuario">{{ u[1] }} {{ u[2] }}</td>
+                <td data-label="Email">{{ u[3] }}</td>
+                <td data-label="Admin"><span class="tag {{ 'verified' if u[4] == 1 else '' }}">{{ 'Sí' if u[4] == 1 else 'No' }}</span></td>
+                <td data-label="Activo"><span class="tag {{ 'verified' if u[5] == 1 else '' }}">{{ 'Sí' if u[5] == 1 else 'No' }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-      </div>
+      </section>
 
-      <div class="card widget">
-        <div class="card-head">
+      <section class="card">
+        <div class="card-title">
           <h2>Reportes recientes</h2>
           <span class="pill">Últimos 5</span>
         </div>
-        <div class="table">
-          <div class="trow thead">
-            <div>Título</div><div>Estado</div><div>Fecha</div>
-          </div>
-          {% for r in recent_reports %}
-          <div class="trow">
-            <div>{{ r[1] }}</div>
-            <div><span class="badge">{{ r[2] }}</span></div>
-            <div>{{ r[3] }}</div>
-          </div>
-          {% endfor %}
+        <div class="table-wrap">
+          <table class="rtable">
+            <thead>
+              <tr><th>Título</th><th>Estado</th><th>Fecha</th></tr>
+            </thead>
+            <tbody>
+              {% for r in recent_reports %}
+              <tr>
+                <td data-label="Título">{{ r[1] }}</td>
+                <td data-label="Estado"><span class="tag">{{ r[2]|replace('_',' ') }}</span></td>
+                <td data-label="Fecha">{{ r[3] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      <div class="card widget">
-        <div class="card-head">
-          <h2>Acciones rápidas</h2>
-          <span class="pill">Admin</span>
-        </div>
-        <div class="shortcuts">
-          <a class="mini" href="/add_member">➕ Agregar usuario</a>
-          <a class="mini" href="/members">👥 Ver integrantes</a>
-          <a class="mini" href="/admin/reports">📝 Ver reportes</a>
-          <a class="mini" href="/admin_home">🏠 Volver al panel</a>
-        </div>
-        <div class="hint">Usá estos accesos para navegar igual que un superadmin.</div>
-      </div>
-    </section>
-
-    <div class="admin-foot">
-      <div>✅ Panel Admin actualizado</div>
-      <div>Modo acceso completo</div>
+      </section>
     </div>
   </main>
 </body>

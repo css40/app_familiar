@@ -1,55 +1,36 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Editar Tweet</title>
-  <link rel="stylesheet" href="/static/editar_tweet.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Editar publicación</title>
+  <link rel="stylesheet" href="/static/base.css">
+  <link rel="stylesheet" href="/static/feed.css">
 </head>
-
 <body>
-  <!-- Topbar -->
   <header class="topbar">
-    <div class="brand">
-      <div class="logo">FW</div>
-      <div class="brand-text">
-        <div class="brand-title">Editar Tweet</div>
-        <div class="brand-sub">Actualizá tu publicación</div>
-      </div>
+    <a class="icon-btn" href="/user_home" aria-label="Volver al inicio" title="Volver al inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Editar publicación</h1>
+      <span>Actualiza lo que escribiste</span>
     </div>
-
-    <div class="top-actions">
-      <a class="btn ghost" href="/user_home">← Home</a>
-      <a class="btn danger" href="/logout">Cerrar sesión</a>
-    </div>
+    
   </header>
 
-  <main class="page">
-    <section class="card">
-      <div class="card-head">
-        <div>
-          <h1>Editar Tweet</h1>
-          <p>Hacé los cambios y guardá. Se mostrará actualizado en el feed.</p>
-        </div>
-        <span class="pill">📝 Editor</span>
+  <main class="page narrow">
+    <form method="POST" class="card form-stack">
+      <div class="field">
+        <label for="contenido">Contenido</label>
+        <textarea id="contenido" name="contenido" required placeholder="Escribe tu publicación...">{{ contenido }}</textarea>
+        <span class="muted">Tip: puedes usar @usuario para mencionar.</span>
       </div>
 
-      <form method="POST" class="form">
-        <label class="label" for="contenido">Contenido</label>
-
-        <div class="textarea-wrap">
-          <textarea id="contenido" name="contenido" required placeholder="Escribí tu tweet...">{{ contenido }}</textarea>
-          <div class="helper">
-            Tip: podés usar @usuario para mencionar.
-          </div>
-        </div>
-
-        <div class="actions">
-          <a class="btn ghost" href="/user_home">Cancelar</a>
-          <button class="btn primary" type="submit">Guardar cambios</button>
-        </div>
-      </form>
-    </section>
+      <div class="actions">
+        <a class="btn" href="/user_home">Cancelar</a>
+        <button class="btn primary" type="submit">Guardar cambios</button>
+      </div>
+    </form>
   </main>
 </body>
 </html>

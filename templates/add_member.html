@@ -2,108 +2,97 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>Agregar integrante</title>
+  <link rel="stylesheet" href="/static/base.css">
   <link rel="stylesheet" href="/static/admin.css">
 </head>
-
 <body>
-  <!-- TOPBAR -->
   <header class="topbar">
-    <div class="brand">
-      <img src="/static/login.png" class="brand-logo" alt="Logo">
-      <div class="brand-text">
-        <div class="brand-title">Agregar integrante</div>
-        <div class="brand-sub">Registro de nuevo miembro</div>
-      </div>
+    <a class="icon-btn" href="/admin_home" aria-label="Volver al panel" title="Volver al panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Agregar integrante</h1>
+      <span>Registro de un nuevo miembro</span>
     </div>
-
-    <div class="top-actions">
-      <a href="/admin_home" class="btn ghost">← Admin</a>
-      <a href="/logout" class="btn danger">Cerrar sesión</a>
-    </div>
+    
   </header>
 
   <main class="page">
-    <section class="card">
-      <h1>Nuevo integrante</h1>
-      <p class="subtitle">Completá los datos para agregar un nuevo miembro a la familia.</p>
+    <form class="card" method="POST" enctype="multipart/form-data">
+      <div class="form-grid">
+        <div class="field">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" type="text" name="nombre" required>
+        </div>
 
-      <form class="add-form" method="POST" enctype="multipart/form-data">
+        <div class="field">
+          <label for="apellido">Apellido</label>
+          <input id="apellido" type="text" name="apellido" required>
+        </div>
 
-        <div class="grid">
-          <div class="field">
-            <label>Nombre</label>
-            <input type="text" name="nombre" required>
-          </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" required>
+        </div>
 
-          <div class="field">
-            <label>Apellido</label>
-            <input type="text" name="apellido" required>
-          </div>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" type="password" name="password" required>
+        </div>
 
-          <div class="field">
-            <label>Email</label>
-            <input type="email" name="email" required>
-          </div>
+        <div class="field">
+          <label for="fecha_nac">Fecha de nacimiento</label>
+          <input id="fecha_nac" type="date" name="fecha_nac">
+        </div>
 
-          <div class="field">
-            <label>Contraseña</label>
-            <input type="password" name="password" required>
-          </div>
+        <div class="field">
+          <label for="estado_civil">Estado civil</label>
+          <input id="estado_civil" type="text" name="estado_civil">
+        </div>
 
-          <div class="field">
-            <label>Fecha de nacimiento</label>
-            <input type="date" name="fecha_nac">
-          </div>
+        <div class="field">
+          <label for="municipio">Municipio</label>
+          <input id="municipio" type="text" name="municipio">
+        </div>
 
-          <div class="field">
-            <label>Estado civil</label>
-            <input type="text" name="estado_civil">
-          </div>
+        <div class="field">
+          <label for="pais">País</label>
+          <input id="pais" type="text" name="pais">
+        </div>
 
-          <div class="field">
-            <label>Municipio</label>
-            <input type="text" name="municipio">
-          </div>
-
-          <div class="field">
-            <label>País</label>
-            <input type="text" name="pais">
-          </div>
-
-          <div class="field">
-            <label>Teléfono</label>
-            <input type="text" name="telefono">
-          </div>
-
-          <div class="field admin-toggle">
-            <label>Administrador</label>
-            <label class="switch"><input type="checkbox" name="is_admin"><span class="slider"></span></label>
-          </div>
-
-          <div class="field admin-toggle">
-            <label>Activo</label>
-            <label class="switch"><input type="checkbox" name="activo" checked><span class="slider"></span></label>
-          </div>
+        <div class="field">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="text" name="telefono">
         </div>
 
         <div class="field full">
-          <label>Biografía</label>
-          <textarea name="bio" rows="3" placeholder="Pequeña biografía..."></textarea>
+          <label for="bio">Biografía</label>
+          <textarea id="bio" name="bio" rows="3" placeholder="Pequeña biografía..."></textarea>
         </div>
 
         <div class="field full">
           <label>Foto de perfil</label>
-          <input type="file" name="foto">
+          <label class="file">📷 <span class="file-label">Elegir foto</span><input type="file" name="foto"></label>
         </div>
 
-        <div class="actions">
-          <a href="/admin_home" class="btn ghost">Cancelar</a>
-          <button type="submit" class="btn primary">Guardar integrante</button>
+        <div class="toggle-field">
+          <span>Administrador</span>
+          <label class="switch"><input type="checkbox" name="is_admin" aria-label="Administrador"><span class="slider"></span></label>
         </div>
-      </form>
-    </section>
+
+        <div class="toggle-field">
+          <span>Activo</span>
+          <label class="switch"><input type="checkbox" name="activo" aria-label="Activo" checked><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="/admin_home" class="btn">Cancelar</a>
+        <button type="submit" class="btn primary">Guardar integrante</button>
+      </div>
+    </form>
   </main>
+  <script src="/static/ui.js"></script>
 </body>
 </html>

@@ -2,64 +2,54 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>Notificaciones</title>
-  <link rel="stylesheet" href="/static/notificaciones.css">
+  <link rel="stylesheet" href="/static/base.css">
 </head>
 <body>
-
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">FW</div>
-    <div class="brand-text">
-      <div class="brand-title">Notificaciones</div>
-      <div class="brand-sub">Tu actividad reciente</div>
+  <header class="topbar">
+    <a class="icon-btn" href="/user_home" aria-label="Volver al inicio" title="Volver al inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Notificaciones</h1>
+      <span>Tu actividad reciente</span>
     </div>
-  </div>
+    
+  </header>
 
-  <div class="top-actions">
-    <a class="btn ghost" href="/user_home">Inicio</a>
-    <form action="/notificaciones/marcar_todo" method="POST" style="margin:0">
-      <button class="btn primary" type="submit">✓ Marcar leídas</button>
-    </form>
-  </div>
-</header>
+  <main class="page">
+    <div class="page-head">
+      <h1>Notificaciones</h1>
+      <form action="/notificaciones/marcar_todo" method="POST">
+        <button class="btn small" type="submit">✓ Marcar como leídas</button>
+      </form>
+    </div>
 
-<main class="noti-page">
-
-  <div class="noti-head">
-    <h2 class="noti-title">🔔 Notificaciones</h2>
-  </div>
-
-  {% if notificaciones|length == 0 %}
-    <div class="noti-empty">No tenés notificaciones todavía.</div>
-  {% else %}
-    <div class="noti-list">
-      {% for n in notificaciones %}
-      <div class="noti" id="noti-{{ n[0] }}">
-
-        <div class="noti-avatar">
-          <img src="/{{ n[5] if n[5] else 'static/default_user.png' }}">
-        </div>
-
-        <div class="noti-body">
-          <div class="noti-text">
-            <b>{{ n[3] }} {{ n[4] }}</b> {{ n[1] }}
-          </div>
-
-          <!-- guardamos el timestamp real en data-time -->
-          <div class="noti-time" data-time="{{ n[2] }}">{{ n[2] }}</div>
-
-          <div class="noti-actions">
-            <button class="btn danger" type="button" onclick="eliminarNoti({{ n[0] }})">🗑 Eliminar</button>
-          </div>
-        </div>
-
+    {% if notificaciones|length == 0 %}
+      <div class="card empty-box">
+        <div class="empty-ico">🔔</div>
+        <h2>Todo al día</h2>
+        <p>No tienes notificaciones todavía.</p>
       </div>
-      {% endfor %}
-    </div>
-  {% endif %}
+    {% else %}
+      <div class="list">
+        {% for n in notificaciones %}
+        <div class="list-item noti" id="noti-{{ n[0] }}">
+          <img class="avatar" src="/{{ n[5] if n[5] else 'static/default_user.png' }}" alt="">
 
-</main>
+          <div class="list-body">
+            <div><b>{{ n[3] }} {{ n[4] }}</b> {{ n[1] }}</div>
+
+            <!-- guardamos el timestamp real en data-time -->
+            <div class="list-sub noti-time" data-time="{{ n[2] }}">{{ n[2] }}</div>
+          </div>
+
+          <button class="btn small danger" type="button" aria-label="Eliminar notificación" onclick="eliminarNoti({{ n[0] }})">Eliminar</button>
+        </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </main>
 
 <script>
   function parseSqliteDatetime(s){
@@ -94,6 +84,5 @@
     }
   }
 </script>
-
 </body>
 </html>

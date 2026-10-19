@@ -2,350 +2,76 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Panel admin</title>
+  <link rel="stylesheet" href="/static/base.css">
   <link rel="stylesheet" href="/static/admin.css">
 </head>
-
 <body>
-  <!-- TOPBAR -->
   <header class="topbar">
-    <div class="brand">
-      <img src="/static/login.png" class="brand-logo" alt="Logo">
-      <div class="brand-text">
-        <div class="brand-title">Panel Admin</div>
-        <div class="brand-sub">Administración familiar</div>
-      </div>
+    <a class="icon-btn" href="/user_home" aria-label="Volver al inicio" title="Volver al inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Panel admin</h1>
+      <span>Administración familiar</span>
     </div>
-
-    <div class="top-actions">
-      <a href="/user_home" class="btn ghost">Inicio</a>
-      <a href="/logout" class="btn danger">Cerrar sesión</a>
-    </div>
+    <div class="top-actions"><a class="btn small danger" href="/logout">Cerrar sesión</a></div>
   </header>
 
-  <main class="page">
-
-    <!-- HERO -->
-    <section class="hero">
-      <div class="hero-left">
-        <h1>👋 Hola, {{ nombre }}</h1>
-        <p>Tenés control total del sistema familiar.</p>
-        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
-          <span class="badge">✅ Sistema estable</span>
-          <span class="badge">🔒 Sesión segura</span>
-          <span class="badge">⚡ Modo admin</span>
-        </div>
+  <main class="page wide">
+    <div class="page-head">
+      <div>
+        <h1>Hola, {{ nombre }} 👋</h1>
+        <p>Desde aquí administras a la familia.</p>
       </div>
-
-      <div class="hero-right">
-        <div class="stat">
-          <div class="stat-num">{{ total_miembros }}</div>
-          <div class="stat-label">Integrantes</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">{{ activos }}</div>
-          <div class="stat-label">Activos</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">{{ total_reports }}</div>
-          <div class="stat-label">Reportes</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">{{ total_groups }}</div>
-          <div class="stat-label">Grupos</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SUMMARY -->
-    <section class="summary">
-      <div class="summary-card">
-        <div class="sum-ico">📣</div>
-        <div>
-          <p class="sum-title">Novedades</p>
-          <div class="sum-sub">Actualizaciones visuales del panel.</div>
-          <span class="badge">Nuevo</span>
-        </div>
-      </div>
-
-      <div class="summary-card">
-        <div class="sum-ico">🎬</div>
-        <div>
-          <p class="sum-title">Shorts</p>
-          <div class="sum-sub">Videos cortos para tu familia.</div>
-          <span class="badge">En progreso</span>
-        </div>
-      </div>
-
-      <div class="summary-card">
-        <div class="sum-ico">🧠</div>
-        <div>
-          <p class="sum-title">Tips</p>
-          <div class="sum-sub">Orden y control, sin enredos.</div>
-          <span class="badge">Pro</span>
-        </div>
-      </div>
-
-      <div class="summary-card">
-        <div class="sum-ico">🔔</div>
-        <div>
-          <p class="sum-title">Actividad</p>
-          <div class="sum-sub">Vista rápida de movimientos.</div>
-          <span class="badge">Live</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- BANNER SEGURIDAD -->
-    <section class="security-banner">
-      <div class="sec-left">
-        <div class="sec-ico">🛡️</div>
-        <div>
-          <div class="sec-title">Seguridad: Estado OK</div>
-          <div class="sec-sub">Sin alertas detectadas · Sesión protegida</div>
-        </div>
-      </div>
-      <div class="sec-right">
-        <span class="badge">2FA (pronto)</span>
-        <span class="badge">Logs (pronto)</span>
-      </div>
-    </section>
-
-    <!-- QUICK ACTIONS -->
-    <section class="quick-actions">
-      <a class="quick-card" href="/add_member">
-        <div class="qc-ico">➕</div>
-        <div class="qc-text">
-          <h3>Agregar integrante</h3>
-          <p>Registrar nuevo miembro</p>
-        </div>
-        <span class="badge">Acción</span>
-      </a>
-
-      <a class="quick-card" href="/members">
-        <div class="qc-ico">👀</div>
-        <div class="qc-text">
-          <h3>Ver integrantes</h3>
-          <p>Administrar perfiles</p>
-        </div>
-        <span class="badge">Admin</span>
-      </a>
-
-      <a class="quick-card" href="/grupos">
-        <div class="qc-ico">👥</div>
-        <div class="qc-text">
-          <h3>Grupos</h3>
-          <p>Gestionar grupos familiares</p>
-        </div>
-        <span class="badge">Social</span>
-      </a>
-
-      <a class="quick-card" href="/admin/reports">
-        <div class="qc-ico">📝</div>
-        <div class="qc-text">
-          <h3>Reportes</h3>
-          <p>Ver reportes técnicos</p>
-        </div>
-        <span class="badge">Admin</span>
-      </a>
-
-      <a class="quick-card" href="/admin/config">
-        <div class="qc-ico">⚙️</div>
-        <div class="qc-text">
-          <h3>Configuración</h3>
-          <p>Opciones del sistema</p>
-        </div>
-        <span class="badge">Setup</span>
-      </a>
-    </section>
-
-    <!-- DASH GRID -->
-    <section class="dash-grid">
-
-      <!-- WIDGET DONUT (solo visual) -->
-      <div class="card widget">
-        <div class="card-head">
-          <h2>📊 Estado de usuarios</h2>
-          <span class="pill">Resumen</span>
-        </div>
-
-        <div class="donut-wrap">
-          <div class="donut" aria-hidden="true"></div>
-          <div class="donut-legend">
-            <div class="leg">
-              <span class="dot a"></span>
-              <div>
-                <div class="leg-title">Activos</div>
-                <div class="leg-sub">{{ activos }} conectados</div>
-              </div>
-            </div>
-            <div class="leg">
-              <span class="dot b"></span>
-              <div>
-                <div class="leg-title">Inactivos</div>
-                <div class="leg-sub">{{ total_miembros - activos }} fuera</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="hint">* Gráfico visual (luego lo hacemos real).</div>
-      </div>
-
-      <!-- CALENDARIO MINI (dummy) -->
-      <div class="card widget">
-        <div class="card-head">
-          <h2>🗓️ Próximos eventos</h2>
-          <span class="pill">Familia</span>
-        </div>
-
-        <div class="events">
-          <div class="event">
-            <div class="dateBox">
-              <div class="d">SÁB</div>
-              <div class="n">10</div>
-            </div>
-            <div class="ev-text">
-              <div class="ev-title">Reunión familiar</div>
-              <div class="ev-sub">Cena y fotos</div>
-            </div>
-            <span class="badge">Plan</span>
-          </div>
-
-          <div class="event">
-            <div class="dateBox">
-              <div class="d">DOM</div>
-              <div class="n">18</div>
-            </div>
-            <div class="ev-text">
-              <div class="ev-title">Cumpleaños</div>
-              <div class="ev-sub">Recordatorio</div>
-            </div>
-            <span class="badge">🎂</span>
-          </div>
-
-          <div class="event">
-            <div class="dateBox">
-              <div class="d">VIE</div>
-              <div class="n">23</div>
-            </div>
-            <div class="ev-text">
-              <div class="ev-title">Limpieza de álbum</div>
-              <div class="ev-sub">Organizar fotos</div>
-            </div>
-            <span class="badge">Pro</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- TABLA DUMMY -->
-      <div class="card widget span-2">
-        <div class="card-head">
-          <h2>🧾 Últimos movimientos</h2>
-          <span class="pill">Vista rápida</span>
-        </div>
-
-        <div class="table">
-          <div class="trow thead">
-            <div>Acción</div><div>Usuario</div><div>Fecha</div><div>Estado</div>
-          </div>
-
-          <div class="trow">
-            <div>✅ Login</div><div>Admin</div><div>Hoy</div><div><span class="badge">OK</span></div>
-          </div>
-          <div class="trow">
-            <div>🖼️ Foto subida</div><div>Miembro</div><div>Ayer</div><div><span class="badge">OK</span></div>
-          </div>
-          <div class="trow">
-            <div>👥 Grupo creado</div><div>Miembro</div><div>Hace 2 días</div><div><span class="badge">OK</span></div>
-          </div>
-          <div class="trow">
-            <div>🎬 Short subido</div><div>Miembro</div><div>Hace 3 días</div><div><span class="badge">OK</span></div>
-          </div>
-        </div>
-
-        <div class="hint">* Esto es visual, luego lo conectamos a la base.</div>
-      </div>
-
-      <!-- TOGGLES (solo visual) -->
-      <div class="card widget">
-        <div class="card-head">
-          <h2>🎛️ Config rápida</h2>
-          <span class="pill">Visual</span>
-        </div>
-
-        <div class="toggles">
-          <div class="toggle">
-            <div>
-              <div class="tg-title">Modo oscuro</div>
-              <div class="tg-sub">Activo por defecto</div>
-            </div>
-            <div class="switch on" aria-hidden="true"></div>
-          </div>
-
-          <div class="toggle">
-            <div>
-              <div class="tg-title">Notificaciones</div>
-              <div class="tg-sub">Avisos del sistema</div>
-            </div>
-            <div class="switch" aria-hidden="true"></div>
-          </div>
-
-          <div class="toggle">
-            <div>
-              <div class="tg-title">Moderación</div>
-              <div class="tg-sub">Revisar contenido</div>
-            </div>
-            <div class="switch on" aria-hidden="true"></div>
-          </div>
-        </div>
-
-        <div class="hint">* Solo visual (luego le metemos JS y DB).</div>
-      </div>
-
-      <!-- ACTIVIDAD -->
-      <div class="card widget">
-        <div class="card-head">
-          <h2>📌 Actividad reciente</h2>
-          <span class="pill">Checklist</span>
-        </div>
-        <ul class="activity">
-          <li>✔️ Nuevo integrante agregado</li>
-          <li>✔️ Perfil actualizado</li>
-          <li>✔️ Acceso del administrador correcto</li>
-        </ul>
-      </div>
-
-      <!-- ATAJOS -->
-      <div class="card widget">
-        <div class="card-head">
-          <h2>⚡ Atajos rápidos</h2>
-          <span class="pill">Pro</span>
-        </div>
-        <div class="shortcuts">
-          <a href="/add_member" class="btn small">➕ Nuevo miembro</a>
-          <a href="/members" class="btn small">👥 Integrantes</a>
-          <a href="/profile" class="btn small">👤 Mi perfil</a>
-          <a href="/shorts" class="btn small ghost">🎬 Shorts</a>
-        </div>
-
-        <div class="divider"></div>
-        <ul class="bullets">
-          <li><b>Tip:</b> mantené contraseñas fuertes.</li>
-          <li><b>Tip:</b> subí videos cortos (10–30s).</li>
-          <li><b>Tip:</b> organizá por grupos.</li>
-        </ul>
-      </div>
-
-    </section>
-
-    <!-- FOOT -->
-    <div class="admin-foot">
-      <div>✅ Sistema estable · Panel Admin</div>
-      <div>Versión visual: <b>v1.0</b> · Tema: <b>{{ nombre_familia }}</b></div>
     </div>
 
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-num">{{ total_miembros }}</div>
+        <div class="stat-label">Integrantes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">{{ activos }}</div>
+        <div class="stat-label">Activos</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">{{ total_reports }}</div>
+        <div class="stat-label">Reportes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">{{ total_groups }}</div>
+        <div class="stat-label">Grupos</div>
+      </div>
+    </section>
+
+    <h2 class="feed-title">¿Qué quieres hacer?</h2>
+    <section class="quick-grid">
+      <a class="quick-card card" href="/add_member">
+        <span class="qc-ico">➕</span>
+        <span class="qc-text"><strong>Agregar integrante</strong><span>Registrar un nuevo miembro</span></span>
+      </a>
+
+      <a class="quick-card card" href="/members">
+        <span class="qc-ico">👥</span>
+        <span class="qc-text"><strong>Ver integrantes</strong><span>Editar o eliminar perfiles</span></span>
+      </a>
+
+      <a class="quick-card card" href="/grupos">
+        <span class="qc-ico">🧩</span>
+        <span class="qc-text"><strong>Grupos</strong><span>Gestionar grupos familiares</span></span>
+      </a>
+
+      <a class="quick-card card" href="/admin/reports">
+        <span class="qc-ico">📝</span>
+        <span class="qc-text"><strong>Reportes</strong><span>Revisar problemas enviados</span></span>
+      </a>
+
+      <a class="quick-card card" href="/admin/config">
+        <span class="qc-ico">⚙️</span>
+        <span class="qc-text"><strong>Resumen del sistema</strong><span>Usuarios y reportes recientes</span></span>
+      </a>
+    </section>
   </main>
 </body>
 </html>

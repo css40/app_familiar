@@ -1,135 +1,110 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>{{ integrante[1] }} {{ integrante[2] }}</title>
-  <link rel="stylesheet" href="/static/member_profile.css">
+  <link rel="stylesheet" href="/static/base.css">
+  <link rel="stylesheet" href="/static/profile.css">
 </head>
-
 <body>
-  <!-- Topbar -->
   <header class="topbar">
-    <div class="brand">
-      <div class="logo">FW</div>
-      <div class="brand-text">
-        <div class="brand-title">Perfil</div>
-        <div class="brand-sub">Detalles del integrante</div>
-      </div>
+    <a class="icon-btn" href="/members_view" aria-label="Volver a integrantes" title="Volver a integrantes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Perfil</h1>
+      <span>Detalles del integrante</span>
     </div>
-
-    <div class="top-actions">
-      <a class="btn ghost" href="/members_view">← Integrantes</a>
-      <a class="btn ghost" href="/user_home">Inicio</a>
-      <a class="btn danger" href="/logout">Cerrar sesión</a>
-    </div>
+    
   </header>
 
   <main class="page">
-    <!-- Profile header (cover + avatar) -->
-    <section class="profile-shell">
+    <section class="profile-hero card">
       <div class="cover"></div>
+      <div class="profile-id">
+        {% if integrante[8] %}
+          <img class="avatar lg" src="/{{ integrante[8].replace('\\','/') }}" alt="{{ integrante[1] }}">
+        {% else %}
+          <img class="avatar lg" src="/static/default_user.png" alt="Sin foto">
+        {% endif %}
 
-      <div class="profile-card card">
-        <div class="profile-top">
-          <div class="avatar-wrap">
-            {% if integrante[8] %}
-              <img class="avatar" src="/{{ integrante[8].replace('\\','/') }}" alt="{{ integrante[1] }}">
-            {% else %}
-              <img class="avatar" src="/static/default_user.png" alt="Sin foto">
+        <div class="identity">
+          <h1 class="name">
+            {{ integrante[1] }} {{ integrante[2] }}
+            {% if integrante[3] == 'jhos@admin.com' %}
+              <img src="/static/verificado.png" alt="Verificado" class="icon-verificado">
+            {% endif %}
+          </h1>
+
+          <div class="sub meta">
+            <span class="tag">📩 {{ integrante[3] }}</span>
+            {% if integrante[6] or integrante[7] %}
+              <span class="tag">📍 {{ integrante[6] or 'Municipio' }}, {{ integrante[7] or 'País' }}</span>
             {% endif %}
           </div>
-
-          <div class="identity">
-            <h1 class="name">
-              {{ integrante[1] }} {{ integrante[2] }}
-              {% if integrante[3] == 'jhos@admin.com' %}
-                <img src="/static/verificado.png" alt="Verificado" class="icon-verificado">
-              {% endif %}
-            </h1>
-
-            <div class="sub">
-              <span class="chip">📩 {{ integrante[3] }}</span>
-              {% if integrante[6] or integrante[7] %}
-                <span class="chip">
-                  📍 {{ integrante[6] or 'Municipio' }}, {{ integrante[7] or 'País' }}
-                </span>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="actions">
-            <a class="btn primary" href="mailto:{{ integrante[3] }}">Contactar</a>
-            <a class="btn ghost" href="/members_view">Volver</a>
-          </div>
         </div>
 
-        <!-- Bio -->
-        <div class="bio card-inner">
-          <div class="section-title">Bio</div>
-          <p>{{ integrante[12] or 'Sin bio' }}</p>
+        <div class="profile-actions">
+          <a class="btn primary" href="mailto:{{ integrante[3] }}">Contactar</a>
         </div>
-
-        <!-- Info grid -->
-        <div class="info card-inner">
-          <div class="section-title">Información</div>
-
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="k">Fecha de nacimiento</div>
-              <div class="v">{{ integrante[5] or 'No especificado' }}</div>
-            </div>
-
-            <div class="info-item">
-              <div class="k">Teléfono</div>
-              <div class="v">{{ integrante[9] or 'No especificado' }}</div>
-            </div>
-
-            <div class="info-item">
-              <div class="k">Dirección</div>
-              <div class="v">{{ integrante[10] or 'No especificado' }}</div>
-            </div>
-
-            <div class="info-item">
-              <div class="k">Estado civil</div>
-              <div class="v">{{ integrante[11] or 'No especificado' }}</div>
-            </div>
-
-            <div class="info-item">
-              <div class="k">Municipio</div>
-              <div class="v">{{ integrante[6] or 'No especificado' }}</div>
-            </div>
-
-            <div class="info-item">
-              <div class="k">País</div>
-              <div class="v">{{ integrante[7] or 'No especificado' }}</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Album -->
-        <div class="album card-inner">
-          <div class="section-title">Álbum</div>
-
-          {% if album and album|length > 0 %}
-            <div class="album-grid">
-              {% for foto in album %}
-                <a class="photo" href="/{{ foto[0].replace('\\','/') }}" target="_blank" rel="noopener">
-                  <img src="/{{ foto[0].replace('\\','/') }}" alt="Foto del álbum">
-                </a>
-              {% endfor %}
-            </div>
-          {% else %}
-            <div class="empty-album">
-              <div class="empty-ico">🖼️</div>
-              <div class="empty-text">Este usuario no ha subido fotos todavía.</div>
-            </div>
-          {% endif %}
-        </div>
-
       </div>
     </section>
-  </main>
 
+    <div class="stack">
+      <section class="card">
+        <h2 class="section-title">Bio</h2>
+        <p>{{ integrante[12] or 'Sin bio' }}</p>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Información</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="k">Fecha de nacimiento</div>
+            <div class="v">{{ integrante[5] or 'No especificado' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="k">Teléfono</div>
+            <div class="v">{{ integrante[9] or 'No especificado' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="k">Dirección</div>
+            <div class="v">{{ integrante[10] or 'No especificado' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="k">Estado civil</div>
+            <div class="v">{{ integrante[11] or 'No especificado' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="k">Municipio</div>
+            <div class="v">{{ integrante[6] or 'No especificado' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="k">País</div>
+            <div class="v">{{ integrante[7] or 'No especificado' }}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Álbum</h2>
+
+        {% if album and album|length > 0 %}
+          <div class="album-grid">
+            {% for foto in album %}
+              <a class="photo" href="/{{ foto[0].replace('\\','/') }}" target="_blank" rel="noopener">
+                <img src="/{{ foto[0].replace('\\','/') }}" alt="Foto del álbum">
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-box">
+            <div class="empty-ico">🖼️</div>
+            <p>Este usuario no ha subido fotos todavía.</p>
+          </div>
+        {% endif %}
+      </section>
+    </div>
+  </main>
 </body>
 </html>

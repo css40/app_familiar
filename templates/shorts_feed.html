@@ -1,112 +1,101 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>Shorts</title>
+  <link rel="stylesheet" href="/static/base.css">
   <link rel="stylesheet" href="/static/shorts.css">
-  <link rel="stylesheet" href="/static/comments.css">
 </head>
-<body>
-
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">FW</div>
-    <div class="brand-text">
-      <div class="brand-title">Para ti</div>
-      <div class="brand-sub">Shorts de tus grupos</div>
+<body class="shorts-body">
+  <header class="topbar">
+    <a class="icon-btn" href="/user_home" aria-label="Volver al inicio" title="Volver al inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Shorts</h1>
+      <span>Videos de tus grupos</span>
     </div>
-  </div>
+    <div class="top-actions"><a class="btn small primary" href="/shorts/upload">+ Subir</a></div>
+  </header>
 
-  <div class="top-actions">
-    <a class="btn" href="/user_home">🏠 Inicio</a>
-    <a class="btn primary" href="/shorts/upload">➕ Subir</a>
-  </div>
-</header>
+  <main class="feed" id="feed">
+    {% if shorts|length == 0 %}
+      <div class="empty-box">
+        <div class="empty-ico">🎬</div>
+        <h2>Aún no hay shorts</h2>
+        <p>Sé el primero en compartir un video con tus grupos.</p>
+        <a class="btn primary" href="/shorts/upload">Subir short</a>
+      </div>
+    {% endif %}
 
-<main class="feed" id="feed">
-  {% if shorts|length == 0 %}
-    <div style="padding:16px;">No hay shorts todavía. <a class="btn primary" href="/shorts/upload">Subir</a></div>
-  {% endif %}
+    {% for s in shorts %}
+    <!-- s: id, video, desc, fecha, nombre, apellido, foto, grupo_nombre, likes -->
+    <section class="short" data-id="{{ s[0] }}">
+      <div class="frame">
+        <!-- muted para autoplay; sin controles: se pausa con un toque -->
+        <video playsinline muted loop preload="metadata" src="/{{ s[1] }}"></video>
 
-  {% for s in shorts %}
-  <!-- s: id, video, desc, fecha, nombre, apellido, foto, grupo_nombre, likes -->
-  <section class="short" data-id="{{ s[0] }}">
-    <div class="frame">
-      <!-- muted para autoplay; controls no, porque haremos tap -->
-      <video playsinline muted loop preload="metadata" src="/{{ s[1] }}"></video>
+        <div class="grad"></div>
+        <div class="hintTap">⏯️ Toca para pausar</div>
 
-      <div class="grad"></div>
-      <div class="hintTap">⏯️ Tap para pausar</div>
+        <div class="actions">
+          <div>
+            <button class="iconBtn likeBtn" type="button" title="Me gusta" aria-label="Me gusta">❤️</button>
+            <div class="count"><span class="likeCount">{{ s[8] }}</span></div>
+          </div>
 
-      <div class="actions">
-        <div>
-          <button class="iconBtn likeBtn" title="Me gusta">❤️</button>
-          <div class="count"><span class="likeCount">{{ s[8] }}</span></div>
+          <div>
+            <button class="iconBtn soundBtn" type="button" title="Sonido" aria-label="Sonido">🔇</button>
+            <div class="count">Sonido</div>
+          </div>
+
+          <div>
+            <button class="iconBtn shareBtn" type="button" title="Copiar link" aria-label="Copiar link">🔗</button>
+            <div class="count">Link</div>
+          </div>
+
+          <div>
+            <button class="iconBtn commentToggle" type="button" title="Comentar" aria-label="Comentar">💬</button>
+            <div class="count">Comentar</div>
+          </div>
         </div>
 
-        <div>
-          <!-- 🔊 sonido -->
-          <button class="iconBtn soundBtn" title="Sonido">🔇</button>
-          <div class="count">Sonido</div>
-        </div>
+        <div class="meta">
+          <span class="pill">📌 {{ s[7] }}</span>
 
-        <div>
-          <button class="iconBtn shareBtn" title="Copiar link">🔗</button>
-          <div class="count">Link</div>
-        </div>
+          <div class="userRow">
+            <img class="avatar" src="{{ '/' + s[6].replace('\\','/') if s[6] else '/static/default_user.png' }}" alt="">
+            <div class="name">{{ s[4] }} {{ s[5] }}</div>
+          </div>
 
-        <div>
-          <button class="iconBtn commentToggle" title="Comentar">💬</button>
-          <div class="count">Comentar</div>
+          {% if s[2] %}
+            <div class="desc">{{ s[2] }}</div>
+          {% endif %}
         </div>
       </div>
+    </section>
+    {% endfor %}
+  </main>
 
-      <div class="meta">
-        <span class="pill">📌 {{ s[7] }}</span>
-
-        <div class="userRow">
-          <img class="avatar" src="{{ '/' + s[6].replace('\\','/') if s[6] else '/static/default_user.png' }}" alt="">
-          <div class="name">{{ s[4] }} {{ s[5] }}</div>
-        </div>
-
-        {% if s[2] %}
-          <div class="desc">{{ s[2] }}</div>
-        {% endif %}
+  <!-- Comentarios (un solo panel reutilizable) -->
+  <div id="short-comments-modal" class="shorts-modal" style="display:none;">
+    <div class="shorts-modal-overlay" data-close></div>
+    <div class="shorts-modal-panel">
+      <div class="modal-header">
+        <div class="modal-title">Comentarios</div>
+        <button class="close-btn" type="button" data-close aria-label="Cerrar">✕</button>
       </div>
-
-      <div class="short-comments" id="short-comments-{{ s[0] }}" style="display:none; padding:8px;">
+      <div class="modal-body">
         <div class="comments-list"></div>
-        <form class="short-comment-form" data-short="{{ s[0] }}">
-          <input type="text" name="texto" placeholder="Comentar..." required>
-          <button type="submit" class="btn">OK</button>
+      </div>
+      <div class="modal-footer">
+        <form id="short-modal-form">
+          <input id="short-modal-input" type="text" name="texto" placeholder="Añade un comentario..." autocomplete="off" required>
+          <button id="short-modal-submit" class="btn primary">Enviar</button>
         </form>
       </div>
-
-    </div>
-  </section>
-  {% endfor %}
-</main>
-
-<!-- Modal estilo TikTok para comentarios (un solo modal reutilizable) -->
-<div id="short-comments-modal" class="shorts-modal" style="display:none;">
-  <div class="shorts-modal-overlay" data-close></div>
-  <div class="shorts-modal-panel">
-    <div class="modal-header">
-      <button class="close-btn" data-close>✕</button>
-      <div class="modal-title">Comentarios</div>
-    </div>
-    <div class="modal-body">
-      <div class="comments-list"></div>
-    </div>
-    <div class="modal-footer">
-      <form id="short-modal-form">
-        <input id="short-modal-input" type="text" name="texto" placeholder="Añadir un comentario..." autocomplete="off" required>
-        <button id="short-modal-submit" class="btn">Enviar</button>
-      </form>
     </div>
   </div>
-</div>
 
 <script>
   const videos = [...document.querySelectorAll(".frame video")];

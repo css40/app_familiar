@@ -1,43 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>Chat - {{ other_name }}</title>
-  <link rel="stylesheet" href="/static/dm.css">
+  <link rel="stylesheet" href="/static/base.css">
+  <link rel="stylesheet" href="/static/chat.css">
 </head>
-<body>
-
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">FW</div>
-    <div class="brand-text">
-      <div class="brand-title">💬 {{ other_name }}</div>
-      <div class="brand-sub">Chat privado</div>
+<body class="chat-body">
+  <header class="topbar">
+    <a class="icon-btn" href="/inbox" aria-label="Volver a chats" title="Volver a chats"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>{{ other_name }}</h1>
+      <span>Chat privado</span>
     </div>
+    
+  </header>
+
+  <main class="chat-page">
+    <div id="msgs" class="dm-list"></div>
+  </main>
+
+  <div class="chat-bar">
+    <form id="sendForm" class="chat-form">
+      <label class="chat-attach dm-file" title="Enviar imagen" aria-label="Enviar imagen">
+        <input id="file" type="file" name="media" accept="image/*">
+      </label>
+      <input id="txt" class="chat-input dm-input" type="text" name="mensaje" placeholder="Escribe un mensaje..." autocomplete="off">
+      <button class="chat-send dm-send" type="submit" aria-label="Enviar">Enviar</button>
+    </form>
   </div>
-
-  <div class="top-actions">
-    <a class="btn ghost" href="/inbox">Chats</a>
-    <a class="btn ghost" href="/buscar_usuario">Buscar</a>
-  </div>
-</header>
-
-<main class="dm-page">
-  <div id="msgs" class="dm-list"></div>
-</main>
-
-<div class="dm-bar">
-  <form id="sendForm" class="dm-form">
-    <input id="txt" class="dm-input" type="text" name="mensaje" placeholder="Escribe un mensaje...">
-
-    <label class="dm-file" title="Enviar imagen">
-      <input id="file" type="file" name="media" accept="image/*">
-    </label>
-
-    <button class="dm-send" type="submit">Enviar</button>
-  </form>
-</div>
 
 <script>
   let lastId = 0;
@@ -137,8 +130,5 @@
   poll();
   setInterval(poll, 1500);
 </script>
-
-
-
 </body>
 </html>

@@ -1,74 +1,40 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>{{ grupo_nombre }}</title>
-  <link rel="stylesheet" href="/static/grupodetalle.css">
-  <link rel="stylesheet" href="/static/comments.css">
+  <link rel="stylesheet" href="/static/base.css">
+  <link rel="stylesheet" href="/static/feed.css">
+  <link rel="stylesheet" href="/static/groups.css">
 </head>
-
 <body>
   {% set post_reacciones = post_reacciones if post_reacciones is defined else {} %}
 
-  <!-- Topbar -->
   <header class="topbar">
-    <div class="brand">
-      <div class="logo">FW</div>
-      <div class="brand-text">
-        <div class="brand-title">{{ grupo_nombre }}</div>
-        <div class="brand-sub">Miembros y administración</div>
-      </div>
+    <a class="icon-btn" href="/grupos" aria-label="Volver a grupos" title="Volver a grupos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>{{ grupo_nombre }}</h1>
+      <span>{{ miembros|length }} miembros</span>
     </div>
-
-    <div class="top-actions">
-      <a class="btn primary" href="/grupo/{{ grupo_id }}/chat">💬 Chat del grupo</a>
-      <a class="btn ghost" href="/grupos">← Grupos</a>
-      <a class="btn ghost" href="/user_home">Inicio</a>
-      <a class="btn danger" href="/logout">Cerrar sesión</a>
-      
-    </div>
+    <div class="top-actions"><a class="btn small primary" href="/grupo/{{ grupo_id }}/chat">💬 Chat</a></div>
   </header>
 
-  <main class="page">
+  <main class="page wide">
+    <div class="group-layout">
 
-    <!-- Hero -->
-    <section class="hero">
-      <div class="hero-left">
-        <h1>{{ grupo_nombre }}</h1>
-        <p>Gestioná miembros, roles y accesos del grupo.</p>
-      </div>
+      <!-- Columna principal: publicar + feed -->
+      <div class="group-main">
 
-      <div class="hero-right">
-        <div class="stat">
-          <div class="stat-num">{{ miembros|length }}</div>
-          <div class="stat-label">Miembros</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">{% if user_id == creador_id %}🛡️{% else %}👤{% endif %}</div>
-          <div class="stat-label">{% if user_id == creador_id %}Eres admin{% else %}Miembro{% endif %}</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- LAYOUT 2 COLUMNAS -->
-    <div class="layout">
-
-      <!-- COLUMNA IZQUIERDA -->
-      <div class="content">
-
-        <!-- Publicar -->
         <section class="card post-box">
-          <h2>Publicar en {{ grupo_nombre }}</h2>
-
           <form action="/grupo/{{ grupo_id }}/post" method="POST" enctype="multipart/form-data">
-            <textarea name="contenido" rows="3"
-              class="input-area"
-              placeholder="¿Qué está pasando en el grupo?"></textarea>
+            <textarea name="contenido" rows="3" class="input-area"
+              placeholder="¿Qué está pasando en {{ grupo_nombre }}?"></textarea>
 
-            <div class="post-actions">
+            <div class="composer-actions">
               <label class="file">
-                📷 Foto
+                📷 <span class="file-label">Foto</span>
                 <input type="file" name="foto" accept="image/*">
               </label>
 
@@ -77,88 +43,84 @@
           </form>
         </section>
 
-       <!-- Feed -->
-<!-- Feed -->
-<section class="card feed">
-  <div class="feed-head">
-    <h2>Feed</h2>
-  </div>
+        <section class="feed">
+          <h2 class="feed-title">Publicaciones</h2>
 
-  {% if posts|length == 0 %}
-    <p class="muted">Aún no hay publicaciones en este grupo.</p>
-  {% else %}
-    <div class="feed-list">
-      {% for p in posts %}
-      <article class="card post-card">
-        <div class="post-top">
-          <div class="avatar-wrap sm">
-            {% if p[7] and p[7] != "" %}
-              <img class="avatar" src="/{{ p[7].replace('\\','/') }}" alt="user">
-            {% else %}
-              <img class="avatar" src="/static/default_user.png" alt="user">
-            {% endif %}
-          </div>
+          {% if posts|length == 0 %}
+            <div class="card empty-box">
+              <div class="empty-ico">📝</div>
+              <p>Aún no hay publicaciones en este grupo.</p>
+            </div>
+          {% else %}
+            <div class="feed-list">
+              {% for p in posts %}
+              <article class="card post-card">
+                <div class="post-top">
+                  {% if p[7] and p[7] != "" %}
+                    <img class="avatar" src="/{{ p[7].replace('\\','/') }}" alt="user">
+                  {% else %}
+                    <img class="avatar" src="/static/default_user.png" alt="user">
+                  {% endif %}
 
-          <div class="post-meta">
-            <div class="post-name">{{ p[5] }} {{ p[6] }}</div>
-            <div class="post-time">{{ p[3] }}</div>
-          </div>
-        </div>
+                  <div class="post-meta">
+                    <div class="post-name">{{ p[5] }} {{ p[6] }}</div>
+                    <div class="post-time">{{ p[3] }}</div>
+                  </div>
+                </div>
 
-        {% if p[1] and p[1] != "" %}
-          <p class="post-text">{{ p[1] }}</p>
-        {% endif %}
+                {% if p[1] and p[1] != "" %}
+                  <p class="post-text">{{ p[1] }}</p>
+                {% endif %}
 
-        {% if p[2] and p[2] != "" %}
-          <img class="post-img"
-               src="/{{ p[2].replace('\\','/') }}"
-               alt="foto post">
-        {% endif %}
+                {% if p[2] and p[2] != "" %}
+                  <img class="post-img"
+                       src="/{{ p[2].replace('\\','/') }}"
+                       alt="foto post">
+                {% endif %}
 
-        <!-- REACCIONES (igual que user_home) -->
-        <div class="tweet-foot">
-          <div class="reacciones">
-            <button class="react reaccion-post" type="button"
-                    data-post="{{ p[0] }}" data-tipo="encanta">
-              ❤️ <span class="count">{{ post_reacciones.get(p[0], {}).get('encanta', 0) }}</span>
-            </button>
+                <!-- Reacciones -->
+                <div class="tweet-foot">
+                  <div class="reacciones">
+                    <button class="react reaccion-post" type="button"
+                            data-post="{{ p[0] }}" data-tipo="encanta">
+                      ❤️ <span class="count">{{ post_reacciones.get(p[0], {}).get('encanta', 0) }}</span>
+                    </button>
 
-            <button class="react reaccion-post" type="button"
-                    data-post="{{ p[0] }}" data-tipo="divierte">
-              😆 <span class="count">{{ post_reacciones.get(p[0], {}).get('divierte', 0) }}</span>
-            </button>
+                    <button class="react reaccion-post" type="button"
+                            data-post="{{ p[0] }}" data-tipo="divierte">
+                      😆 <span class="count">{{ post_reacciones.get(p[0], {}).get('divierte', 0) }}</span>
+                    </button>
 
-            <button class="react reaccion-post" type="button"
-                    data-post="{{ p[0] }}" data-tipo="enoja">
-              😡 <span class="count">{{ post_reacciones.get(p[0], {}).get('enoja', 0) }}</span>
-            </button>
-          </div>
-        </div>
+                    <button class="react reaccion-post" type="button"
+                            data-post="{{ p[0] }}" data-tipo="enoja">
+                      😡 <span class="count">{{ post_reacciones.get(p[0], {}).get('enoja', 0) }}</span>
+                    </button>
+                  </div>
+                </div>
 
-        <!-- Comentarios -->
-        <div class="comments" id="comments-{{ p[0] }}">
-          <div class="comments-list"></div>
-          <form class="comment-form" data-post="{{ p[0] }}">
-            <input type="text" name="texto" placeholder="Escribí un comentario..." required>
-            <button type="submit" class="btn">Comentar</button>
-          </form>
-        </div>
+                <!-- Comentarios -->
+                <div class="comments" id="comments-{{ p[0] }}">
+                  <div class="comments-list"></div>
+                  <form class="comment-form" data-post="{{ p[0] }}">
+                    <input type="text" name="texto" placeholder="Escribe un comentario..." required>
+                    <button type="submit" class="btn">Enviar</button>
+                  </form>
+                </div>
+              </article>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </section>
+      </div>
 
-      </article>
-      {% endfor %}
-    </div>
-  {% endif %}
-</section>
+      <!-- Columna lateral: miembros -->
+      <aside class="group-side">
+        <h2 class="feed-title">Miembros</h2>
 
-</div> <!-- ✅ CIERRA .content (ESTO TE FALTABA) -->
-      <!-- COLUMNA DERECHA: MIEMBROS -->
-      <aside class="sidebar">
-
-        <!-- Tools (miembros) -->
-        <section class="card tools-card">
+        <section class="tools">
           <div class="search-wrap">
             <span class="search-ico">🔍</span>
-            <input id="search" type="text" placeholder="Buscar miembro por nombre o rol..." autocomplete="off">
+            <input id="search" type="search" placeholder="Buscar por nombre o rol" autocomplete="off">
           </div>
 
           <div class="chips">
@@ -168,23 +130,20 @@
           </div>
         </section>
 
-        <!-- Grid de miembros -->
-        <section class="grid" id="grid">
+        <section class="members-list" id="grid">
           {% for m in miembros %}
-          <article class="card member"
+          <article class="card item-card member"
                    data-name="{{ ((m[1] or '') ~ ' ' ~ (m[2] or ''))|lower }}"
                    data-role="{{ (m[4] or '')|lower }}"
                    data-photo="{{ '1' if m[3] and m[3] != '' else '0' }}"
                    data-iscreator="{{ '1' if m[0] == creador_id else '0' }}">
 
             <div class="card-top">
-              <div class="avatar-wrap">
-                {% if m[3] and m[3] != "" %}
-                  <img src="/{{ m[3].replace('\\','/') }}" class="avatar" alt="{{ m[1] }}">
-                {% else %}
-                  <img src="/static/default_user.png" class="avatar" alt="Sin foto">
-                {% endif %}
-              </div>
+              {% if m[3] and m[3] != "" %}
+                <img src="/{{ m[3].replace('\\','/') }}" class="avatar" alt="{{ m[1] }}">
+              {% else %}
+                <img src="/static/default_user.png" class="avatar" alt="Sin foto">
+              {% endif %}
 
               <div class="who">
                 <h3 class="name">
@@ -193,32 +152,22 @@
                     <span class="crown" title="Creador">👑</span>
                   {% endif %}
                 </h3>
-                <p class="role">Rol: <b>{{ m[4] }}</b></p>
+                <p class="role">{{ m[4] }}</p>
               </div>
-            </div>
 
-            <div class="meta">
               {% if m[0] == creador_id %}
                 <span class="tag verified">Creador</span>
               {% elif (m[4] or '')|lower in ['admin','administrador'] %}
                 <span class="tag verified">Admin</span>
-              {% else %}
-                <span class="tag">Miembro</span>
-              {% endif %}
-
-              {% if m[3] and m[3] != "" %}
-                <span class="tag">📷 Con foto</span>
-              {% else %}
-                <span class="tag muted">Sin foto</span>
               {% endif %}
             </div>
 
             <div class="card-actions">
-              <a class="btn ghost" href="/member/{{ m[0] }}">Ver perfil</a>
+              <a class="btn small" href="/member/{{ m[0] }}">Ver perfil</a>
 
               {% if user_id == creador_id and m[0] != creador_id %}
               <form action="/grupo/{{ grupo_id }}/eliminar/{{ m[0] }}" method="POST" class="inline">
-                <button type="submit" class="btn danger">Eliminar</button>
+                <button type="submit" class="btn small danger">Eliminar</button>
               </form>
               {% endif %}
             </div>
@@ -226,38 +175,28 @@
           {% endfor %}
         </section>
 
-        <!-- Empty -->
-        <section class="empty" id="empty" style="display:none;">
-          <div class="empty-box">
-            <div class="empty-ico">🫥</div>
-            <h2>No hay resultados</h2>
-            <p>Probá con otro nombre o rol.</p>
-            <button class="btn ghost" id="reset" type="button">Limpiar</button>
-          </div>
+        <section class="empty-box" id="empty" style="display:none;">
+          <div class="empty-ico">🫥</div>
+          <h2>No hay resultados</h2>
+          <p>Prueba con otro nombre o rol.</p>
+          <button class="btn small" id="reset" type="button">Limpiar</button>
         </section>
 
-        <!-- Add members (solo creador) -->
+        <!-- Añadir miembros (solo creador) -->
         {% if user_id == creador_id %}
         <section class="card add">
-          <div class="add-head">
-            <div>
-              <h2>Añadir nuevo miembro</h2>
-              <p>Buscá usuarios y asignales un rol. Podés agregar varios de una vez.</p>
-            </div>
-            <span class="pill">Admin only</span>
+          <h2>Añadir miembros</h2>
+          <p class="muted">Busca usuarios y asígnales un rol. Puedes agregar varios a la vez.</p>
+
+          <div class="add-search">
+            <input type="text" id="buscar-usuario" placeholder="Buscar por nombre o correo" autocomplete="off">
+            <div id="sugerencias" class="sugerencias"></div>
           </div>
 
-          <div class="add-body">
-            <div class="add-search">
-              <input type="text" id="buscar-usuario" placeholder="Buscar por nombre o correo...">
-              <div id="sugerencias" class="sugerencias"></div>
-            </div>
-
-            <div class="selected">
-              <div class="selected-title">Seleccionados</div>
-              <div id="miembros-seleccionados" class="selected-list"></div>
-              <button id="agregar-btn" class="btn primary" type="button">Agregar al grupo</button>
-            </div>
+          <div class="selected">
+            <div class="selected-title">Seleccionados</div>
+            <div id="miembros-seleccionados" class="selected-list"></div>
+            <button id="agregar-btn" class="btn primary block" type="button">Agregar al grupo</button>
           </div>
         </section>
 
@@ -400,7 +339,6 @@
           renderSeleccionados();
         </script>
         {% endif %}
-
       </aside>
     </div>
 
@@ -548,7 +486,6 @@
 </script>
 
   </main>
+  <script src="/static/ui.js"></script>
 </body>
-{% set post_reacciones = post_reacciones if post_reacciones is defined else {} %}
-
 </html>

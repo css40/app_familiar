@@ -1,61 +1,55 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>Buscar usuario</title>
-  <link rel="stylesheet" href="/static/buscar_usuario.css"> <!-- usa el mismo estilo bonito -->
+  <link rel="stylesheet" href="/static/base.css">
 </head>
 <body>
-
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">FW</div>
-    <div class="brand-text">
-      <div class="brand-title">Buscar usuario</div>
-      <div class="brand-sub">Encontrá gente y chateá</div>
+  <header class="topbar">
+    <a class="icon-btn" href="/inbox" aria-label="Volver a chats" title="Volver a chats"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Buscar usuario</h1>
+      <span>Encuentra gente y chatea</span>
     </div>
-  </div>
+    
+  </header>
 
-  <div class="top-actions">
-    <a class="btn ghost" href="/user_home">Inicio</a>
-    <a class="btn ghost" href="/inbox">Chats</a>
-  </div>
-</header>
-
-<main class="noti-page">
-
-  <form method="GET" action="/buscar_usuario" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
-    <input name="q" value="{{ q }}" placeholder="Nombre, apellido o correo..."
-           style="flex:1;min-width:240px;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:rgba(255,255,255,.92);outline:none;">
-    <button class="btn primary" type="submit">🔎 Buscar</button>
-  </form>
-
-  {% if q and resultados|length == 0 %}
-    <div class="noti-empty" style="margin-top:14px;">No hay resultados para “{{ q }}”.</div>
-  {% endif %}
-
-  <div class="noti-list">
-    {% for u in resultados %}
-      <div class="noti">
-        <div class="noti-avatar">
-          <img src="/{{ u[4] if u[4] else 'static/default_user.png' }}">
-        </div>
-
-        <div class="noti-body">
-          <div class="noti-text">
-            <b>{{ u[1] }} {{ u[2] }}</b> <span style="opacity:.7">({{ u[3] }})</span>
-          </div>
-
-          <div class="noti-actions">
-            <a class="btn primary" href="/dm/{{ u[0] }}">💬 Chatear</a>
-            <a class="btn ghost" href="/member/{{ u[0] }}">👤 Ver perfil</a>
-          </div>
-        </div>
+  <main class="page">
+    <form method="GET" action="/buscar_usuario" class="tools">
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input type="search" name="q" value="{{ q }}" placeholder="Nombre, apellido o correo" autocomplete="off">
       </div>
-    {% endfor %}
-  </div>
+      <button class="btn primary" type="submit">Buscar</button>
+    </form>
 
-</main>
+    {% if q and resultados|length == 0 %}
+      <div class="card empty-box">
+        <div class="empty-ico">🫥</div>
+        <h2>Sin resultados</h2>
+        <p>No hay resultados para “{{ q }}”.</p>
+      </div>
+    {% endif %}
+
+    <div class="list">
+      {% for u in resultados %}
+        <div class="list-item">
+          <img class="avatar" src="/{{ u[4] if u[4] else 'static/default_user.png' }}" alt="">
+
+          <div class="list-body">
+            <div class="list-title">{{ u[1] }} {{ u[2] }}</div>
+            <div class="list-sub">{{ u[3] }}</div>
+            <div class="list-actions">
+              <a class="btn small primary" href="/dm/{{ u[0] }}">💬 Chatear</a>
+              <a class="btn small" href="/member/{{ u[0] }}">Ver perfil</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </main>
 </body>
 </html>

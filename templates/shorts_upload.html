@@ -1,29 +1,30 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Subir Short</title>
-  <link rel="stylesheet" href="/static/shorts_upload.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Subir short</title>
+  <link rel="stylesheet" href="/static/base.css">
+  <link rel="stylesheet" href="/static/shorts.css">
 </head>
 <body>
+  <header class="topbar">
+    <a class="icon-btn" href="/shorts" aria-label="Volver a shorts" title="Volver a shorts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Subir short</h1>
+      <span>Máx. 25 MB · 10–30 s · mp4, webm o mov</span>
+    </div>
+    
+  </header>
 
-<header class="topbar">
-  <a class="btn" href="/shorts">⬅️ Volver</a>
-  <a class="btn" href="/user_home">🏠 Inicio</a>
-</header>
-
-<main class="page">
-  <div class="card">
-    <h1 class="h1">Subir Short</h1>
-    <div class="sub">Máx 25MB · recomendado 10–30s · mp4/webm/mov</div>
-
-    <form method="POST" enctype="multipart/form-data">
+  <main class="page narrow">
+    <form method="POST" enctype="multipart/form-data" class="card form-stack">
 
       <!-- GRUPO -->
       <div class="field">
-        <label>Grupo</label>
-        <select name="grupo_id" required>
+        <label for="grupo_id">Grupo</label>
+        <select id="grupo_id" name="grupo_id" required>
           {% for g in grupos %}
             <option value="{{ g[0] }}">{{ g[1] }}</option>
           {% endfor %}
@@ -35,7 +36,7 @@
         <label>Video</label>
 
         <div class="drop file-picker">
-          <!-- input REAL (oculto) -->
+          <!-- input real (oculto) -->
           <input
             type="file"
             id="videoInput"
@@ -44,76 +45,70 @@
             required
           >
 
-          <!-- botón bonito -->
           <button
             type="button"
-            class="btn ghost file-btn"
+            class="btn file-btn"
             onclick="document.getElementById('videoInput').click()"
           >
             🎬 Seleccionar video
           </button>
 
-          <!-- nombre archivo -->
           <div class="file-name" id="fileName">
             Ningún video seleccionado
           </div>
 
           <!-- PREVIEW -->
-            <div class="video-preview hidden" id="previewWrap">
+          <div class="video-preview hidden" id="previewWrap">
             <video id="videoPreview" playsinline></video>
 
             <button
-                type="button"
-                class="preview-play"
-                id="previewPlay"
+              type="button"
+              class="preview-play"
+              id="previewPlay"
+              aria-label="Reproducir vista previa"
             >
-                ▶️
+              ▶️
             </button>
-            </div>
-
+          </div>
 
           <!-- INFO -->
           <div class="video-info" id="videoInfo"></div>
 
           <!-- ERROR -->
           <div class="video-error" id="videoError"></div>
+
           <!-- PROGRESO -->
-            <div class="upload-progress hidden" id="uploadProgress">
+          <div class="upload-progress hidden" id="uploadProgress">
             <div class="bar">
-                <div class="fill" id="uploadFill"></div>
+              <div class="fill" id="uploadFill"></div>
             </div>
             <div class="percent" id="uploadPercent">0%</div>
-            </div>
-
-
-          <div class="sub" style="margin-top:8px;">
-            Tip: vertical 9:16 y cortito para que cargue rápido.
           </div>
         </div>
       </div>
 
       <!-- DESCRIPCIÓN -->
       <div class="field">
-        <label>Descripción (opcional)</label>
+        <label for="descripcion">Descripción <span class="muted">(opcional)</span></label>
         <input
+          id="descripcion"
           type="text"
           name="descripcion"
           maxlength="120"
           placeholder="Ej: cumpleaños 🎂"
         >
+        <span class="muted">Tip: un video vertical y cortito carga más rápido.</span>
       </div>
 
-      <!-- ACTIONS -->
+      <!-- ACCIONES -->
       <div class="actions">
         <a class="btn" href="/shorts">Cancelar</a>
         <button class="btn primary" type="submit">⬆️ Subir</button>
       </div>
 
     </form>
-  </div>
-</main>
+  </main>
 
-<!-- ================= JS ÚNICO ================= -->
 <script>
   const input = document.getElementById("videoInput");
   const fileName = document.getElementById("fileName");
@@ -247,6 +242,5 @@ form.addEventListener("submit", (e)=>{
 });
 
 </script>
-
 </body>
 </html>

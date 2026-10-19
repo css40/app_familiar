@@ -1,64 +1,69 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reportes del sistema</title>
-  <link rel="stylesheet" href="/static/admin.css" />
-  <link rel="stylesheet" href="/static/admin_extra.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Reportes</title>
+  <link rel="stylesheet" href="/static/base.css">
+  <link rel="stylesheet" href="/static/admin.css">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">
-      <div class="logo">FW</div>
-      <div class="brand-text">
-        <div class="brand-title">Reportes de usuarios</div>
-        <div class="brand-sub">Administra los estados y responde</div>
-      </div>
+    <a class="icon-btn" href="/admin_home" aria-label="Volver al panel" title="Volver al panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <div class="topbar-title">
+      <h1>Reportes</h1>
+      <span>Revisa y actualiza su estado</span>
     </div>
-    <div class="top-actions">
-      <a class="btn ghost" href="/admin_home">← Panel</a>
-      <a class="btn danger" href="/logout">Cerrar sesión</a>
-    </div>
+    
   </header>
 
   <main class="page">
-    <div class="card">
-      <div class="hero" style="padding:18px; margin-bottom:16px; gap:14px;">
-        <div>
-          <h2>Reportes recientes</h2>
-          <p style="color: rgba(255,255,255,.75); margin:8px 0 0;">Controlá estados y asigná respuestas rápidas.</p>
-        </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <span class="badge">Total: {{ reportes|length }}</span>
-          <span class="badge">Pendientes: {{ pendientes }}</span>
-          <span class="badge">En progreso: {{ en_progreso }}</span>
-          <span class="badge">Resueltos: {{ resueltos }}</span>
-        </div>
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-num">{{ reportes|length }}</div>
+        <div class="stat-label">Total</div>
       </div>
-      <div class="report-list">
-        {% if reportes %}
-          {% for r in reportes %}
-            <div class="report-card {{ r[4] }}">
-              <div class="report-header">
-                <div>
-                  <strong>{{ r[1] }}</strong>
-                  <div class="report-meta">De {{ r[6] }} · {{ r[5] }}</div>
-                </div>
-                <span class="badge">{{ r[4] }}</span>
+      <div class="stat">
+        <div class="stat-num">{{ pendientes }}</div>
+        <div class="stat-label">Pendientes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">{{ en_progreso }}</div>
+        <div class="stat-label">En progreso</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">{{ resueltos }}</div>
+        <div class="stat-label">Resueltos</div>
+      </div>
+    </section>
+
+    <div class="report-list">
+      {% if reportes %}
+        {% for r in reportes %}
+          <article class="card report-card {{ r[4] }}">
+            <div class="report-header">
+              <div>
+                <strong>{{ r[1] }}</strong>
+                <div class="report-meta">De {{ r[6] }} · {{ r[5] }}</div>
               </div>
-              <p>{{ r[2] }}</p>
-              <div class="report-actions">
-                <a class="btn ghost" href="/admin/reporte/{{ r[0] }}/pendiente">Pendiente</a>
-                <a class="btn ghost" href="/admin/reporte/{{ r[0] }}/en_progreso">En progreso</a>
-                <a class="btn ghost" href="/admin/reporte/{{ r[0] }}/resuelto">Resuelto</a>
-              </div>
+              <span class="tag status">{{ r[4]|replace('_',' ') }}</span>
             </div>
-          {% endfor %}
-        {% else %}
+            <p>{{ r[2] }}</p>
+            <div class="report-actions">
+              <a class="btn small {% if r[4] == 'pendiente' %}primary{% endif %}" href="/admin/reporte/{{ r[0] }}/pendiente">Pendiente</a>
+              <a class="btn small {% if r[4] == 'en_progreso' %}primary{% endif %}" href="/admin/reporte/{{ r[0] }}/en_progreso">En progreso</a>
+              <a class="btn small {% if r[4] == 'resuelto' %}primary{% endif %}" href="/admin/reporte/{{ r[0] }}/resuelto">Resuelto</a>
+            </div>
+          </article>
+        {% endfor %}
+      {% else %}
+        <div class="card empty-box">
+          <div class="empty-ico">🎉</div>
+          <h2>Sin reportes</h2>
           <p>No hay reportes aún.</p>
-        {% endif %}
-      </div>
+        </div>
+      {% endif %}
     </div>
   </main>
 </body>

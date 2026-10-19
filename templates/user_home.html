@@ -1,75 +1,140 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Usuario Home</title>
-  <link rel="stylesheet" href="/static/user_home.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Inicio</title>
+  <link rel="stylesheet" href="/static/base.css">
+  <link rel="stylesheet" href="/static/feed.css">
 </head>
-
-<body>
-  <!-- Topbar -->
+<body class="with-nav">
   <header class="topbar">
-    <div class="brand">
-      <div class="logo">FW</div>
-      <div class="brand-text">
-        <div class="brand-title">Family_web</div>
-        <div class="brand-sub">Tu feed privado</div>
-      </div>
-    </div>
+    <a class="brand" href="/user_home">
+      <span class="logo">FW</span>
+      <span class="brand-title">Family_web</span>
+    </a>
 
     <div class="top-actions">
-      <a class="btn ghost" href="/members_view">👥 Integrantes</a>
-      <a class="btn ghost" href="/grupos">🧩 Grupos</a>
-      <a class="btn ghost" href="/inbox">💬 Chats</a>
-      <a class="btn ghost" href="/shorts">🎬 Shorts</a>
-      <a class="btn ghost" href="/reportar">🐞 Reportar</a>
-
-      {% if session.get('is_admin') == 1 %}
-      <a class="btn ghost" href="/admin_home">🛠️ Panel admin</a>
-      {% endif %}
-
-      <a class="btn ghost" href="/notificaciones">
-        🔔 <span id="notif-badge">{% if notif_count > 0 %}{{ notif_count }}{% else %}{% endif %}</span>
+      <a class="icon-btn" href="/notificaciones" aria-label="Notificaciones" title="Notificaciones">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17V11a6 6 0 1 1 12 0v6l1.5 2h-15Z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg><span id="notif-badge" class="badge-count">{% if notif_count > 0 %}{{ notif_count }}{% else %}{% endif %}</span>
       </a>
-
-      <a class="btn primary" href="/profile">👤 Mi perfil</a>
-      <a class="btn danger" href="/logout">Cerrar sesión</a>
+      <details class="menu">
+        <summary class="icon-btn" aria-label="Mi cuenta" title="Mi cuenta"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 3.8-6 8-6s7.2 2 8 6"/></svg></summary>
+        <div class="menu-panel">
+          <a href="/profile">Mi perfil</a>
+          {% if session.get('is_admin') == 1 %}<a href="/admin_home">Panel admin</a>{% endif %}
+          <a href="/reportar">Reportar un problema</a>
+          <hr>
+          <a class="danger" href="/logout">Cerrar sesión</a>
+        </div>
+      </details>
     </div>
   </header>
+  <nav class="tabbar" aria-label="Navegación principal">
+    <a class="tab active" href="/user_home" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Inicio</span></a>
+    <a class="tab" href="/members_view"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8"/><path d="M18 14.8c2 .6 3.2 2.3 3.5 5.2"/></svg><span>Integrantes</span></a>
+    <a class="tab" href="/grupos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg><span>Grupos</span></a>
+    <a class="tab" href="/inbox"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12Z"/></svg><span>Chats</span></a>
+    <a class="tab" href="/shorts"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m10 8.5 5 3.5-5 3.5Z"/></svg><span>Shorts</span></a>
+  </nav>
 
   <main class="page">
-    {% if session.get('is_admin') == 1 %}
-    <section class="admin-callout">
-      <div class="card admin-card">
-        <div>
-          <h2>Acceso rápido a administración</h2>
-          <p>Como administrador tienes acceso directo al panel. Haz clic aquí para gestionarlo.</p>
-        </div>
-        <a class="btn primary" href="/admin_home">🛠️ Ir al Panel admin</a>
+    <div class="page-head">
+      <div>
+        <h1>Hola, <span class="accent">{{ nombre }}</span> 👋</h1>
+        <p>¿Qué hay de nuevo en la familia?</p>
       </div>
-    </section>
-    {% endif %}
+    </div>
 
-    <!-- Welcome card -->
-    <section class="welcome">
-      <div class="welcome-left">
-        <h1>Bienvenido, <span class="accent">{{ nombre }}</span></h1>
-        <p>Compartí updates, fotos y menciones. Tus reacciones se guardan en tiempo real.</p>
-      </div>
-      <div class="welcome-right">
-        <div class="stat">
-          <div class="stat-num">{{ tweets|length }}</div>
-          <div class="stat-label">Tweets en feed</div>
+    <!-- Crear publicación -->
+    <section class="card composer">
+      <form method="POST" enctype="multipart/form-data" action="/post_tweet" class="tweet-form">
+        <div class="textarea-wrap">
+          <textarea id="tweet-text" name="contenido" placeholder="¿Qué estás pensando? Usa @ para mencionar" required></textarea>
+          <div id="sugerencias" class="sugerencias"></div>
         </div>
-        <div class="stat">
-          <div class="stat-num">⚡</div>
-          <div class="stat-label">En desarrollo</div>
+
+        <div class="composer-actions">
+          <label class="file">
+            📷 <span class="file-label">Foto</span>
+            <input type="file" name="foto" />
+          </label>
+
+          <button type="submit" class="btn primary">Publicar</button>
         </div>
-      </div>
+      </form>
     </section>
 
-  <script>
+    <!-- Feed -->
+    <h2 class="feed-title">Últimas publicaciones</h2>
+
+    <div class="tweets-container">
+      {% for tweet in tweets %}
+        <article class="tweet card">
+          <div class="tweet-head">
+            {% if tweet[5] and tweet[5] != "" %}
+              <img src="/{{ tweet[5].replace('\\','/') }}" alt="Foto perfil" class="avatar">
+            {% else %}
+              <img src="/static/default_user.png" alt="Foto perfil" class="avatar">
+            {% endif %}
+
+            <div class="who">
+              <strong class="name">
+                {{ tweet[4] }}
+                {% if tweet[4] == "Family_web" %}
+                  <img src="/static/verificado.png" alt="Verificado" class="icon-verificado">
+                {% endif %}
+              </strong>
+              <span class="time">{{ tweet[3] }}</span>
+            </div>
+
+            {% if tweet[6] == user_id or session['email'] == 'jhos@admin.com' %}
+              <div class="tweet-tools">
+                <a class="btn small ghost" href="/editar_tweet/{{ tweet[0] }}">Editar</a>
+                <a class="btn small danger" href="/eliminar_tweet/{{ tweet[0] }}">Eliminar</a>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="tweet-body">
+            <p class="content">{{ tweet[1] | safe }}</p>
+
+            {% if tweet[2] and tweet[2] != "" %}
+              <img src="/{{ tweet[2].replace('\\','/') }}" class="tweet-foto" alt="Foto de la publicación">
+            {% endif %}
+          </div>
+
+          <div class="tweet-foot">
+            <div class="reacciones">
+              <button class="react reaccion" type="button" data-tweet="{{ tweet[0] }}" data-tipo="encanta">
+                ❤️ <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('encanta', 0) }}</span>
+              </button>
+
+              <button class="react reaccion" type="button" data-tweet="{{ tweet[0] }}" data-tipo="divierte">
+                😆 <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('divierte', 0) }}</span>
+              </button>
+
+              <button class="react reaccion" type="button" data-tweet="{{ tweet[0] }}" data-tipo="enoja">
+                😡 <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('enoja', 0) }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Comentarios -->
+          <div class="comments" id="comments-{{ tweet[0] }}">
+            <div class="comments-list"></div>
+            <form class="comment-form" data-tweet="{{ tweet[0] }}">
+              <input type="text" name="texto" placeholder="Escribe un comentario..." required>
+              <button type="submit" class="btn">Enviar</button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </main>
+
+    <script>
     async function pollNotifCount(){
       try{
         const res = await fetch('/api/notificaciones/count');
@@ -88,156 +153,6 @@
     setInterval(pollNotifCount, 5000);
     window.addEventListener('load', pollNotifCount);
   </script>
-
-    <!-- Layout -->
-    <section class="grid">
-      <!-- Left column -->
-      <div class="col">
-        <!-- Composer -->
-        <div class="card composer">
-          <div class="card-title">
-            <h2>Crear un Tweet</h2>
-            <span class="pill">Tip: usa @ para mencionar</span>
-          </div>
-
-          <form method="POST" enctype="multipart/form-data" action="/post_tweet" class="tweet-form">
-            <div class="textarea-wrap">
-              <textarea id="tweet-text" name="contenido" placeholder="¿Qué estás pensando?" required></textarea>
-              <div id="sugerencias" class="sugerencias"></div>
-            </div>
-
-            <div class="composer-actions">
-              <label class="file">
-                <input type="file" name="foto" />
-                <span>📷 Foto</span>
-              </label>
-
-              <button type="submit" class="btn primary">Twittear</button>
-            </div>
-
-            <div class="composer-hint">
-              Se permite texto + imagen. Las menciones aparecen en sugerencias.
-            </div>
-          </form>
-        </div>
-
-        <!-- Sidebar / Tips -->
-        <div class="card side">
-          <h3>Acciones rápidas</h3>
-          <div class="quick">
-            <a class="quick-item" href="/profile">
-              <div class="qi-ico">👤</div>
-              <div class="qi-txt">
-                <div class="qi-title">Editar perfil</div>
-                <div class="qi-sub">Foto, nombre, bio…</div>
-              </div>
-            </a>
-
-            <a class="quick-item" href="/grupos">
-              <div class="qi-ico">👥</div>
-              <div class="qi-txt">
-                <div class="qi-title">Ver grupos</div>
-                <div class="qi-sub">Entrá y publicá</div>
-              </div>
-            </a>
-
-            <a class="quick-item" href="/members_view">
-              <div class="qi-ico">🧑‍🤝‍🧑</div>
-              <div class="qi-txt">
-                <div class="qi-title">Integrantes</div>
-                <div class="qi-sub">Encontrá gente</div>
-              </div>
-            </a>
-          </div>
-
-          <div class="divider"></div>
-
-          <h3>Atajos</h3>
-          <ul class="bullets">
-            <li><b>@usuario</b> para mencionar</li>
-            <li><b>❤️ 😆 😡</b> reacciones por tweet</li>
-            <li>Si sos dueño/Admin podés editar/eliminar</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Right column -->
-      <div class="col">
-        <div class="feed-header">
-          <h2>Últimos Tweets</h2>
-          <div class="feed-sub">Lo más reciente primero</div>
-        </div>
-
-        <div class="tweets-container">
-          {% for tweet in tweets %}
-            <article class="tweet card">
-              <div class="tweet-head">
-          {% if tweet[5] and tweet[5] != "" %}
-            <img src="/{{ tweet[5].replace('\\','/') }}" alt="Foto perfil" class="avatar">
-          {% else %}
-            <img src="/static/default_user.png" alt="Foto perfil" class="avatar">
-          {% endif %}
-
-
-                <div class="who">
-                  <div class="who-top">
-                    <strong class="name">
-                      {{ tweet[4] }}
-                      {% if tweet[4] == "Family_web" %}
-                        <img src="/static/verificado.png" alt="Verificado" class="icon-verificado">
-                      {% endif %}
-                    </strong>
-                    <span class="time">{{ tweet[3] }}</span>
-                  </div>
-                </div>
-
-                {% if tweet[6] == user_id or session['email'] == 'jhos@admin.com' %}
-                  <div class="menu">
-                    <a class="mini" href="/editar_tweet/{{ tweet[0] }}">Editar</a>
-                    <a class="mini danger" href="/eliminar_tweet/{{ tweet[0] }}">Eliminar</a>
-                  </div>
-                {% endif %}
-              </div>
-
-              <div class="tweet-body">
-                <p class="content">{{ tweet[1] | safe }}</p>
-
-            {% if tweet[2] and tweet[2] != "" %}
-              <img src="/{{ tweet[2].replace('\\','/') }}" class="tweet-foto" alt="Foto del tweet">
-            {% endif %}
-
-              </div>
-
-              <div class="tweet-foot">
-                <div class="reacciones">
-                  <button class="react reaccion" type="button" data-tweet="{{ tweet[0] }}" data-tipo="encanta">
-                    ❤️ <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('encanta', 0) }}</span>
-                  </button>
-
-                  <button class="react reaccion" type="button" data-tweet="{{ tweet[0] }}" data-tipo="divierte">
-                    😆 <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('divierte', 0) }}</span>
-                  </button>
-
-                  <button class="react reaccion" type="button" data-tweet="{{ tweet[0] }}" data-tipo="enoja">
-                    😡 <span class="count">{{ tweet_reacciones.get(tweet[0], {}).get('enoja', 0) }}</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Comentarios para el tweet -->
-              <div class="comments" id="comments-{{ tweet[0] }}">
-                <div class="comments-list"></div>
-                <form class="comment-form" data-tweet="{{ tweet[0] }}">
-                  <input type="text" name="texto" placeholder="Comentar..." required>
-                  <button type="submit" class="btn">Comentar</button>
-                </form>
-              </div>
-            </article>
-          {% endfor %}
-        </div>
-      </div>
-    </section>
-  </main>
 
 <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 <script>
@@ -374,5 +289,6 @@
       });
     }catch(e){ }
   </script>
+<script src="/static/ui.js"></script>
 </body>
 </html>

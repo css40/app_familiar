@@ -1,0 +1,33 @@
+/* Publicaciones: inicio y feed de grupos */
+.accent{ color:var(--primary); }
+
+.composer{ margin-bottom:22px; }
+.textarea-wrap{ position:relative; }
+.composer textarea{ min-height:96px; }
+.composer-actions{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin-top:12px;
+}
+
+.feed-title{ margin:0 0 12px; }
+.tweets-container, .feed-list{ display:flex; flex-direction:column; gap:16px; }
+
+/* Tarjeta de publicación (inicio y grupos) */
+.tweet-head, .post-top{ display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.tweet-head .who, .post-meta{ min-width:0; flex:1; }
+.tweet-head .name, .post-name{ display:block; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tweet-head .time, .post-time{ display:block; color:var(--muted); font-size:.8rem; white-space:nowrap; }
+.tweet-tools{ display:flex; gap:4px; flex-shrink:0; }
+.tweet-tools .btn{ min-height:34px; padding:4px 10px; font-size:.8rem; }
+
+.tweet-body .content, .post-text{ white-space:pre-wrap; word-break:break-word; font-size:1rem; line-height:1.55; }
+.tweet-foto, .post-img{
+  width:100%; max-height:520px; object-fit:cover;
+  margin-top:12px; border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+}
+.tweet-foot{ margin-top:14px; }
+
+@media (max-width:480px){
+  .composer-actions .btn{ flex:0 0 auto; }
+}
