@@ -1,12 +1,6 @@
-blinker==1.9.0
-click==8.3.1
 Flask==3.1.2
-itsdangerous==2.2.0
-Jinja2==3.1.6
-MarkupSafe==3.0.3
+Flask-SocketIO==5.5.1
 Werkzeug==3.1.5
-flask-socketio==5.3.4
-python-socketio==5.8.0
-python-engineio==4.13.1
 gunicorn==23.0.0
-eventlet==0.35.2
+eventlet==0.39.1
+greenlet==3.1.1

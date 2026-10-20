@@ -1,5 +1,5 @@
 from flask import Flask
-import socketio as sio_pkg
+import os
 from db import init_db
 from blueprints import auth_bp, admin_bp, user_bp, groups_bp, chat_bp, shorts_bp, report_bp
 from extensions import socketio
@@ -26,8 +26,5 @@ app.register_blueprint(chat_bp)
 app.register_blueprint(shorts_bp)
 app.register_blueprint(report_bp)
 
-# AQUÍ ESTÁ EL CAMBIO: Usar socketio.server en lugar de socketio
-app_asgi = sio_pkg.ASGIApp(socketio.server, app)
-
 if __name__ == '__main__':
-    socketio.run(app, host="0.0.0.0", port=5000)
+    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
