@@ -1,5 +1,5 @@
 from flask import Flask
-import socketio as sio_pkg  # O importa directamente la clase ASGIApp
+import socketio as sio_pkg
 from db import init_db
 from blueprints import auth_bp, admin_bp, user_bp, groups_bp, chat_bp, shorts_bp, report_bp
 from extensions import socketio
@@ -26,9 +26,8 @@ app.register_blueprint(chat_bp)
 app.register_blueprint(shorts_bp)
 app.register_blueprint(report_bp)
 
-# Envuelve tu aplicación Flask con el middleware WSGI/ASGI de socketio para Uvicorn
-# Esto crea una aplicación compatible que Uvicorn puede ejecutar correctamente:
-app_asgi = socketio.ASGIApp(socketio, app)
+# Objeto ASGI correcto para Uvicorn usando el paquete global sio_pkg
+app_asgi = sio_pkg.ASGIApp(socketio, app)
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=5000)
