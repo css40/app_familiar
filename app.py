@@ -26,8 +26,8 @@ app.register_blueprint(chat_bp)
 app.register_blueprint(shorts_bp)
 app.register_blueprint(report_bp)
 
-# Objeto ASGI correcto para Uvicorn usando el paquete global sio_pkg
-app_asgi = sio_pkg.ASGIApp(socketio, app)
+# AQUÍ ESTÁ EL CAMBIO: Usar socketio.server en lugar de socketio
+app_asgi = sio_pkg.ASGIApp(socketio.server, app)
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=5000)
